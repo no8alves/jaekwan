@@ -171,6 +171,87 @@ p.lede{color:var(--ink2);margin:0 0 22px;max-width:66ch;font-size:14.5px}
 .wkt-dose{font-family:var(--mono);font-size:11.5px;color:var(--signal);font-weight:600}
 .wkt-ex{font-size:12.5px;color:var(--ink);margin-top:3px;line-height:1.4}
 .wkt-goal{font-size:12px;color:var(--ink2);margin-top:4px;line-height:1.45}
+.wkt-days{display:grid;gap:4px;margin-top:4px}
+.wkt-day{display:grid;grid-template-columns:34px 1fr;gap:8px;align-items:start;font-size:12px}
+.wkt-dn{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--signal);text-align:center;background:var(--band);border-radius:4px;padding:1px 0}
+.wkt-de{color:var(--ink);line-height:1.4}
+
+/* ---------- 처방카드 내 주차별 요약 카드 ---------- */
+.wk-cards{display:grid;gap:10px}
+.wkc{background:var(--card);border:1px solid var(--rule);border-left:4px solid var(--wc);border-radius:8px;padding:12px 14px}
+.wkc-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.wkc-w{font-family:var(--serif,inherit);font-size:22px;font-weight:800;line-height:1;color:var(--wc)}
+.wkc-w small{font-size:11px;font-weight:600;color:var(--ink3);margin-left:1px}
+.wkc-phase{font-family:var(--mono);font-size:10px;letter-spacing:.08em;padding:2px 8px;border-radius:20px;background:var(--wc);color:#fff}
+.wkc-stats{display:flex;gap:12px;flex-wrap:wrap;margin-left:auto}
+.wkc-stat{font-size:12px;color:var(--ink2)}
+.wkc-stat b{font-family:var(--mono);font-size:13px;color:var(--ink);font-weight:700}
+.wkc-dots{display:flex;gap:4px;margin:11px 0 9px}
+.wkd-dot{
+  width:26px;height:22px;border-radius:5px;display:grid;place-items:center;
+  font-family:var(--mono);font-size:11px;font-weight:600;background:var(--band);color:var(--ink3);
+}
+.wkd-dot.on{background:var(--wc);color:#fff}
+.wkc-icons{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.wkc-ico{font-size:19px;line-height:1;width:30px;height:30px;display:grid;place-items:center;background:var(--band);border-radius:7px}
+.wkc-more{font-family:var(--mono);font-size:11px;color:var(--ink3);font-weight:600;position:relative;cursor:default;padding:4px 6px;border-radius:6px;outline:none}
+.wkc-more:hover,.wkc-more:focus{background:var(--band);color:var(--ink)}
+.wkc-pop{
+  position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%) translateY(4px);
+  background:var(--ink);color:#F3F7F0;border-radius:8px;padding:9px 12px;min-width:150px;width:max-content;max-width:240px;
+  display:flex;flex-direction:column;gap:5px;z-index:20;
+  opacity:0;visibility:hidden;transition:opacity .16s,transform .16s;pointer-events:none;
+  box-shadow:0 6px 20px rgba(18,48,42,.22);
+}
+.wkc-more:hover .wkc-pop,.wkc-more:focus .wkc-pop{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0)}
+.wkc-pop::after{content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);border:6px solid transparent;border-top-color:var(--ink)}
+.wkc-pop-row{font-family:var(--sans);font-size:12.5px;font-weight:500;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.wkc-sum{font-size:13px;color:var(--ink);line-height:1.55;padding-top:9px;border-top:1px dashed var(--rule)}
+.wkc-note{font-size:11px;color:var(--ink3);margin:4px 0 0;line-height:1.5}
+
+/* ---------- 주차 탭 + 요일별 편집 ---------- */
+.wtabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.wtab{
+  border:1px solid var(--rule);background:var(--card);border-radius:8px;padding:8px 13px;cursor:pointer;
+  font-family:var(--sans);display:flex;flex-direction:column;align-items:center;gap:1px;min-width:52px;
+  border-bottom:3px solid var(--wc);transition:all .13s;
+}
+.wtab:hover{transform:translateY(-1px)}
+.wtab[data-on="1"]{background:var(--ink);border-color:var(--ink)}
+.wtab[data-on="1"] .wtab-n,.wtab[data-on="1"] .wtab-p{color:#F3F7F0}
+.wtab-n{font-family:var(--serif,inherit);font-size:14px;font-weight:800;color:var(--ink)}
+.wtab-p{font-family:var(--mono);font-size:9px;letter-spacing:.06em;color:var(--ink3)}
+.wk-summary{background:var(--card);border:1px solid var(--rule);border-left:4px solid var(--wc);border-radius:8px;padding:14px 16px;margin-bottom:14px}
+.wks-title{display:flex;align-items:baseline;gap:10px;margin-bottom:10px}
+.wks-title b{font-family:var(--serif,inherit);font-size:16px;font-weight:800}
+.wks-title span{font-family:var(--mono);font-size:11px;color:var(--wc);font-weight:600}
+.daygrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.daycard{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:13px 15px}
+.daycard.is-rest{background:var(--band);opacity:.85}
+.day-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.day-name{font-family:var(--serif,inherit);font-size:15px;font-weight:800}
+.rest-toggle{font-size:11.5px;color:var(--ink3);display:flex;align-items:center;gap:5px;cursor:pointer}
+.rest-toggle input{accent-color:var(--ink3);cursor:pointer}
+.day-rest-msg{font-size:12.5px;color:var(--ink3);line-height:1.5}
+.day-picker{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:11px;padding-bottom:11px;border-bottom:1px dashed var(--rule)}
+.day-chip{
+  display:flex;align-items:center;gap:4px;border:1px solid var(--rule);background:#fff;border-radius:16px;
+  padding:4px 10px;cursor:pointer;font-family:var(--sans);font-size:11.5px;color:var(--ink3);transition:all .12s;
+}
+.day-chip[data-on="1"]{background:var(--signal);color:#fff;border-color:var(--signal);font-weight:500}
+.day-chip:hover{border-color:var(--signal)}
+.day-chip *{pointer-events:none}
+.wtab *{pointer-events:none}
+.day-empty{font-size:12px;color:var(--ink3);padding:4px 0}
+.day-details{display:grid;gap:9px}
+.ex-detail{background:var(--band);border-radius:8px;padding:9px 11px}
+.exd-name{font-size:13px;font-weight:600;margin-bottom:7px}
+.exd-fields{display:flex;flex-wrap:wrap;gap:8px 12px}
+.exd-fields label{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--ink2)}
+.exd-fields label.dim{opacity:.45}
+.exd-fields input{width:46px;text-align:right;font-family:var(--mono);font-size:12.5px;padding:3px 5px;border:1px solid var(--rule);border-radius:4px;background:#fff}
+.exd-fields input:focus{outline:2px solid var(--focus);border-color:var(--focus)}
+.exd-fields i{font-style:normal;font-family:var(--mono);font-size:10px;color:var(--ink3)}
 
 /* ---------- chart block ---------- */
 .chart{background:var(--card);border:1px solid var(--rule);border-radius:2px;margin-bottom:16px}
@@ -348,6 +429,13 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
   .rail,.act,header.top .teamtag,.panel:not([data-on="1"]),.foot,.btn{display:none !important}
   .wrap{max-width:none;padding:0}
   .rx{border-width:1px}
+  /* 인쇄 시 +N 안의 숨은 운동을 옆에 펼쳐 표시 */
+  .wkc-pop{position:static;opacity:1 !important;visibility:visible !important;transform:none !important;
+    display:inline-flex;flex-direction:row;flex-wrap:wrap;gap:4px 10px;background:none;color:var(--ink);
+    box-shadow:none;padding:0 0 0 6px;min-width:0;max-width:none}
+  .wkc-pop::after{display:none}
+  .wkc-pop-row{font-size:11px}
+  .wkc-more{background:none !important;color:var(--ink3) !important}
 }
 </style>
 </head>
@@ -854,7 +942,7 @@ const ROLES = [
 /* ============================================================
    STATE
    ============================================================ */
-const S = {step:1, age:null, built:null, a:{}, picked:new Set(), dose:{freq:3,time:15,weeks:4,rpe:11}, weekPlan:null, weekPlanKey:'', goal:'', team:'', members:['','','',''], evalRes:null};
+const S = {step:1, age:null, built:null, a:{}, picked:new Set(), dose:{freq:3,time:15,weeks:4,rpe:11}, weekPlan:null, weekPlanKey:'', activeWeek:0, goal:'', team:'', members:['','','',''], evalRes:null};
 const $ = s=>document.querySelector(s);
 const $$ = s=>Array.from(document.querySelectorAll(s));
 const ageObj = ()=>AGES.find(a=>a.id===S.age);
@@ -1300,34 +1388,58 @@ const EX_PHASE = {
   gait:2, aerobic:2, interval:2, stamp:1, yarn:2,
 };
 function exPhase(id){ return EX_PHASE[id]||2; }
+const DAYS=['월','화','수','목','금','토','일'];
+// 빈도(주 n회)에 따라 운동일 요일 인덱스 배분 (고르게 분산)
+const FREQ_DAYS={1:[2],2:[0,3],3:[0,2,4],4:[0,1,3,5],5:[0,1,2,3,4],6:[0,1,2,3,4,5],7:[0,1,2,3,4,5,6]};
 
-// 자동 초안 생성: 기간을 3구간으로 나눠 단계적으로 운동 투입, 강도·시간 점증
+// 자동 초안 생성: 기간을 3구간으로 나눠 단계적으로 운동 투입, 강도·시간 점증, 요일 분배
 function autoWeekPlan(){
   const c=caseObj(), a=S.a, res=S.evalRes;
   const W=Math.max(1,Math.min(12,S.dose.weeks|0));
   const picked=[...S.picked];
-  // 각 운동의 도입 단계 → 몇 주차부터 넣을지 결정
   const cut1=Math.max(1,Math.round(W/3)), cut2=Math.max(cut1+1,Math.round(W*2/3));
   const introWeek=id=>{ const ph=exPhase(id); return ph===1?1 : ph===2?cut1+1 : cut2+1; };
-  // 강도·시간 점증(초기값 → 후기값)
   const baseTime=S.dose.time, baseRpe=S.dose.rpe, baseFreq=S.dose.freq;
   const weeks=[];
   for(let w=1; w<=W; w++){
-    const prog=(w-1)/Math.max(1,W-1); // 0~1
+    const prog=(w-1)/Math.max(1,W-1);
     const time=Math.round(baseTime + prog*Math.min(20,baseTime*0.8));
     const rpe=Math.min(16, Math.round(baseRpe + prog*3));
-    const freq=Math.min(6, baseFreq + (w>Math.round(W/2)?1:0));
+    const freq=Math.min(7, baseFreq + (w>Math.round(W/2)?1:0));
     const items=picked.filter(id=>introWeek(id)<=w);
-    // 이번 주 새로 추가된 운동
     const added=picked.filter(id=>introWeek(id)===w);
-    weeks.push({
-      w, freq, time, rpe,
-      items,
-      goal: autoWeekGoal(w, W, added, res),
-      note:''
+    // 요일 구조: 7일, 각 운동일에 이번 주 운동을 배치
+    const activeDays=FREQ_DAYS[freq]||FREQ_DAYS[3];
+    const days=DAYS.map((dnm,di)=>{
+      const isActive=activeDays.includes(di);
+      return {
+        rest:!isActive,
+        ex: isActive ? items.map(id=>({
+          id,
+          time: perExTime(id, time, items.length),
+          rpe,
+          sets: perExSets(id).sets,
+          reps: perExSets(id).reps
+        })) : []
+      };
     });
+    weeks.push({ w, freq, time, rpe, items, days, goal: autoWeekGoal(w, W, added, res), note:'' });
   }
   return weeks;
+}
+// 운동별 1회 배정 시간(총 세션시간을 운동 수로 대략 나눔, 최소 5분)
+function perExTime(id, sessionTime, n){
+  return Math.max(5, Math.round(sessionTime / Math.max(1,n)));
+}
+// 운동 성격에 따른 기본 세트·횟수 제안
+function perExSets(id){
+  const strength=['iso','band','sts','stump'];      // 근력형: 세트·횟수 뚜렷
+  const rom=['aarom','rom','stretch','posture'];      // 가동범위형
+  const aerobic=['aerobic','interval','gait','aqua']; // 지속형: 세트 개념 약함
+  if(strength.includes(id)) return {sets:2, reps:12};
+  if(rom.includes(id)) return {sets:2, reps:10};
+  if(aerobic.includes(id)) return {sets:1, reps:0};   // reps 0 = 시간 위주
+  return {sets:2, reps:10};
 }
 function autoWeekGoal(w, W, added, res){
   const exName=id=>{const x=EX_LIB.find(e=>e.id===id);return x?x.nm.replace(/\s*\([^)]*\)/,''):'';};
@@ -1343,51 +1455,112 @@ function planKey(){ return `${S.built?S.built.id:''}|${[...S.picked].sort().join
 
 function renderSchedule(){
   const c=caseObj(), res=S.evalRes;
-  // 프로그램/기간/선택이 바뀌면 초안 재생성 (사용자 수정 보존 위해 key 비교)
   if(!S.weekPlan || S.weekPlanKey!==planKey()){
-    S.weekPlan=autoWeekPlan(); S.weekPlanKey=planKey();
+    S.weekPlan=autoWeekPlan(); S.weekPlanKey=planKey(); S.activeWeek=0;
   }
+  if(S.activeWeek>=S.weekPlan.length) S.activeWeek=0;
   const beta=c.tags.includes('betablocker');
-  const phaseName=w=>{ const W=S.dose.weeks; return w<=Math.round(W/3)?'초기':w<=Math.round(W*2/3)?'중기':'후기'; };
-  const phaseColor=w=>{ const W=S.dose.weeks; return w<=Math.round(W/3)?'var(--signal)':w<=Math.round(W*2/3)?'var(--caution)':'var(--alert)'; };
-  $('#weekList').innerHTML = S.weekPlan.map((wk,idx)=>`
-    <div class="weekcard" style="--wc:${phaseColor(wk.w)}">
-      <div class="wk-head">
-        <div class="wk-title"><span class="wk-badge">${wk.w}주차</span><span class="wk-phase">${phaseName(wk.w)}</span></div>
-        <div class="wk-dose">
-          <label>빈도 <input type="number" min="1" max="7" value="${wk.freq}" data-wk="${idx}" data-fld="freq"><span>회/주</span></label>
-          <label>시간 <input type="number" min="5" max="60" value="${wk.time}" data-wk="${idx}" data-fld="time"><span>분</span></label>
-          <label>RPE <input type="number" min="6" max="20" value="${wk.rpe}" data-wk="${idx}" data-fld="rpe"><span>점</span></label>
-        </div>
-      </div>
-      <div class="wk-body">
-        <div class="wk-label">이번 주 운동 <span class="wk-cnt">${wk.items.length}개</span></div>
-        <div class="wk-ex">${EX_LIB.filter(x=>S.picked.has(x.id)).map(x=>`
-          <button class="wk-chip" data-wk="${idx}" data-ex="${x.id}" data-on="${wk.items.includes(x.id)?'1':'0'}">
-            <span>${x.icon||'🔹'}</span>${x.nm.replace(/\s*\([^)]*\)/,'')}
-          </button>`).join('')}</div>
-        <div class="wk-label" style="margin-top:12px">이번 주 목표</div>
-        <textarea class="wk-goal" rows="2" data-wk="${idx}" data-fld="goal" placeholder="이번 주에 이루고자 하는 것">${wk.goal}</textarea>
-      </div>
-    </div>`).join('');
+  const W=S.dose.weeks;
+  const phaseName=w=>w<=Math.round(W/3)?'초기':w<=Math.round(W*2/3)?'중기':'후기';
+  const phaseColor=w=>w<=Math.round(W/3)?'var(--signal)':w<=Math.round(W*2/3)?'var(--caution)':'var(--alert)';
 
-  // 강도/시간/빈도/목표 입력
-  $('#weekList').querySelectorAll('input[data-fld],textarea[data-fld]').forEach(el=>{
-    el.addEventListener('input',e=>{
-      const i=+e.target.dataset.wk, f=e.target.dataset.fld, v=e.target.value;
-      S.weekPlan[i][f] = (f==='goal')? v : (+v||S.weekPlan[i][f]);
-    });
-  });
-  // 운동 칩 토글
-  $('#weekList').querySelectorAll('.wk-chip').forEach(chip=>{
-    chip.addEventListener('click',()=>{
-      const i=+chip.dataset.wk, id=chip.dataset.ex;
-      const items=S.weekPlan[i].items;
-      const pos=items.indexOf(id);
-      if(pos>=0){items.splice(pos,1);chip.dataset.on='0';} else {items.push(id);chip.dataset.on='1';}
-      chip.closest('.weekcard').querySelector('.wk-cnt').textContent=items.length+'개';
-    });
-  });
+  // 주차 선택 탭
+  const tabs=S.weekPlan.map((wk,idx)=>
+    `<button class="wtab" data-wtab="${idx}" data-on="${idx===S.activeWeek?'1':'0'}" style="--wc:${phaseColor(wk.w)}">
+       <span class="wtab-n">${wk.w}주</span><span class="wtab-p">${phaseName(wk.w)}</span>
+     </button>`).join('');
+
+  const wk=S.weekPlan[S.activeWeek];
+  const pickedList=EX_LIB.filter(x=>S.picked.has(x.id));
+  const exName=id=>{const x=EX_LIB.find(e=>e.id===id);return x?x.nm.replace(/\s*\([^)]*\)/,''):'';};
+  const exIcon=id=>{const x=EX_LIB.find(e=>e.id===id);return x?x.icon||'🔹':'🔹';};
+
+  // 요일별 편집 영역
+  const dayCards=wk.days.map((day,di)=>{
+    const activeEx=new Set(day.ex.map(e=>e.id));
+    const chips=pickedList.map(x=>
+      `<button class="day-chip" data-di="${di}" data-ex="${x.id}" data-on="${activeEx.has(x.id)?'1':'0'}">
+         <span>${x.icon||'🔹'}</span>${exName(x.id)}
+       </button>`).join('');
+    const rows=day.ex.map(e=>{
+      const aerobic=(perExSets(e.id).reps===0);
+      return `<div class="ex-detail">
+        <div class="exd-name">${exIcon(e.id)} ${exName(e.id)}</div>
+        <div class="exd-fields">
+          <label>시간<input type="number" min="1" max="90" value="${e.time}" data-di="${di}" data-exid="${e.id}" data-k="time"><i>분</i></label>
+          <label>RPE<input type="number" min="6" max="20" value="${e.rpe}" data-di="${di}" data-exid="${e.id}" data-k="rpe"><i>점</i></label>
+          <label>세트<input type="number" min="1" max="10" value="${e.sets}" data-di="${di}" data-exid="${e.id}" data-k="sets"><i>세트</i></label>
+          <label class="${aerobic?'dim':''}">횟수<input type="number" min="0" max="50" value="${e.reps}" data-di="${di}" data-exid="${e.id}" data-k="reps"${aerobic?' title="지속형 운동은 시간 위주"':''}><i>회</i></label>
+        </div>
+      </div>`;
+    }).join('');
+    return `<div class="daycard ${day.rest?'is-rest':''}">
+      <div class="day-head">
+        <div class="day-name">${DAYS[di]}요일</div>
+        <label class="rest-toggle"><input type="checkbox" data-restdi="${di}" ${day.rest?'checked':''}> 휴식일</label>
+      </div>
+      ${day.rest
+        ? '<div class="day-rest-msg">회복을 위한 휴식일입니다. 필요하면 체크를 풀고 운동을 배치하세요.</div>'
+        : `<div class="day-picker">${chips}</div>
+           <div class="day-details">${rows||'<div class="day-empty">위에서 이 요일에 할 운동을 골라주세요.</div>'}</div>`}
+    </div>`;
+  }).join('');
+
+  $('#weekList').innerHTML=`
+    <div class="wtabs">${tabs}</div>
+    <div class="wk-summary" style="--wc:${phaseColor(wk.w)}">
+      <div class="wks-title"><b>${wk.w}주차 · ${phaseName(wk.w)}</b> <span>주 ${wk.days.filter(d=>!d.rest).length}회 운동</span></div>
+      <div class="wks-goal">
+        <label class="wk-label">이번 주 목표</label>
+        <textarea class="wk-goal" rows="2" data-wgoal="${S.activeWeek}" placeholder="이번 주에 이루고자 하는 것">${wk.goal}</textarea>
+      </div>
+    </div>
+    <div class="daygrid">${dayCards}</div>`;
+
+  bindScheduleEvents();
+}
+
+function bindScheduleEvents(){
+  const root=$('#weekList');
+  // 클릭: 주차 탭 / 운동 칩 / (휴식 토글은 change로)
+  root.onclick=e=>{
+    const tab=e.target.closest('.wtab');
+    if(tab){ S.activeWeek=+tab.dataset.wtab; renderSchedule(); return; }
+    const chip=e.target.closest('.day-chip');
+    if(chip){
+      const di=+chip.dataset.di, id=chip.dataset.ex;
+      const day=S.weekPlan[S.activeWeek].days[di];
+      const pos=day.ex.findIndex(x=>x.id===id);
+      if(pos>=0){ day.ex.splice(pos,1); }
+      else {
+        const wk=S.weekPlan[S.activeWeek], sc=perExSets(id);
+        day.ex.push({id, time:perExTime(id,wk.time,wk.items.length||1), rpe:wk.rpe, sets:sc.sets, reps:sc.reps});
+      }
+      renderSchedule(); return;
+    }
+  };
+  // change: 휴식일 토글
+  root.onchange=e=>{
+    const cb=e.target.closest('[data-restdi]');
+    if(cb){
+      const di=+cb.dataset.restdi, day=S.weekPlan[S.activeWeek].days[di];
+      day.rest=cb.checked;
+      if(day.rest) day.ex=[];
+      renderSchedule();
+    }
+  };
+  // input: 주 목표 / 운동별 시간·RPE·세트·횟수
+  root.oninput=e=>{
+    const g=e.target.closest('[data-wgoal]');
+    if(g){ S.weekPlan[+g.dataset.wgoal].goal=g.value; return; }
+    const f=e.target.closest('.exd-fields input, input[data-k]');
+    if(f && f.dataset.k){
+      const di=+f.dataset.di, id=f.dataset.exid, k=f.dataset.k;
+      const day=S.weekPlan[S.activeWeek].days[di];
+      const ex=day.ex.find(x=>x.id===id);
+      if(ex) ex[k]=+f.value||0;
+    }
+  };
 }
 
 /* ============================================================
@@ -1407,17 +1580,64 @@ function renderWeekTable(){
   const c=caseObj(), beta=c.tags.includes('betablocker');
   if(!S.weekPlan||!S.weekPlan.length) return '<p style="margin:0;font-size:13px;color:var(--ink3)">주차별 계획이 아직 없습니다.</p>';
   const exName=id=>{const x=EX_LIB.find(e=>e.id===id);return x?x.nm.replace(/\s*\([^)]*\)/,''):'';};
+  const exIcon=id=>{const x=EX_LIB.find(e=>e.id===id);return x?x.icon||'🔹':'🔹';};
   const W=S.dose.weeks;
   const phaseName=w=>w<=Math.round(W/3)?'초기':w<=Math.round(W*2/3)?'중기':'후기';
-  return `<div class="wk-table">${S.weekPlan.map(wk=>`
-    <div class="wkt-row">
-      <div class="wkt-w"><b>${wk.w}주</b><span>${phaseName(wk.w)}</span></div>
-      <div class="wkt-main">
-        <div class="wkt-dose">주 ${wk.freq}회 · ${wk.time}분 · RPE ${wk.rpe}${beta?' (RPE 기준)':''}</div>
-        <div class="wkt-ex">${wk.items.map(exName).filter(Boolean).join(', ')||'—'}</div>
-        <div class="wkt-goal">🎯 ${wk.goal? wk.goal.replace(/</g,'&lt;'):'목표 미입력'}</div>
+  const phaseColor=w=>w<=Math.round(W/3)?'var(--signal)':w<=Math.round(W*2/3)?'var(--caution)':'var(--alert)';
+
+  return `<div class="wk-cards">${S.weekPlan.map(wk=>{
+    const workDays=wk.days.map((d,di)=>({d,di})).filter(o=>!o.d.rest && o.d.ex.length);
+    const nDays=workDays.length;
+    // 이번 주 등장하는 고유 운동 집합
+    const uniq=[...new Set(workDays.flatMap(o=>o.d.ex.map(e=>e.id)))];
+    // 평균 시간·강도 (운동 세션 기준)
+    const allEx=workDays.flatMap(o=>o.d.ex);
+    const avgTime=allEx.length?Math.round(allEx.reduce((s,e)=>s+e.time,0)/allEx.length):0;
+    const avgRpe=allEx.length?Math.round(allEx.reduce((s,e)=>s+e.rpe,0)/allEx.length):0;
+    // 요일 점 시각화 (월~일)
+    const dots=DAYS.map((dn,di)=>{
+      const on=!wk.days[di].rest && wk.days[di].ex.length;
+      return `<span class="wkd-dot ${on?'on':''}" title="${dn}요일${on?' 운동':' 휴식'}">${dn}</span>`;
+    }).join('');
+    // 운동 아이콘 요약 (최대 6개, 나머지는 +N에 호버 툴팁)
+    const shown=uniq.slice(0,6), hidden=uniq.slice(6);
+    const icons=shown.map(id=>`<span class="wkc-ico" title="${exName(id)}">${exIcon(id)}</span>`).join('')
+      + (hidden.length?`<span class="wkc-more" tabindex="0">+${hidden.length}<span class="wkc-pop">${
+          hidden.map(id=>`<span class="wkc-pop-row">${exIcon(id)} ${exName(id)}</span>`).join('')
+        }</span></span>`:'');
+    // 한 문장 요약
+    const summary=weekOneLine(wk, nDays, uniq, avgTime, avgRpe, phaseName(wk.w), beta);
+    return `<div class="wkc" style="--wc:${phaseColor(wk.w)}">
+      <div class="wkc-head">
+        <div class="wkc-w">${wk.w}<small>주차</small></div>
+        <div class="wkc-phase">${phaseName(wk.w)}</div>
+        <div class="wkc-stats">
+          <span class="wkc-stat">📅 <b>${nDays}</b>일</span>
+          <span class="wkc-stat">🏋️ <b>${uniq.length}</b>종</span>
+          <span class="wkc-stat">⏱️ <b>${avgTime}</b>분</span>
+          <span class="wkc-stat">🔥 <b>RPE ${avgRpe}</b>${beta?'*':''}</span>
+        </div>
       </div>
-    </div>`).join('')}</div>`;
+      <div class="wkc-dots">${dots}</div>
+      <div class="wkc-icons">${icons||'<span style="color:var(--ink3);font-size:12px">배치된 운동 없음</span>'}</div>
+      <div class="wkc-sum">✦ ${summary}</div>
+    </div>`;
+  }).join('')}${beta?'<p class="wkc-note">* 베타차단제 복용 — 심박수 대신 자각강도(RPE)를 강도 기준으로 사용합니다.</p>':''}</div>`;
+}
+// 주차별 한 문장 요약 생성
+function weekOneLine(wk, nDays, uniq, avgTime, avgRpe, phase, beta){
+  if(nDays===0) return '이번 주는 배치된 운동이 없습니다.';
+  const focusName=(()=>{
+    // 가장 많이 등장한 운동을 이번 주 핵심으로
+    const cnt={};
+    wk.days.forEach(d=>d.ex.forEach(e=>{cnt[e.id]=(cnt[e.id]||0)+1;}));
+    const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0];
+    const x=top?EX_LIB.find(e=>e.id===top[0]):null;
+    return x?x.nm.replace(/\s*\([^)]*\)/,''):'';
+  })();
+  const intensity = avgRpe<=11?'가볍게' : avgRpe<=13?'적당한 강도로' : '다소 높은 강도로';
+  const phaseWord = phase==='초기'?'적응하며 기초를 다지는' : phase==='중기'?'강도를 올려가는' : '목표 수준으로 마무리하는';
+  return `${phaseWord} 주. 주 ${nDays}회 ${focusName} 중심으로 ${uniq.length}종을 회당 약 ${avgTime}분씩 ${intensity} 수행합니다.`;
 }
 function renderCard(){
   const c=caseObj(), a=S.a, res=S.evalRes, k=karvonen(), g=ageObj();
