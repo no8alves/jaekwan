@@ -410,6 +410,48 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
 .role .rd{font-size:12px;color:var(--ink2);line-height:1.45}
 .role input{width:100%;margin-top:7px;font-size:12.5px;padding:4px 6px}
 .aibox{border:1px dashed var(--rule);border-radius:2px;padding:13px;background:var(--band);font-size:13.5px;white-space:pre-wrap;line-height:1.65;min-height:52px}
+
+/* ---------- AI 적합성 검토 결과 ---------- */
+.rv{white-space:normal}
+.rv-verdict{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  border:1.5px solid var(--ink);border-radius:6px;padding:11px 14px;background:#fff;margin-bottom:14px;
+}
+.rv-verdict[data-v="ok"]{border-color:var(--signal)}
+.rv-verdict[data-v="warn"]{border-color:var(--caution)}
+.rv-verdict[data-v="bad"]{border-color:var(--alert)}
+.rv-pill{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.04em;padding:4px 10px;border-radius:20px;color:#fff;background:var(--ink);white-space:nowrap}
+.rv-verdict[data-v="ok"] .rv-pill{background:var(--signal)}
+.rv-verdict[data-v="warn"] .rv-pill{background:var(--caution)}
+.rv-verdict[data-v="bad"] .rv-pill{background:var(--alert)}
+.rv-vreason{font-size:13px;color:var(--ink);font-weight:500;line-height:1.45}
+.rv-group{margin-bottom:14px}
+.rv-group:last-child{margin-bottom:0}
+.rv-h{
+  display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;margin-bottom:7px;
+  padding-bottom:5px;border-bottom:1px solid var(--rule);
+}
+.rv-h .rv-ic{font-size:14px}
+.rv-h[data-k="good"]{color:var(--signal)}
+.rv-h[data-k="fix"]{color:var(--alert)}
+.rv-h[data-k="advice"]{color:var(--ink)}
+.rv-h .rv-n{font-family:var(--mono);font-size:10px;color:var(--ink3);font-weight:600;margin-left:auto}
+.rv-list{display:grid;gap:7px}
+.rv-item{
+  display:grid;grid-template-columns:16px 1fr;gap:8px;align-items:start;
+  font-size:13px;line-height:1.5;padding:8px 10px;border-radius:5px;background:var(--band);
+}
+.rv-item .rv-b{font-size:12px;line-height:1.35}
+.rv-good .rv-b{color:var(--signal)}
+.rv-fix{background:#F9E9E7;border-left:3px solid var(--alert)}
+.rv-fix .rv-b{color:var(--alert)}
+.rv-advice{background:#EAF0F6;border-left:3px solid #3B6EA5}
+.rv-advice .rv-b{color:#3B6EA5}
+.rv-fix .rv-what{font-weight:700;display:block;margin-bottom:2px}
+.rv-fix .rv-why{color:var(--ink2);display:block}
+.rv-fix .rv-how{color:var(--alert);display:block;margin-top:3px}
+.rv-how::before{content:"→ ";font-weight:700}
+.rv-disc{font-size:11px;color:var(--ink3);margin-top:12px;padding-top:9px;border-top:1px dashed var(--rule)}
 .check{display:grid;gap:5px}
 .check label{display:grid;grid-template-columns:auto 1fr;gap:9px;font-size:13.3px;align-items:start;cursor:pointer}
 .check input{margin-top:4px;accent-color:var(--signal)}
@@ -1849,37 +1891,75 @@ function buildReviewContext(){
   return L.join('\n');
 }
 
-/* AI 없이 돌아가는 기계적 점검 (폴백) */
-function localReviewHtml(){
+/* 검토 결과 데이터 → 카드형 HTML */
+function renderReview(d, note){
+  const V={'적합':'ok','부분 수정 필요':'warn','재설계 권장':'bad'};
+  const v=V[d.verdict]||'warn';
+  const good=(d.good||[]).filter(Boolean);
+  const fix=(d.fix||[]).filter(x=>x&&(x.what||x.why||x.how));
+  const advice=(d.advice||[]).filter(Boolean);
+  let h='<div class="rv">';
+  if(note) h+=`<div style="color:var(--caution);font-size:12px;margin-bottom:12px">${_esc(note)}</div>`;
+  h+=`<div class="rv-verdict" data-v="${v}">
+        <span class="rv-pill">${_esc(d.verdict||'검토 결과')}</span>
+        <span class="rv-vreason">${_esc(d.verdict_reason||'')}</span>
+      </div>`;
+  h+=`<div class="rv-group"><div class="rv-h" data-k="good"><span class="rv-ic">✅</span>잘한 점<span class="rv-n">${good.length}</span></div>
+      <div class="rv-list">${good.length?good.map(t=>`<div class="rv-item rv-good"><span class="rv-b">✓</span><span>${_esc(t)}</span></div>`).join(''):'<div class="rv-item"><span class="rv-b">–</span><span>특별히 부합한다고 볼 항목이 확인되지 않았습니다.</span></div>'}</div></div>`;
+  h+=`<div class="rv-group"><div class="rv-h" data-k="fix"><span class="rv-ic">⚠️</span>수정 필요<span class="rv-n">${fix.length}</span></div>
+      <div class="rv-list">${fix.length?fix.map(x=>`<div class="rv-item rv-fix"><span class="rv-b">!</span><span>${x.what?`<span class="rv-what">${_esc(x.what)}</span>`:''}${x.why?`<span class="rv-why">${_esc(x.why)}</span>`:''}${x.how?`<span class="rv-how">${_esc(x.how)}</span>`:''}</span></div>`).join(''):'<div class="rv-item"><span class="rv-b">✓</span><span>사정과 어긋나는 부분은 발견되지 않았습니다.</span></div>'}</div></div>`;
+  h+=`<div class="rv-group"><div class="rv-h" data-k="advice"><span class="rv-ic">💡</span>조언 · 빠진 것<span class="rv-n">${advice.length}</span></div>
+      <div class="rv-list">${advice.length?advice.map(t=>`<div class="rv-item rv-advice"><span class="rv-b">＋</span><span>${_esc(t)}</span></div>`).join(''):'<div class="rv-item"><span class="rv-b">–</span><span>추가로 보완할 항목이 없습니다.</span></div>'}</div></div>`;
+  h+=`<div class="rv-disc">⚠️ 교육용 자동 검토입니다. 실제 임상 판단을 대신하지 않으며, 각 항목의 근거는 팀이 직접 확인하세요.</div>`;
+  h+='</div>';
+  return h;
+}
+
+/* AI 응답 텍스트에서 JSON 추출 (코드펜스·잡텍스트 허용) */
+function parseReviewJSON(text){
+  let t=String(text).trim().replace(/^```(?:json)?/i,'').replace(/```$/,'').trim();
+  const s=t.indexOf('{'), e=t.lastIndexOf('}');
+  if(s>=0&&e>s) t=t.slice(s,e+1);
+  const d=JSON.parse(t);
+  if(!d || typeof d!=='object') throw new Error('형식 오류');
+  return d;
+}
+
+/* AI 없이 돌아가는 규칙 기반 점검 (폴백) */
+function localReviewData(){
   const c=caseObj(), a=S.a, res=S.evalRes;
   const picked=EX_LIB.filter(x=>S.picked.has(x.id));
-  const flags=[];
+  const sys=c.tags.filter(t=>t!=='betablocker').join(', ')||'없음';
+  const fix=[], good=[], advice=[];
+
   picked.forEach(x=>{
     const rel = x.tags.includes('*') || x.tags.some(t=>c.tags.includes(t));
     const blk = x.block ? x.block(a) : null;
-    if(blk) flags.push(`🚫 <strong>${_esc(x.nm)}</strong> — 현재 사정값에서 금기: ${_esc(blk)}`);
-    else if(!rel) flags.push(`⚠ <strong>${_esc(x.nm)}</strong> — 이 대상자의 계통(${_esc(c.tags.filter(t=>t!=='betablocker').join(', ')||'없음')})과 직접 관련이 낮습니다. 선택 근거를 확인하세요.`);
+    if(blk) fix.push({what:x.nm, why:`현재 사정값에서 금기 조건에 해당: ${blk}`, how:'해당 조건이 해소된 뒤 다시 배치하세요.'});
+    else if(!rel) fix.push({what:x.nm, why:`표적 계통[${x.tags.join(', ')}]이 대상자 계통(${sys})·진단과 직접 관련이 낮습니다.`, how:'선택 근거를 확인하고, 대상자 진단에 맞는 중재로 교체를 검토하세요.'});
+    else good.push(`${x.nm} — 대상자 계통(${sys})에 부합하는 선택`);
   });
-  if(res.risk==='caution' && S.dose.rpe>13) flags.push(`⚠ 조건부 진행 판정인데 목표 RPE가 ${S.dose.rpe}점으로 높습니다. 한 단계 낮추는 것을 검토하세요.`);
-  if(res.risk==='stop') flags.push(`🚫 규칙 엔진이 '운동 보류'로 판정했습니다. 능동/등척성 등 침상 내 안전 활동 외의 중재는 금기 해소 후 추가해야 합니다.`);
-  if(a.mmt<=2 && S.dose.time>15) flags.push(`⚠ MMT ${a.mmt}등급(중력 이기지 못함)인데 1회 ${S.dose.time}분은 깁니다. 짧게 자주로 조정을 검토하세요.`);
+  if(res.risk==='caution' && S.dose.rpe>13) fix.push({what:'운동 강도(목표 RPE '+S.dose.rpe+')', why:'조건부 진행 판정에서는 강도를 한 단계 낮춰 시작해야 합니다.', how:'목표 RPE를 11~13 이하로 낮추세요.'});
+  if(res.risk==='stop') fix.push({what:'프로그램 전체', why:"규칙 엔진이 '운동 보류'로 판정했습니다.", how:'능동/등척성 등 침상 내 안전 활동 외의 중재는 금기 해소 후 추가하세요.'});
+  if(a.mmt<=2 && S.dose.time>15) fix.push({what:'1회 지속시간('+S.dose.time+'분)', why:`MMT ${a.mmt}등급은 중력을 이기지 못하는 단계입니다.`, how:'짧게 자주(예: 5~10분 × 하루 2~3회)로 조정하세요.'});
+
   const sugg=suggest();
   const missed=[...sugg].filter(id=>!S.picked.has(id)).map(id=>EX_LIB.find(x=>x.id===id).nm);
+  if(missed.length) advice.push(`규칙 엔진이 권장하나 선택하지 않은 중재: ${missed.join(', ')}`);
+  res.rules.filter(r=>r.s!=='info').forEach(r=>advice.push(`[${r.code}] ${r.msg}`));
 
-  let h=`<div style="color:var(--caution);font-size:12px;margin-bottom:10px">⚠ AI 검토 연결 실패 — 규칙 기반 자동 점검 결과로 대체했습니다.</div>`;
-  h+=`<strong>판정</strong>  ${RISK_KO[res.risk]}\n`;
-  h+=res.rules.length?`<strong>근거 규칙</strong>\n${res.rules.map(r=>`· [${r.code}] ${_esc(r.msg)}`).join('\n')}\n\n`:'\n';
-  h+=`<strong>프로그램 점검</strong>\n${flags.length?flags.map(f=>'· '+f).join('\n'):'· 기계적 점검에서 뚜렷한 불일치는 발견되지 않았습니다. 각 중재의 선택 근거는 팀이 직접 검토하세요.'}\n\n`;
-  h+=`<strong>엔진 권장이나 미선택</strong>\n${missed.length?'· '+missed.join(', '):'· 없음'}\n\n`;
-  h+=`⚠️ 교육용 자동 점검 — 실제 임상 판단을 대신하지 않습니다.`;
-  return h;
+  let verdict='적합', reason='규칙 기반 점검에서 뚜렷한 불일치가 없습니다. 세부 근거는 팀이 확인하세요.';
+  if(res.risk==='stop' || fix.some(f=>/금기|보류/.test(f.why))){ verdict='재설계 권장'; reason='금기 또는 운동 보류 판정에 해당하는 항목이 있습니다.'; }
+  else if(fix.length){ verdict='부분 수정 필요'; reason=`${fix.length}개 항목에서 사정과 어긋나는 부분이 확인됩니다.`; }
+
+  return {verdict, verdict_reason:reason, good, fix, advice};
 }
 
 async function aiReview(){
   const out=$('#aiOut'), btn=$('#btnAI');
   const useAI = AI_PROXY && AI_PROXY.indexOf('PASTE_')!==0;
 
-  if(!useAI){ out.innerHTML=localReviewHtml(); btn.textContent='다시 검토'; return; }
+  if(!useAI){ out.innerHTML=renderReview(localReviewData(),'규칙 기반 자동 점검 결과입니다 (AI 미연결).'); btn.textContent='다시 검토'; return; }
 
   btn.disabled=true; btn.textContent='검토 중…';
   out.textContent='AI가 프로그램의 적합성을 검토하고 있습니다…';
@@ -1893,20 +1973,19 @@ async function aiReview(){
 규칙:
 - 아래에 주어진 정보만 근거로 삼아라. 새로운 임상 사실이나 수치를 지어내지 마라.
 - 규칙 코드(예: BP-02)나 주의사항 문구를 근거로 인용하라.
-- 아래 형식의 한국어로만 답하라:
+- 반드시 아래 JSON 객체 하나만 출력하라. 코드펜스나 다른 설명 문장을 붙이지 마라.
 
-■ 총평: (적합 / 부분 수정 필요 / 재설계 권장 중 하나 + 한 문장 이유)
+{
+  "verdict": "적합" | "부분 수정 필요" | "재설계 권장",
+  "verdict_reason": "판정 이유 한 문장",
+  "good": ["대상자 상태에 부합하는 선택과 그 이유", "..."],
+  "fix": [
+    {"what": "문제가 되는 중재/설정 이름", "why": "왜 부적합한지 (규칙 코드/주의사항 인용)", "how": "어떻게 바꿔야 하는지"}
+  ],
+  "advice": ["이 대상자에게 필요하나 빠진 중재나 주의, 또는 개선 조언", "..."]
+}
 
-■ 잘 맞는 점
-- (대상자 상태에 부합하는 선택과 그 이유, 2~4개)
-
-■ 재검토 필요
-- (사정과 어긋나는 중재·강도·안전조치. 무엇이 왜 문제이고 어떻게 바꿔야 하는지. 없으면 "없음")
-
-■ 빠진 것
-- (이 대상자에게 필요하나 프로그램에 없는 중재나 주의. 없으면 "없음")
-
-맨 끝 줄: ⚠️ 교육용 자동 검토 — 실제 임상 판단을 대신하지 않습니다.
+good 은 2~4개. 해당 항목이 없으면 빈 배열 []. 모든 문장은 한국어.
 
 ${buildReviewContext()}`;
 
@@ -1918,9 +1997,16 @@ ${buildReviewContext()}`;
     });
     const j=await r.json();
     if(!j.text) throw new Error(j.error||'빈 응답');
-    out.textContent=j.text;
+    let data;
+    try{ data=parseReviewJSON(j.text); }
+    catch(pe){
+      out.innerHTML=renderReview(localReviewData(),'AI 응답을 구조화하지 못해 규칙 기반 점검으로 표시합니다.')
+        +`<details style="margin-top:10px"><summary style="font-size:12px;color:var(--ink3);cursor:pointer">AI 원문 보기</summary><div class="aibox" style="margin-top:6px">${_esc(j.text)}</div></details>`;
+      return;
+    }
+    out.innerHTML=renderReview(data);
   }catch(err){
-    out.innerHTML=localReviewHtml();
+    out.innerHTML=renderReview(localReviewData(),'AI 검토 연결 실패 — 규칙 기반 자동 점검 결과로 대체했습니다.');
   }finally{
     btn.disabled=false; btn.textContent='다시 검토';
   }
