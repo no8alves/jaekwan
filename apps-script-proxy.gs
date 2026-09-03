@@ -23,12 +23,14 @@
  */
 
 // 시도할 모델 목록 (앞에서부터 순서대로, 503/429/404 면 다음 것으로 넘어감)
+// ?models=1 로 이 키가 실제로 쓸 수 있는 목록을 확인할 수 있음.
 var MODELS = [
-  'gemini-2.5-flash',
+  'gemini-3.6-flash',
   'gemini-flash-latest',
-  'gemini-2.0-flash',
-  'gemini-2.5-flash-lite',
-  'gemini-flash-lite-latest'
+  'gemini-3.5-flash',
+  'gemini-3.8-flash',
+  'gemini-flash-lite-latest',
+  'gemini-3.1-flash-lite'
 ];
 
 var API_ROOT = 'https://generativelanguage.googleapis.com/v1beta/';
