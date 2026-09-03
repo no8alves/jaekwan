@@ -1709,9 +1709,9 @@ function renderCard(){
     </div>
 
     <div class="rxsec">
-      <h4>임상 요약 · SOAP 자동 생성</h4>
-      <div class="aibox" id="aiOut">생성 버튼을 누르면 사정 데이터를 근거로 SOAP 형식 임상 기록을 작성합니다.</div>
-      <button class="btn ghost small" id="btnAI" style="margin-top:9px">SOAP 요약 생성</button>
+      <h4>AI 적합성 검토 · 프로그램 타당성</h4>
+      <div class="aibox" id="aiOut">검토 버튼을 누르면 이 대상자의 사정 결과와 지금 구성한 재활 프로그램을 대조해, 각 중재가 대상자에게 적절한지·금기나 놓친 부분은 없는지 짚어줍니다.</div>
+      <button class="btn ghost small" id="btnAI" style="margin-top:9px">AI 적합성 검토</button>
     </div>
 
     <div class="rxsec">
@@ -1736,7 +1736,7 @@ function renderCard(){
   </div>`;
 
   $$('#rxCard [data-mem]').forEach(el=>el.addEventListener('input',e=>{S.members[+e.target.dataset.mem]=e.target.value;}));
-  $('#btnAI').addEventListener('click',aiSummary);
+  $('#btnAI').addEventListener('click',aiReview);
 }
 
 /* ---------- 로컬 SOAP 조립 엔진 (인터넷 불필요) ----------
@@ -1789,50 +1789,126 @@ function buildSOAP(){
 }
 
 /* ============================================================
-   AI SOAP 요약 (Gemini 프록시)
+   AI 적합성 검토 (Gemini 프록시)
    ------------------------------------------------------------
-   AI_PROXY 를 Apps Script 웹앱 배포 URL(끝이 /exec)로 바꾸면
-   AI 생성이 켜집니다. 비워두거나 호출이 실패하면 자동으로
-   로컬 규칙 엔진(buildSOAP) 결과로 대체됩니다.
+   사정 결과 + 구성한 프로그램을 대조해 각 중재의 타당성,
+   금기·불일치, 놓친 부분을 검토한다.
+   AI_PROXY 가 비었거나 호출 실패 시 로컬 규칙 점검으로 대체.
    ============================================================ */
 const AI_PROXY = 'https://script.google.com/macros/s/AKfycbxEZ6Obkq4oEG3LMSI9Plh4G1wcdFxd8v2i0DTiFB1zglQb1nuFAFBcZodn1uV2YFzo/exec';
+const RISK_KO = {ok:'운동 가능', caution:'조건부 진행', stop:'운동 보류'};
+const _esc = s => String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 
-function localSOAPHtml(soap){
-  return `<strong>S (주관적 자료)</strong>  ${soap.S}\n\n`+
-    `<strong>O (객관적 자료)</strong>  ${soap.O}\n\n`+
-    `<strong>A (사정·판정)</strong>  ${soap.A}\n\n`+
-    `<strong>P (계획)</strong>  ${soap.P}`;
-}
+/* 대상자·사정·프로그램을 하나의 텍스트 컨텍스트로 조립 */
+function buildReviewContext(){
+  const c=caseObj(), a=S.a, res=S.evalRes, g=ageObj(), k=karvonen();
+  const beta=c.tags.includes('betablocker');
+  const picked=EX_LIB.filter(x=>S.picked.has(x.id));
+  const sugg=suggest();
+  const missed=[...sugg].filter(id=>!S.picked.has(id)).map(id=>EX_LIB.find(x=>x.id===id).nm);
 
-async function aiSummary(){
-  const out=$('#aiOut'), btn=$('#btnAI');
-  const soap=buildSOAP();
-  const useAI = AI_PROXY && AI_PROXY.indexOf('PASTE_')!==0;
+  const L=[];
+  L.push('# 대상자');
+  L.push(`- ${g.nm}(${g.k}세대) / ${c.age}세 ${c.sex}`);
+  L.push(`- 진단: ${c.dx}`);
+  L.push(`- 주호소: ${c.cc}`);
+  L.push(`- 현병력: ${c.hx}`);
+  L.push(`- 투약: ${c.meds}${beta?' (베타차단제 포함)':''}`);
+  L.push(`- 관련 계통: ${c.tags.filter(t=>t!=='betablocker').join(', ')||'없음'}`);
+  L.push(`- 진단별 주의사항: ${c.cautions.join(' / ')}`);
 
-  if(!useAI){
-    out.innerHTML=localSOAPHtml(soap);
-    btn.textContent='요약 다시 생성';
-    return;
+  L.push('\n# 사정 결과');
+  L.push(`- 혈압 ${a.sbp}/${a.dbp} mmHg (연령 정상 ${g.vs.sbp[0]}-${g.vs.sbp[1]}/${g.vs.dbp[0]}-${g.vs.dbp[1]}), 맥박 ${a.hr} bpm (정상 ${g.vs.hr[0]}-${g.vs.hr[1]}), 호흡 ${a.rr}/분, 체온 ${a.temp}℃, SpO2 ${a.spo2}% (정상 ≥${g.vs.spo2[0]})${a.bg!=null?`, 혈당 ${a.bg} mg/dL`:''}`);
+  L.push(`- 통증 NRS ${a.pain}/10, 환측 도수근력 MMT ${a.mmt}/5, 관절가동범위 ${a.rom}, 이동능력 ${a.amb}, 낙상위험 ${a.fall}, 인지 ${a.cog}`);
+  L.push(`- 규칙 엔진 판정: ${RISK_KO[res.risk]}`);
+  if(res.rules.length){
+    L.push('- 발동된 규칙:');
+    res.rules.forEach(r=>L.push(`  [${r.s.toUpperCase()} ${r.code}] ${r.msg}`));
   }
 
-  btn.disabled=true; btn.textContent='생성 중…';
-  out.textContent='AI가 임상 기록을 작성하고 있습니다…';
+  L.push('\n# 실습생이 구성한 프로그램');
+  L.push(`- 강도 설계: 주 ${S.dose.freq}회 · 회당 ${S.dose.time}분 · 총 ${S.dose.weeks}주`);
+  L.push(`  ${beta?`베타차단제 → 목표 자각강도(RPE) ${S.dose.rpe}, 심박수 기준 미적용`:`목표심박수 ${k.lo}-${k.hi} bpm, 목표 RPE ${S.dose.rpe}`}`);
+  L.push(`- 목표 진술: ${S.goal||'(미입력)'}`);
+  L.push(`- 선택한 중재 ${picked.length}개:`);
+  picked.forEach(x=>{
+    const rel = x.tags.includes('*') || x.tags.some(t=>c.tags.includes(t));
+    const blk = x.block ? x.block(a) : null;
+    const notes=[];
+    if(!rel) notes.push('⚠ 대상자의 계통/진단과 직접 관련이 낮음');
+    if(blk) notes.push('⚠ 현재 사정값에서 금기 조건: '+blk);
+    L.push(`  · ${x.nm} — 표적계통[${x.tags.join(',')}], 권장용량 ${x.dose}${notes.length?' | '+notes.join(' | '):''}`);
+  });
+  if(missed.length) L.push(`- 엔진은 권장하나 선택하지 않은 중재: ${missed.join(', ')}`);
+  if(S.weekPlan && S.weekPlan.length){
+    L.push(`- 주차별 배치: ${S.weekPlan.map(w=>{
+      const days = w.days ? w.days.filter(d=>!d.rest && d.ex.length).length : w.freq;
+      return `${w.w}주(운동 ${days}일/주, ${w.items.length}종)`;
+    }).join(' / ')}`);
+  }
+  return L.join('\n');
+}
 
-  const c=caseObj();
-  const draft=`S ${soap.S}\nO ${soap.O}\nA ${soap.A}\nP ${soap.P}`;
+/* AI 없이 돌아가는 기계적 점검 (폴백) */
+function localReviewHtml(){
+  const c=caseObj(), a=S.a, res=S.evalRes;
+  const picked=EX_LIB.filter(x=>S.picked.has(x.id));
+  const flags=[];
+  picked.forEach(x=>{
+    const rel = x.tags.includes('*') || x.tags.some(t=>c.tags.includes(t));
+    const blk = x.block ? x.block(a) : null;
+    if(blk) flags.push(`🚫 <strong>${_esc(x.nm)}</strong> — 현재 사정값에서 금기: ${_esc(blk)}`);
+    else if(!rel) flags.push(`⚠ <strong>${_esc(x.nm)}</strong> — 이 대상자의 계통(${_esc(c.tags.filter(t=>t!=='betablocker').join(', ')||'없음')})과 직접 관련이 낮습니다. 선택 근거를 확인하세요.`);
+  });
+  if(res.risk==='caution' && S.dose.rpe>13) flags.push(`⚠ 조건부 진행 판정인데 목표 RPE가 ${S.dose.rpe}점으로 높습니다. 한 단계 낮추는 것을 검토하세요.`);
+  if(res.risk==='stop') flags.push(`🚫 규칙 엔진이 '운동 보류'로 판정했습니다. 능동/등척성 등 침상 내 안전 활동 외의 중재는 금기 해소 후 추가해야 합니다.`);
+  if(a.mmt<=2 && S.dose.time>15) flags.push(`⚠ MMT ${a.mmt}등급(중력 이기지 못함)인데 1회 ${S.dose.time}분은 깁니다. 짧게 자주로 조정을 검토하세요.`);
+  const sugg=suggest();
+  const missed=[...sugg].filter(id=>!S.picked.has(id)).map(id=>EX_LIB.find(x=>x.id===id).nm);
+
+  let h=`<div style="color:var(--caution);font-size:12px;margin-bottom:10px">⚠ AI 검토 연결 실패 — 규칙 기반 자동 점검 결과로 대체했습니다.</div>`;
+  h+=`<strong>판정</strong>  ${RISK_KO[res.risk]}\n`;
+  h+=res.rules.length?`<strong>근거 규칙</strong>\n${res.rules.map(r=>`· [${r.code}] ${_esc(r.msg)}`).join('\n')}\n\n`:'\n';
+  h+=`<strong>프로그램 점검</strong>\n${flags.length?flags.map(f=>'· '+f).join('\n'):'· 기계적 점검에서 뚜렷한 불일치는 발견되지 않았습니다. 각 중재의 선택 근거는 팀이 직접 검토하세요.'}\n\n`;
+  h+=`<strong>엔진 권장이나 미선택</strong>\n${missed.length?'· '+missed.join(', '):'· 없음'}\n\n`;
+  h+=`⚠️ 교육용 자동 점검 — 실제 임상 판단을 대신하지 않습니다.`;
+  return h;
+}
+
+async function aiReview(){
+  const out=$('#aiOut'), btn=$('#btnAI');
+  const useAI = AI_PROXY && AI_PROXY.indexOf('PASTE_')!==0;
+
+  if(!useAI){ out.innerHTML=localReviewHtml(); btn.textContent='다시 검토'; return; }
+
+  btn.disabled=true; btn.textContent='검토 중…';
+  out.textContent='AI가 프로그램의 적합성을 검토하고 있습니다…';
+
   const prompt=
-`너는 재활의학 임상 기록 작성을 돕는 도우미다. 아래 규칙 엔진이 산출한 사정 자료·초안만 근거로,
-간호·재활 실습생이 발표에 쓸 자연스러운 한국어 SOAP 기록으로 다시 써라.
+`너는 재활의학 임상 지도자다. 아래는 한 대상자의 사정 결과와, 실습생이 그 대상자를 위해 구성한 재활 프로그램이다.
+이 프로그램이 이 대상자에게 적합한지 검토하라. 사정과 중재가 어긋나는 부분을 반드시 짚어라.
+예: 무릎 통증이 심한 대상자에게 관련 없는 상지 강화만 배치, 조건부 진행 판정인데 고강도 배치,
+현재 금기 조건에 걸리는 운동 선택, 낙상 고위험인데 감독 없는 균형훈련, 필요한 중재 누락 등.
 
 규칙:
-- 주어진 수치와 판정 외에 새로운 임상 사실을 지어내지 마라.
-- S, O, A, P 네 항목으로 나누고 각 항목은 3~5문장, 매끄러운 서술형으로.
-- 전문 용어는 유지한다.
-- 맨 끝에 "⚠️ 교육용 자동 생성 — 실제 임상 판단을 대신하지 않습니다." 를 덧붙여라.
+- 아래에 주어진 정보만 근거로 삼아라. 새로운 임상 사실이나 수치를 지어내지 마라.
+- 규칙 코드(예: BP-02)나 주의사항 문구를 근거로 인용하라.
+- 아래 형식의 한국어로만 답하라:
 
-[대상자] ${c.age}세 ${c.sex} · ${c.dx}
-[규칙 엔진 초안]
-${draft}`;
+■ 총평: (적합 / 부분 수정 필요 / 재설계 권장 중 하나 + 한 문장 이유)
+
+■ 잘 맞는 점
+- (대상자 상태에 부합하는 선택과 그 이유, 2~4개)
+
+■ 재검토 필요
+- (사정과 어긋나는 중재·강도·안전조치. 무엇이 왜 문제이고 어떻게 바꿔야 하는지. 없으면 "없음")
+
+■ 빠진 것
+- (이 대상자에게 필요하나 프로그램에 없는 중재나 주의. 없으면 "없음")
+
+맨 끝 줄: ⚠️ 교육용 자동 검토 — 실제 임상 판단을 대신하지 않습니다.
+
+${buildReviewContext()}`;
 
   try{
     const r=await fetch(AI_PROXY,{
@@ -1844,11 +1920,9 @@ ${draft}`;
     if(!j.text) throw new Error(j.error||'빈 응답');
     out.textContent=j.text;
   }catch(err){
-    out.innerHTML=
-      `<div style="color:var(--caution);font-size:12px;margin-bottom:8px">⚠ AI 연결 실패 — 로컬 엔진 결과로 대체했습니다.</div>`+
-      localSOAPHtml(soap);
+    out.innerHTML=localReviewHtml();
   }finally{
-    btn.disabled=false; btn.textContent='요약 다시 생성';
+    btn.disabled=false; btn.textContent='다시 검토';
   }
 }
 
