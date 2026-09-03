@@ -1710,7 +1710,7 @@ function renderCard(){
 
     <div class="rxsec">
       <h4>임상 요약 · SOAP 자동 생성</h4>
-      <div class="aibox" id="aiOut">생성 버튼을 누르면 사정 데이터를 근거로 SOAP 형식 기록을 조립합니다. 인터넷 연결 없이 앱 안에서 바로 작동합니다.</div>
+      <div class="aibox" id="aiOut">생성 버튼을 누르면 사정 데이터를 근거로 SOAP 형식 임상 기록을 작성합니다.</div>
       <button class="btn ghost small" id="btnAI" style="margin-top:9px">SOAP 요약 생성</button>
     </div>
 
@@ -1788,15 +1788,68 @@ function buildSOAP(){
   return {S:S_,O:O_,A:A_,P:P_};
 }
 
-function aiSummary(){
-  const out=$('#aiOut');
-  const soap = buildSOAP();
-  out.innerHTML =
-    `<strong>S (주관적 자료)</strong>  ${soap.S}\n\n`+
+/* ============================================================
+   AI SOAP 요약 (Gemini 프록시)
+   ------------------------------------------------------------
+   AI_PROXY 를 Apps Script 웹앱 배포 URL(끝이 /exec)로 바꾸면
+   AI 생성이 켜집니다. 비워두거나 호출이 실패하면 자동으로
+   로컬 규칙 엔진(buildSOAP) 결과로 대체됩니다.
+   ============================================================ */
+const AI_PROXY = 'PASTE_APPS_SCRIPT_EXEC_URL';
+
+function localSOAPHtml(soap){
+  return `<strong>S (주관적 자료)</strong>  ${soap.S}\n\n`+
     `<strong>O (객관적 자료)</strong>  ${soap.O}\n\n`+
     `<strong>A (사정·판정)</strong>  ${soap.A}\n\n`+
     `<strong>P (계획)</strong>  ${soap.P}`;
-  $('#btnAI').textContent='요약 다시 생성';
+}
+
+async function aiSummary(){
+  const out=$('#aiOut'), btn=$('#btnAI');
+  const soap=buildSOAP();
+  const useAI = AI_PROXY && AI_PROXY.indexOf('PASTE_')!==0;
+
+  if(!useAI){
+    out.innerHTML=localSOAPHtml(soap);
+    btn.textContent='요약 다시 생성';
+    return;
+  }
+
+  btn.disabled=true; btn.textContent='생성 중…';
+  out.textContent='AI가 임상 기록을 작성하고 있습니다…';
+
+  const c=caseObj();
+  const draft=`S ${soap.S}\nO ${soap.O}\nA ${soap.A}\nP ${soap.P}`;
+  const prompt=
+`너는 재활의학 임상 기록 작성을 돕는 도우미다. 아래 규칙 엔진이 산출한 사정 자료·초안만 근거로,
+간호·재활 실습생이 발표에 쓸 자연스러운 한국어 SOAP 기록으로 다시 써라.
+
+규칙:
+- 주어진 수치와 판정 외에 새로운 임상 사실을 지어내지 마라.
+- S, O, A, P 네 항목으로 나누고 각 항목은 3~5문장, 매끄러운 서술형으로.
+- 전문 용어는 유지한다.
+- 맨 끝에 "⚠️ 교육용 자동 생성 — 실제 임상 판단을 대신하지 않습니다." 를 덧붙여라.
+
+[대상자] ${c.age}세 ${c.sex} · ${c.dx}
+[규칙 엔진 초안]
+${draft}`;
+
+  try{
+    const r=await fetch(AI_PROXY,{
+      method:'POST',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify({prompt})
+    });
+    const j=await r.json();
+    if(!j.text) throw new Error(j.error||'빈 응답');
+    out.textContent=j.text;
+  }catch(err){
+    out.innerHTML=
+      `<div style="color:var(--caution);font-size:12px;margin-bottom:8px">⚠ AI 연결 실패 — 로컬 엔진 결과로 대체했습니다.</div>`+
+      localSOAPHtml(soap);
+  }finally{
+    btn.disabled=false; btn.textContent='요약 다시 생성';
+  }
 }
 
 /* ============================================================
