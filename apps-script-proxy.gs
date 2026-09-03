@@ -1,47 +1,69 @@
 /**
  * REHAB LAB — Gemini 프록시 (Google Apps Script)
  * ------------------------------------------------------------
- * 이 스크립트는 Gemini API 키를 서버에 숨긴 채,
- * 웹앱(index.html)이 보낸 프롬프트를 Gemini에 전달하고 결과만 돌려줍니다.
+ * Gemini API 키를 서버에 숨긴 채, 웹앱(index.html)이 보낸 프롬프트를
+ * Gemini에 전달하고 결과만 돌려줍니다.
  *
  * [설치]
  * 1. https://script.google.com  →  새 프로젝트
- * 2. 이 파일 내용을 전부 붙여넣기 (Code.gs 를 덮어쓰기)
- * 3. 왼쪽 톱니바퀴(프로젝트 설정) → 아래 "스크립트 속성" →
+ * 2. 이 파일 내용을 전부 붙여넣기 (Code.gs 덮어쓰기) → 💾 저장
+ * 3. 왼쪽 ⚙️ 프로젝트 설정 → 아래 "스크립트 속성" →
  *      속성:  GEMINI_KEY
- *      값:    aistudio.google.com/apikey 에서 발급한 키 (AIza... 로 시작, 약 39자)
- *             ※ 앞뒤 공백/줄바꿈 없이, 키 "문자열만" 붙여넣기
+ *      값:    aistudio.google.com/apikey 팝업에서 "키 복사" 로 얻은 문자열
+ *             (AQ. 로 시작, 약 50자. "cURL 빠른 시작 복사" 아님!)
  *    저장
- * 4. 오른쪽 위 "배포" → "새 배포" → 유형: 웹 앱
- *      실행 계정:      나
- *      액세스 권한:    모든 사용자
- *    "배포" 클릭 → 나오는 웹 앱 URL(끝이 /exec) 복사
- *    ※ 코드를 고친 뒤에는 "배포 관리" → 연필(수정) → 버전 "새 버전" → 배포
- * 5. 그 URL 을 index.html 의  const AI_PROXY = '...'  자리에 붙여넣기
+ * 4. "배포" → "새 배포" → 유형: 웹 앱 / 실행: 나 / 액세스: 모든 사용자 → 배포
+ *      → 웹 앱 URL(/exec) 복사
+ * 5. 코드를 고친 뒤에는:  "배포" → "배포 관리" → 연필(수정) → 버전 "새 버전" → 배포
+ *      ※ 이 방식이면 URL 이 안 바뀝니다. "새 배포" 를 누르면 URL 이 새로 생깁니다.
  *
- * [상태 확인] 브라우저로 그 /exec URL 을 그냥 열면 아래처럼 보여야 정상:
- *   {"ok":true,"keyConfigured":true,"keyLength":39,"model":"gemini-flash-latest"}
- *   keyConfigured 가 false 거나 keyLength 가 39 근처가 아니면 3번 스크립트 속성을 다시 확인.
+ * [상태 확인]
+ *   /exec           → {"ok":true,"keyConfigured":true,"keyLength":50,...}
+ *   /exec?models=1  → 이 키로 쓸 수 있는 모델 목록
  */
 
-// 사용할 모델. 무료 등급에서 도는 Flash 계열. 문제 시 'gemini-2.5-flash' 등으로 교체.
-var MODEL = 'gemini-flash-latest';
-var GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/'
-  + MODEL + ':generateContent';
+// 시도할 모델 목록 (앞에서부터 순서대로, 503/429/404 면 다음 것으로 넘어감)
+var MODELS = [
+  'gemini-2.5-flash',
+  'gemini-flash-latest',
+  'gemini-2.0-flash',
+  'gemini-2.5-flash-lite',
+  'gemini-flash-lite-latest'
+];
+
+var API_ROOT = 'https://generativelanguage.googleapis.com/v1beta/';
 
 function getKey_() {
   var k = PropertiesService.getScriptProperties().getProperty('GEMINI_KEY');
   return (k || '').trim();
 }
 
-function doGet() {
-  var k = getKey_();
+function doGet(e) {
+  var key = getKey_();
+  if (e && e.parameter && e.parameter.models === '1') {
+    try {
+      var r = UrlFetchApp.fetch(API_ROOT + 'models', {
+        headers: { 'x-goog-api-key': key },
+        muteHttpExceptions: true
+      });
+      var d = JSON.parse(r.getContentText() || '{}');
+      if (d.error) return json_({ error: d.error.message, code: d.error.code });
+      var names = (d.models || [])
+        .filter(function (m) {
+          return (m.supportedGenerationMethods || []).indexOf('generateContent') >= 0;
+        })
+        .map(function (m) { return m.name.replace('models/', ''); });
+      return json_({ ok: true, count: names.length, models: names });
+    } catch (err) {
+      return json_({ error: String(err) });
+    }
+  }
   return json_({
     ok: true,
-    keyConfigured: k.length > 0,
-    keyLength: k.length,
-    model: MODEL,
-    msg: 'POST { "prompt": "..." } 형식으로 호출하세요.'
+    keyConfigured: key.length > 0,
+    keyLength: key.length,
+    models: MODELS,
+    msg: 'POST { "prompt": "..." } 로 호출. 모델 목록은 ?models=1'
   });
 }
 
@@ -54,40 +76,52 @@ function doPost(e) {
     var key = getKey_();
     if (!key) return json_({ error: '서버에 GEMINI_KEY 스크립트 속성이 없습니다.' });
     if (key.length > 200) {
-      return json_({ error: 'GEMINI_KEY 값이 너무 깁니다(' + key.length + '자). API 키 문자열만(AIza..., 약 39자) 넣으세요.' });
+      return json_({ error: 'GEMINI_KEY 값이 너무 깁니다(' + key.length + '자). 팝업의 "키 복사" 버튼으로 키 문자열만 넣으세요.' });
     }
 
-    var payload = {
+    var list = body.model ? [body.model] : MODELS;
+    var payload = JSON.stringify({
       contents: [{ parts: [{ text: prompt }] }],
       generationConfig: { temperature: 0.4, maxOutputTokens: 1400 }
-    };
-
-    var res = UrlFetchApp.fetch(GEMINI_ENDPOINT, {
-      method: 'post',
-      contentType: 'application/json',
-      headers: { 'x-goog-api-key': key },   // 키를 URL이 아닌 헤더로 전달
-      payload: JSON.stringify(payload),
-      muteHttpExceptions: true
     });
 
-    var data = JSON.parse(res.getContentText() || '{}');
+    var lastErr = '알 수 없는 오류';
+    for (var i = 0; i < list.length; i++) {
+      var model = list[i];
+      for (var attempt = 0; attempt < 2; attempt++) {
+        var res = UrlFetchApp.fetch(API_ROOT + 'models/' + model + ':generateContent', {
+          method: 'post',
+          contentType: 'application/json',
+          headers: { 'x-goog-api-key': key },
+          payload: payload,
+          muteHttpExceptions: true
+        });
+        var status = res.getResponseCode();
+        var data = JSON.parse(res.getContentText() || '{}');
 
-    if (data.error) {
-      return json_({ error: (data.error.message || 'Gemini 오류'), code: data.error.code });
+        if (status === 200 && !data.error) {
+          var text = '';
+          try {
+            text = data.candidates[0].content.parts
+              .map(function (p) { return p.text || ''; }).join('');
+          } catch (x) { text = ''; }
+          if (text) return json_({ text: text, model: model });
+          var blocked = data.promptFeedback && data.promptFeedback.blockReason;
+          lastErr = blocked ? ('차단됨: ' + blocked) : '빈 응답';
+          break; // 다음 모델로
+        }
+
+        lastErr = (data.error && data.error.message) || ('HTTP ' + status);
+
+        // 503/429 면 잠깐 쉬고 같은 모델 1회 재시도, 그 외(404 등)는 다음 모델로
+        if (status === 503 || status === 429) {
+          Utilities.sleep(1200);
+          continue;
+        }
+        break;
+      }
     }
-
-    var text = '';
-    try {
-      text = data.candidates[0].content.parts
-        .map(function (p) { return p.text || ''; }).join('');
-    } catch (x) { text = ''; }
-
-    if (!text) {
-      var blocked = data.promptFeedback && data.promptFeedback.blockReason;
-      return json_({ error: blocked ? ('차단됨: ' + blocked) : '빈 응답', raw: data });
-    }
-
-    return json_({ text: text });
+    return json_({ error: lastErr });
   } catch (err) {
     return json_({ error: String(err) });
   }
