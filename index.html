@@ -452,6 +452,20 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
 .rv-fix .rv-how{color:var(--alert);display:block;margin-top:3px}
 .rv-how::before{content:"→ ";font-weight:700}
 .rv-disc{font-size:11px;color:var(--ink3);margin-top:12px;padding-top:9px;border-top:1px dashed var(--rule)}
+
+/* ---------- 3D 부위 커버리지 ---------- */
+.bl-tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.04em;padding:1px 5px;border-radius:2px;font-weight:600}
+.bodywrap{display:grid;grid-template-columns:1fr 172px;gap:14px;align-items:start}
+@media(max-width:620px){.bodywrap{grid-template-columns:1fr}}
+#bodyCanvas{width:100%;height:340px;display:block;border:1px solid var(--rule);border-radius:6px;
+  background:radial-gradient(120% 90% at 50% 15%,#F4F8F1,#DDE7D8);touch-action:none;cursor:grab}
+#bodyCanvas:active{cursor:grabbing}
+.bodylegend{display:flex;flex-direction:column;gap:9px;font-size:11.5px}
+.bl-row{display:grid;grid-template-columns:12px 1fr;gap:7px;line-height:1.35;color:var(--ink2)}
+.bl-sw{width:12px;height:12px;border-radius:3px;margin-top:2px}
+.bl-row b{color:var(--ink);font-weight:600;font-size:11.5px}
+.bl-empty{color:var(--ink3)}
+.bodyfall{font-size:12.5px;color:var(--ink3);padding:24px 12px;text-align:center;line-height:1.6}
 .check{display:grid;gap:5px}
 .check label{display:grid;grid-template-columns:auto 1fr;gap:9px;font-size:13.3px;align-items:start;cursor:pointer}
 .check input{margin-top:4px;accent-color:var(--signal)}
@@ -624,6 +638,17 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
   </div>
 
   <div class="chart">
+    <h3>부위 커버리지 · 3D <span class="hint">BODY COVERAGE</span></h3>
+    <div class="body">
+      <p class="ex-guide">선택한 운동이 실제로 목표하는 신체 부위입니다. 드래그해서 돌려볼 수 있습니다. <b class="bl-tag" style="background:#DCEEE6;color:#0C8A66">초록</b> 대상자 문제부위를 다룸 · <b class="bl-tag" style="background:#F3E1DF;color:#A0281F">빨강</b> 관련 없거나 금기인 부위 · <b class="bl-tag" style="background:#FAF0DC;color:#B0700B">노랑</b> 문제부위인데 프로그램에 없음</p>
+      <div class="bodywrap">
+        <canvas id="bodyCanvas"></canvas>
+        <div class="bodylegend" id="bodyLegend"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart">
     <h3>팀 목표 진술 <span class="hint">GOAL STATEMENT</span></h3>
     <div class="body">
       <textarea id="goalText" rows="3" placeholder="예) 4주 후 대상자는 보조기구 없이 실내 10m를 통증 NRS 3 이하로 보행할 수 있다."></textarea>
@@ -676,6 +701,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
 </p>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
 <script>
 /* ============================================================
    DATA
@@ -1411,10 +1437,12 @@ function renderProgram(){
     el.dataset.on = S.picked.has(id)?'1':'0';
     el.querySelector('.ex-state').textContent = S.picked.has(id)?'선택됨':(el.dataset.rel==='1'?'권장':'선택 가능');
     updateExCount();
+    Body3D.update();
     $$('#rail button').forEach(b=>b.disabled=!reachable(+b.dataset.go));
   };
   $('#goalText').value = S.goal;
   $('#goalText').oninput = e=>{S.goal=e.target.value;};
+  Body3D.ensure(); Body3D.update();
 }
 function updateExCount(){
   const el=$('#exCount'); if(el) el.textContent = S.picked.size+'개 선택됨';
@@ -2011,6 +2039,165 @@ ${buildReviewContext()}`;
     btn.disabled=false; btn.textContent='다시 검토';
   }
 }
+
+/* ============================================================
+   3D 부위 커버리지
+   ============================================================ */
+const BODY_REGIONS = ['head','chest','core','back','armL','armR','hipL','hipR','legL','legR'];
+const REGION_KO = {head:'머리·인지',chest:'가슴·심폐',core:'몸통·코어',back:'등·척추',
+  armL:'왼팔',armR:'오른팔',hipL:'왼쪽 고관절',hipR:'오른쪽 고관절',legL:'왼다리',legR:'오른다리'};
+const SYS_REGIONS = {
+  'ortho-upper':['armL','armR','back'], 'ortho-lower':['hipL','hipR','legL','legR'],
+  'spine':['back','core'], 'cardiac':['chest'], 'pulmonary':['chest'],
+  'neuro':['head','armL','armR','legL','legR','core'], 'amputation':['legL','legR'],
+  'metabolic':['chest','legL','legR'], 'sarcopenia':['armL','armR','legL','legR','core'],
+  'frailty':['legL','legR','core'], 'cognitive':['head'], 'postop':[]
+};
+const EX_REGIONS = {
+  aarom:'CASE', rom:'CASE', stretch:'CASE', iso:'CASE',
+  band:['armL','armR','legL','legR'], aerobic:['chest','legL','legR'], interval:['chest','legL','legR'],
+  aqua:['hipL','hipR','legL','legR','back'], balance:['legL','legR','core'],
+  gait:['hipL','hipR','legL','legR','core'], breath:['chest'],
+  adl:['armL','armR','legL','legR','core'], stump:['legL','legR'],
+  sts:['hipL','hipR','legL','legR','core'], posture:['back','core','armL','armR'], cognitive:['head']
+};
+function caseRegions(){
+  const c=caseObj(), set=new Set();
+  if(c) c.tags.forEach(t=>(SYS_REGIONS[t]||[]).forEach(r=>set.add(r)));
+  if(!set.size) BODY_REGIONS.forEach(r=>set.add(r));
+  return set;
+}
+function programRegions(){
+  const a=S.a, res=S.evalRes, cr=caseRegions();
+  const hit=new Set(), bad=new Set();
+  EX_LIB.filter(x=>S.picked.has(x.id)).forEach(x=>{
+    let regs=EX_REGIONS[x.id];
+    if(regs==='CASE') regs=[...cr];
+    (regs||[]).forEach(r=>{
+      hit.add(r);
+      const blocked = (x.block&&x.block(a)) || (res&&res.risk==='stop'&&!['aarom','rom','breath','iso'].includes(x.id));
+      if(blocked) bad.add(r);
+    });
+  });
+  return {hit,bad};
+}
+
+const Body3D = (()=>{
+  const COL={neutral:0xC7D1C3, good:0x2E9E77, bad:0xC0392B, gap:0xE0A93B, skin:0xBFC9BC};
+  let ready=false, renderer, scene, cam, human, mats={}, rot={x:-0.08,y:0.5}, drag=false, last=null, ro;
+
+  function mat(c){ return new THREE.MeshStandardMaterial({color:c,roughness:.85}); }
+  function limb(x0,y0,x1,y1,r){
+    const dx=x1-x0, dy=y1-y0, len=Math.hypot(dx,dy);
+    const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,len,12), mat(COL.neutral));
+    m.position.set((x0+x1)/2,(y0+y1)/2,0);
+    m.rotation.z=Math.atan2(-dx,dy);
+    return m;
+  }
+  function ball(x,y,r,c){
+    const m=new THREE.Mesh(new THREE.SphereGeometry(r,16,12), mat(c||COL.neutral));
+    m.position.set(x,y,0); return m;
+  }
+  function boxMesh(x,y,z,w,h,d){
+    const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d), mat(COL.neutral));
+    m.position.set(x,y,z); return m;
+  }
+
+  function build(){
+    human=new THREE.Group();
+    const reg=(name,mesh)=>{ mats[name]=mesh.material; human.add(mesh); return mesh; };
+    const skin=mesh=>{ mesh.material=mat(COL.skin); human.add(mesh); return mesh; };
+
+    reg('head', ball(0,1.62,0.135));
+    skin(ball(0,1.45,0.055));                                    // neck
+    reg('chest', boxMesh(0,1.16,0,0.36,0.34,0.20));
+    reg('core',  boxMesh(0,0.84,0,0.30,0.30,0.17));
+    reg('back',  boxMesh(0,1.02,-0.115,0.30,0.62,0.05));
+    skin(ball(-0.235,1.32,0.075)); skin(ball(0.235,1.32,0.075)); // shoulders
+    reg('armL', limb(-0.235,1.30,-0.31,0.70,0.052));
+    reg('armR', limb(0.235,1.30,0.31,0.70,0.052));
+    reg('hipL', ball(-0.11,0.63,0.078));
+    reg('hipR', ball(0.11,0.63,0.078));
+    reg('legL', limb(-0.11,0.60,-0.13,0.02,0.07));
+    reg('legR', limb(0.11,0.60,0.13,0.02,0.07));
+    skin(ball(-0.13,0.0,0.06)); skin(ball(0.13,0.0,0.06));       // feet
+
+    human.position.y=-0.8;
+    scene.add(human);
+  }
+
+  function ensure(){
+    if(ready) return;
+    const cv=document.getElementById('bodyCanvas'); if(!cv) return;
+    if(typeof THREE==='undefined'){
+      const w=cv.parentElement;
+      const d=document.createElement('div'); d.className='bodyfall';
+      d.textContent='3D 뷰를 불러오지 못했습니다 (네트워크 차단). 아래 범례는 부위 커버리지 계산 결과로 계속 표시됩니다.';
+      cv.replaceWith(d); ready=true; update(); return;
+    }
+    scene=new THREE.Scene();
+    cam=new THREE.PerspectiveCamera(38, cv.clientWidth/cv.clientHeight||1.4, 0.1, 100);
+    cam.position.set(0,0.15,3.15);
+    renderer=new THREE.WebGLRenderer({canvas:cv, antialias:true, alpha:true});
+    renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+    scene.add(new THREE.AmbientLight(0xffffff,0.75));
+    const dir=new THREE.DirectionalLight(0xffffff,0.7); dir.position.set(1.4,2,2.2); scene.add(dir);
+    const dir2=new THREE.DirectionalLight(0xffffff,0.28); dir2.position.set(-1.5,0.5,-1.5); scene.add(dir2);
+    build(); resize();
+
+    cv.addEventListener('pointerdown',e=>{drag=true;last={x:e.clientX,y:e.clientY};cv.setPointerCapture(e.pointerId);});
+    cv.addEventListener('pointermove',e=>{ if(!drag)return;
+      rot.y+=(e.clientX-last.x)*0.01; rot.x+=(e.clientY-last.y)*0.008;
+      rot.x=Math.max(-0.9,Math.min(0.9,rot.x)); last={x:e.clientX,y:e.clientY}; });
+    const stop=()=>drag=false;
+    cv.addEventListener('pointerup',stop); cv.addEventListener('pointercancel',stop); cv.addEventListener('pointerleave',stop);
+    ro=new ResizeObserver(resize); ro.observe(cv);
+
+    ready=true; loop(); update();
+  }
+  function resize(){
+    const cv=renderer&&renderer.domElement; if(!cv) return;
+    const w=cv.clientWidth||360, h=cv.clientHeight||340;
+    renderer.setSize(w,h,false); cam.aspect=w/h; cam.updateProjectionMatrix();
+  }
+  function loop(){
+    if(!ready||!renderer) return;
+    if(!drag) rot.y+=0.0035;
+    human.rotation.set(rot.x,rot.y,0);
+    renderer.render(scene,cam);
+    requestAnimationFrame(loop);
+  }
+  function setRegion(name,hex){ const m=mats[name]; if(m) m.color.setHex(hex); }
+
+  function update(){
+    if(!ready) return;
+    if(!S.built||!S.evalRes){ BODY_REGIONS.forEach(r=>setRegion(r,COL.neutral)); renderLegend({}); return; }
+    const cr=caseRegions(), {hit,bad}=programRegions();
+    const buckets={good:[],bad:[],gap:[],none:[]};
+    BODY_REGIONS.forEach(r=>{
+      let key;
+      if(bad.has(r)) key='bad';
+      else if(hit.has(r)&&cr.has(r)) key='good';
+      else if(hit.has(r)&&!cr.has(r)) key='bad';
+      else if(cr.has(r)&&!hit.has(r)) key='gap';
+      else key='none';
+      setRegion(r, COL[key==='none'?'neutral':key]);
+      buckets[key].push(REGION_KO[r]);
+    });
+    renderLegend(buckets);
+  }
+  function renderLegend(b){
+    const el=document.getElementById('bodyLegend'); if(!el) return;
+    const row=(hex,label,arr)=>`<div class="bl-row"><span class="bl-sw" style="background:#${hex}"></span>
+      <span><b>${label}</b><br>${arr&&arr.length?arr.join(', '):'<span class="bl-empty">해당 없음</span>'}</span></div>`;
+    el.innerHTML =
+      row('2E9E77','적절히 다룸', b.good) +
+      row('C0392B','관련 없거나 금기', b.bad) +
+      row('E0A93B','문제부위인데 미포함', b.gap) +
+      `<div class="bodyhint" style="font-size:11px;color:var(--ink3);margin-top:2px">회색은 이 대상자와 무관한 부위입니다.</div>`;
+  }
+  return {ensure, update};
+})();
 
 /* ============================================================
    INIT
