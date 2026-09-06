@@ -513,8 +513,8 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
 <!-- ===== STEP 1 ===== -->
 <section class="panel" data-step="1">
   <p class="eyebrow">Step 01 — Population</p>
-  <h2 class="sec">노인 대상자의 연령대를 고르세요</h2>
-  <p class="lede">이 실습은 <b>노인 대상자</b>의 재활운동 프로그램을 구성합니다. 같은 노년이라도 전기·후기·초고령에 따라 활력징후 정상 범위와 운동 반응이 다릅니다. 여기서 선택한 값이 이후 모든 판정 기준의 기준선이 됩니다.</p>
+  <h2 class="sec">대상자의 연령대를 고르세요</h2>
+  <p class="lede">이 실습은 <b>50대 후반 ~ 70대</b>(중년 후기 ~ 후기 노년) 대상자의 재활운동 프로그램을 구성합니다. 같은 시기라도 연령대에 따라 활력징후 정상 범위와 운동 반응이 다릅니다. 여기서 선택한 값이 이후 모든 판정 기준의 기준선이 됩니다.</p>
   <div class="grid g3" id="ageGrid"></div>
 </section>
 
@@ -529,7 +529,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
     <div class="body">
       <div class="rows">
         <div class="row"><label>이름 (가명)<i>NAME</i></label><div class="in"><input type="text" id="bc_nm" placeholder="예) 김O수" maxlength="12"></div></div>
-        <div class="row"><label>나이<i>AGE</i></label><div class="in"><input type="number" id="bc_age" min="60" max="110" placeholder="세"><span class="unit">세</span></div></div>
+        <div class="row"><label>나이<i>AGE</i></label><div class="in"><input type="number" id="bc_age" min="55" max="85" placeholder="세"><span class="unit">세</span></div></div>
         <div class="row"><label>성별<i>SEX</i></label><div class="in"><select id="bc_sex"><option value="남">남</option><option value="여">여</option></select></div></div>
       </div>
     </div>
@@ -706,14 +706,14 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
 /* ============================================================
    DATA
    ============================================================ */
-// 노인 대상 전용 — 전기 노년 / 후기 노년 / 초고령
+// 대상 연령: 50대 후반 ~ 70대 (중년 후기 ~ 후기 노년)
 const AGES = [
-  {id:'senior', k:'65–74', nm:'전기 노년', sub:'활동적이나 만성질환 시작', mid:69, emo:'🧓',
-   vs:{sbp:[100,139],dbp:[60,89],hr:[60,100],rr:[12,20],spo2:[93,100],temp:[36.0,37.5]}},
-  {id:'senior2', k:'75–84', nm:'후기 노년', sub:'다약제·낙상 위험·근력 저하', mid:79, emo:'🧓',
-   vs:{sbp:[100,145],dbp:[60,89],hr:[60,100],rr:[12,22],spo2:[92,100],temp:[36.0,37.5]}},
-  {id:'oldest', k:'85+', nm:'초고령', sub:'근감소·노쇠·인지 저하', mid:88, emo:'👵',
-   vs:{sbp:[100,150],dbp:[60,90],hr:[60,100],rr:[12,22],spo2:[92,100],temp:[35.8,37.5]}}
+  {id:'a5564', k:'55–64', nm:'중년 후기', sub:'퇴행·만성질환 시작, 회복력 유지', mid:60, emo:'🧑‍🦱',
+   vs:{sbp:[100,135],dbp:[60,85],hr:[60,100],rr:[12,20],spo2:[94,100],temp:[36.0,37.5]}},
+  {id:'a6574', k:'65–74', nm:'전기 노년', sub:'활동적이나 회복 더딤, 낙상 주의', mid:69, emo:'🧓',
+   vs:{sbp:[100,139],dbp:[60,88],hr:[60,100],rr:[12,20],spo2:[93,100],temp:[36.0,37.5]}},
+  {id:'a7579', k:'75–79', nm:'후기 노년', sub:'근력·균형 저하 뚜렷, 다약제', mid:77, emo:'🧓',
+   vs:{sbp:[100,142],dbp:[60,89],hr:[60,100],rr:[12,22],spo2:[92,100],temp:[36.0,37.5]}}
 ];
 
 const VS_FIELDS = [
@@ -899,11 +899,11 @@ function prefillAgeHint(){
 function fillExample(){
   const g=ageObj();
   const samples={
-    senior:{nm:'김O자',age:69,sex:'여',dx:'무릎 골관절염 · 낙상 후 활동 위축',cc:'계단·등산이 무릎이 아파 겁나서 걷기를 줄였다',hx:'6개월 전 낙상, 이후 외출 감소·다리 힘 저하',meds:'혈압약, 필요시 진통제',tags:['ortho-lower','frailty'],beta:false,cautions:'체중부하 관절 충격 최소화 — 점프·달리기 제외\n통증 악화 시 하중 조절\n균형훈련은 지지물 곁에서'},
-    senior2:{nm:'박O순',age:79,sex:'여',dx:'골다공증 · 흉추 압박골절 병력 · 자세 불안정',cc:'등이 굽고 오래 서 있기 힘들며 자주 휘청인다',hx:'폐경 후 골다공증, 1년 전 압박골절, 보행 시 지팡이',meds:'비스포스포네이트, 칼슘·비타민D',tags:['spine','osteoporosis','frailty'],beta:false,cautions:'척추 굴곡·회전 부하 운동 절대 금지 (윗몸일으키기·허리 비틀기)\n낙상 예방 최우선 — 균형훈련은 지지물 곁에서\n고충격 운동 금지, 저충격 체중부하 운동 권장'},
-    oldest:{nm:'최O남',age:87,sex:'남',dx:'낙상 후 근감소증 · 노쇠',cc:'의자에서 혼자 못 일어나고 자주 넘어진다',hx:'악력 저하, 보행속도 느림, 최근 6개월 체중 감소',meds:'다약제 7종 복용',tags:['frailty','sarcopenia'],beta:false,cautions:'다약제 — 기립성 저혈압·어지럼 확인 후 시작\n앉은 자세에서 시작해 점진적 기립 훈련\n단백질 섭취 병행 교육'}
+    a5564:{nm:'김O수',age:62,sex:'남',dx:'요추관 협착증 감압·유합술 후 6주',cc:'오래 서거나 걸으면 다리가 저리고 허리가 뻣뻣하다',hx:'신경인성 파행으로 수술, 급성기 지나 재활 시작, 앉아 있는 시간 길다',meds:'진통제, 근이완제',tags:['spine','postop'],beta:false,cautions:'요추 굴곡·회전·비틀기 부하 운동 금지 (윗몸일으키기·허리 돌리기)\n발살바(숨 참고 힘주기) 유발 고부하 금지\n무거운 물건 들기 제한 — 통증 없는 중립 자세 유지'},
+    a6574:{nm:'이O자',age:68,sex:'여',dx:'낙상 후 좌측 손목 요골 원위부 골절 · 금속판 고정술 후 4주',cc:'손목이 뻣뻣하고 힘이 안 들어가 문 손잡이 돌리기가 어렵다',hx:'빙판 낙상, 골다공증 병력, 유합 진행 중, 고정 기간 후 관절 강직·근위축',meds:'칼슘·비타민D, 필요시 진통제',tags:['ortho-upper','postop','frailty'],beta:false,cautions:'유합 초기 — 손목 체중지지·과신전, 무거운 물건 들기 금지\n통증 없는 범위에서 관절가동범위부터 회복\n부종 관리(거상) 병행, 반대손 과사용 주의'},
+    a7579:{nm:'박O철',age:76,sex:'남',dx:'고혈압성 뇌출혈 개두술·혈종 제거 후 5주 · 우측 편마비',cc:'오른쪽 팔다리에 힘이 없고 말이 어눌하며 쉽게 지친다',hx:'수술 후 급성기 지나 재활 전동, 주의집중·지구력 저하, 앉은 자세 유지 훈련 중',meds:'항경련제, 혈압약, 항혈전제',tags:['neuro','cognitive','frailty'],beta:false,cautions:'혈압 급상승 유발 등척성 과부하·발살바 금지\n피로·집중력 저하 — 20분 이내로 나눠 자주 휴식\n환측 견관절 아탈구 예방, 상지 견인 금지\n낙상 고위험 — 균형훈련은 감독 하 지지물 곁에서'}
   };
-  const ex=samples[S.age]||samples.senior;
+  const ex=samples[S.age]||samples.a5564;
   $('#bc_nm').value=ex.nm; $('#bc_age').value=ex.age; $('#bc_sex').value=ex.sex;
   $('#bc_dx').value=ex.dx; $('#bc_cc').value=ex.cc; $('#bc_hx').value=ex.hx; $('#bc_meds').value=ex.meds;
   $('#bc_cautions').value=ex.cautions; $('#bc_beta').checked=ex.beta;
