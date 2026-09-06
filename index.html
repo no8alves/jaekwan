@@ -1193,29 +1193,29 @@ function illustPlaceholder(c, loading){
   const emo = c.sex === '여' ? '👵' : '👴';
   return `<div class="illust-ph ${loading?'load':''}"><span>${emo}</span>${loading?'<small>일러스트 생성 중…</small>':''}</div>`;
 }
-async function fetchIllustration(c){
-  const box = () => document.getElementById('dbIllust');
-  const setEmoji = () => { const b=box(); if(b) b.innerHTML = illustPlaceholder(c, false); };
-  if(c._illust){ const b=box(); if(b) b.innerHTML = `<img src="${c._illust}" alt="${c.nm}">`; return; }
-  if(c._illustFail){ setEmoji(); return; }
-  const useAI = AI_PROXY && AI_PROXY.indexOf('PASTE_') !== 0;
-  if(!useAI){ setEmoji(); return; }
-  const who = c.sex === '여' ? '한국인 할머니' : '한국인 할아버지';
+// 대상자별 고정 일러스트 URL (Pollinations, 무료·키 불필요)
+function illustURL(c){
+  const who = c.sex === '여' ? 'elderly Korean woman' : 'elderly Korean man';
   const prompt =
-`${c.age}세 ${who}의 상반신 인물 일러스트 한 장. 재활운동 교육 자료용.
-표정은 온화하고 차분하며 존엄하게, 밝고 희망적인 분위기.
-따뜻한 파스텔 색감, 부드러운 플랫 벡터 일러스트레이션, 단순한 단색 배경.
-상황 맥락: ${c.cat} 관련 재활 중인 어르신. 의료적으로 자극적이거나 고통스러운 장면은 그리지 말 것. 글자 없이.`;
-  try{
-    const r = await fetch(AI_PROXY, {
-      method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body: JSON.stringify({ image:true, prompt })
-    });
-    const j = await r.json();
-    if(j.image){ c._illust = j.image; const b=box(); if(b) b.innerHTML = `<img src="${j.image}" alt="${c.nm}">`; }
-    else { c._illustFail = true; setEmoji(); }
-  }catch(e){ c._illustFail = true; setEmoji(); }
+`soft flat pastel illustration, dignified half-body portrait of a calm ${who} aged about ${c.age}, ` +
+`gentle warm hopeful expression, plain solid pale background, warm childrens storybook style, clean simple lines, no text, no words`;
+  let h = 0;
+  for(let i=0;i<c.id.length;i++) h = (h*31 + c.id.charCodeAt(i)) >>> 0;
+  return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=420&height=480&nologo=true&seed=${h}&model=flux`;
 }
+function loadIllust(c, boxId){
+  const box = () => document.getElementById(boxId);
+  if(!box()) return;
+  const url = c._illust || illustURL(c);
+  if(c._illust){ box().innerHTML = `<img src="${url}" alt="${c.nm}">`; return; }
+  if(c._illustFail){ box().innerHTML = illustPlaceholder(c, false); return; }
+  const img = new Image();
+  img.alt = c.nm;
+  img.onload = () => { c._illust = url; const b = box(); if(b){ b.innerHTML = ''; b.appendChild(img); } };
+  img.onerror = () => { c._illustFail = true; const b = box(); if(b) b.innerHTML = illustPlaceholder(c, false); };
+  img.src = url;
+}
+function fetchIllustration(c){ loadIllust(c, 'dbIllust'); }
 
 /* ---- 컨페티 ---- */
 function confettiBurst(){
@@ -1242,15 +1242,12 @@ function confettiBurst(){
 function renderCaseView(){
   const c = caseObj(), g = ageObj(); if(!c || !g) return;
   const sysList = SYS_MAP.filter(s => c.tags.includes(s.t));
-  const illust = c._illust
-    ? `<img src="${c._illust}" alt="${c.nm}">`
-    : illustPlaceholder(c, false);
   $('#caseView').innerHTML = `
     <div class="chart">
       <h3>대상자 정보 <span class="hint">CASE · ${c.id.toUpperCase()}</span></h3>
       <div class="body">
         <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
-          <div class="db-illust" style="width:120px;height:138px">${illust}</div>
+          <div class="db-illust" id="caseIllust" style="width:120px;height:138px">${illustPlaceholder(c, !c._illust)}</div>
           <div style="flex:1;min-width:220px">
             <div class="kv" style="margin-bottom:10px">
               <div><b>${c.nm}</b><span>성명(가명)</span></div>
@@ -1277,6 +1274,7 @@ function renderCaseView(){
         </ul>
       </div>
     </div>`;
+  loadIllust(c, 'caseIllust');
 }
 
 // 진단 계통 → 아이콘·라벨 매핑 (태그 우선순위 순)
