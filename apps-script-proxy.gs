@@ -22,7 +22,7 @@
  *   /exec?models=1  → 이 키로 쓸 수 있는 모델 목록
  */
 
-// 시도할 모델 목록 (앞에서부터 순서대로, 503/429/404 면 다음 것으로 넘어감)
+// 텍스트 모델 (앞에서부터 순서대로, 503/429/404 면 다음 것으로 넘어감)
 // ?models=1 로 이 키가 실제로 쓸 수 있는 목록을 확인할 수 있음.
 var MODELS = [
   'gemini-3.6-flash',
@@ -31,6 +31,14 @@ var MODELS = [
   'gemini-3.8-flash',
   'gemini-flash-lite-latest',
   'gemini-3.1-flash-lite'
+];
+
+// 이미지 생성 모델 (POST 본문에 image:true 를 보내면 사용)
+var IMAGE_MODELS = [
+  'gemini-2.5-flash-image',
+  'gemini-3.1-flash-image',
+  'nano-banana-pro-preview',
+  'gemini-3-pro-image'
 ];
 
 var API_ROOT = 'https://generativelanguage.googleapis.com/v1beta/';
@@ -81,10 +89,14 @@ function doPost(e) {
       return json_({ error: 'GEMINI_KEY 값이 너무 깁니다(' + key.length + '자). 팝업의 "키 복사" 버튼으로 키 문자열만 넣으세요.' });
     }
 
-    var list = body.model ? [body.model] : MODELS;
+    var wantImage = body.image === true;
+    var list = body.model ? [body.model] : (wantImage ? IMAGE_MODELS : MODELS);
+    var genCfg = wantImage
+      ? { responseModalities: ['TEXT', 'IMAGE'] }
+      : { temperature: 0.4, maxOutputTokens: 1400 };
     var payload = JSON.stringify({
       contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { temperature: 0.4, maxOutputTokens: 1400 }
+      generationConfig: genCfg
     });
 
     var lastErr = '알 수 없는 오류';
@@ -102,12 +114,20 @@ function doPost(e) {
         var data = JSON.parse(res.getContentText() || '{}');
 
         if (status === 200 && !data.error) {
-          var text = '';
-          try {
-            text = data.candidates[0].content.parts
-              .map(function (p) { return p.text || ''; }).join('');
-          } catch (x) { text = ''; }
-          if (text) return json_({ text: text, model: model });
+          var parts = [];
+          try { parts = data.candidates[0].content.parts || []; } catch (x) { parts = []; }
+
+          if (wantImage) {
+            for (var p = 0; p < parts.length; p++) {
+              var d = parts[p].inlineData || parts[p].inline_data;
+              if (d && d.data) {
+                return json_({ image: 'data:' + (d.mimeType || d.mime_type || 'image/png') + ';base64,' + d.data, model: model });
+              }
+            }
+          } else {
+            var text = parts.map(function (q) { return q.text || ''; }).join('');
+            if (text) return json_({ text: text, model: model });
+          }
           var blocked = data.promptFeedback && data.promptFeedback.blockReason;
           lastErr = blocked ? ('차단됨: ' + blocked) : '빈 응답';
           break; // 다음 모델로

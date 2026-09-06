@@ -23,6 +23,7 @@
   --sans:"Pretendard Variable",Pretendard,system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
 }
 *{box-sizing:border-box}
+[hidden]{display:none !important}
 html,body{margin:0;padding:0}
 body{
   background:var(--paper);
@@ -123,34 +124,70 @@ p.lede{color:var(--ink2);margin:0 0 22px;max-width:66ch;font-size:14.5px}
 .dot-mod{color:var(--caution)}
 .dot-sev{color:var(--alert)}
 
+/* ---------- 우리 조 (조원·조장) ---------- */
+.mem-row{display:grid;grid-template-columns:32px 1fr 30px;gap:8px;align-items:center;margin-bottom:7px}
+.mem-star{
+  border:1px solid var(--rule);background:var(--band);border-radius:7px;height:32px;cursor:pointer;
+  font-size:14px;color:var(--ink3);line-height:1;transition:all .13s;
+}
+.mem-star.on{background:var(--caution);border-color:var(--caution);color:#fff}
+.mem-star:hover{border-color:var(--caution)}
+.mem-name{width:100%;font-family:var(--sans);font-size:14px}
+.mem-del{border:none;background:transparent;color:var(--ink3);font-size:13px;cursor:pointer;padding:4px}
+.mem-del:hover{color:var(--alert)}
+
 /* ---------- 대상자 뽑기 ---------- */
-.draw{max-width:520px;margin:6px auto 0}
+.draw{max-width:560px;margin:6px auto 0}
 .draw-card{
-  position:relative;border:1.5px solid var(--ink);border-radius:12px;background:#fff;
-  min-height:214px;padding:20px 22px;overflow:hidden;
+  position:relative;border:1.5px solid var(--ink);border-radius:14px;background:#fff;
+  min-height:210px;padding:18px 20px;overflow:hidden;
 }
-.draw-card.spin{animation:drawspin .5s ease}
-@keyframes drawspin{
-  0%{transform:perspective(700px) rotateY(0);opacity:1}
-  45%{transform:perspective(700px) rotateY(90deg) scale(.94);opacity:.15}
-  55%{transform:perspective(700px) rotateY(-90deg) scale(.94);opacity:.15}
-  100%{transform:perspective(700px) rotateY(0);opacity:1}
+.draw-card.drawing{border-style:dashed;border-color:var(--signal)}
+.draw-card.pop{animation:drawpop .55s cubic-bezier(.2,1.3,.4,1)}
+@keyframes drawpop{
+  0%{transform:scale(.82) rotate(-3deg);opacity:.2}
+  55%{transform:scale(1.04) rotate(1deg);opacity:1}
+  100%{transform:scale(1) rotate(0);opacity:1}
 }
-.draw-front{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-height:174px;color:var(--ink3)}
-.draw-q{font-size:60px;font-weight:800;line-height:1;color:var(--rule)}
-.db-cat{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--signal);text-transform:uppercase}
-.db-name{font-size:23px;font-weight:800;letter-spacing:-.02em;margin:3px 0 1px}
+.draw-inner{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;min-height:174px;color:var(--ink3);text-align:center}
+.draw-q{font-size:58px;font-weight:800;line-height:1;color:var(--rule)}
+.draw-hint{margin:0;font-size:13px}
+.draw-card.drawing .draw-q{animation:qspin .5s linear infinite}
+@keyframes qspin{to{transform:rotate(360deg)}}
+/* 셔플 중 카드 */
+.shuf{animation:shufflash .09s ease}
+@keyframes shufflash{from{opacity:.25;transform:translateY(4px)}to{opacity:1;transform:none}}
+/* 확정된 카드 레이아웃 */
+.draw-inner.settled{flex-direction:row;align-items:stretch;gap:16px;text-align:left;min-height:0}
+.db-illust{
+  flex:none;width:132px;height:150px;border-radius:10px;overflow:hidden;background:var(--band);
+  display:flex;align-items:center;justify-content:center;
+}
+.db-illust img{width:100%;height:100%;object-fit:cover;display:block}
+.illust-ph{display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--ink3)}
+.illust-ph span{font-size:44px;line-height:1}
+.illust-ph small{font-size:10px}
+.illust-ph.load span{animation:pulse 1.1s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.45}50%{opacity:1}}
+.db-info{min-width:0;display:flex;flex-direction:column}
+.db-cat{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--signal);text-transform:uppercase}
+.db-name{font-size:22px;font-weight:800;letter-spacing:-.02em;margin:3px 0 1px}
 .db-meta{font-family:var(--mono);font-size:12px;color:var(--ink3)}
-.db-dx{font-size:14.5px;font-weight:600;margin:10px 0 6px;line-height:1.4}
-.db-cc{font-size:13px;color:var(--ink2);line-height:1.5}
-.db-verdict{display:inline-block;margin-top:12px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.04em;padding:3px 11px;border-radius:20px;color:#fff}
+.db-dx{font-size:14px;font-weight:600;margin:9px 0 5px;line-height:1.4}
+.db-cc{font-size:12.5px;color:var(--ink2);line-height:1.5}
+.db-verdict{display:inline-block;align-self:flex-start;margin-top:11px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.04em;padding:3px 11px;border-radius:20px;color:#fff}
 .dbv-ok{background:var(--signal)}
 .dbv-caution{background:var(--caution)}
+@media(max-width:520px){
+  .draw-inner.settled{flex-direction:column;align-items:center;text-align:center}
+  .db-verdict{align-self:center}
+}
 .draw-ctl{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:16px}
-.draw-team{font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;color:var(--ink)}
-.draw-team input{font-family:var(--sans);font-size:14px;border:1px solid var(--rule);border-radius:4px;padding:6px 10px;width:130px}
-.draw-team input:focus{outline:2px solid var(--focus);border-color:var(--focus)}
 .draw-note{font-size:12px;color:var(--ink3);margin:11px 0 0}
+/* 컨페티 */
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:60;overflow:hidden}
+.confetti i{position:absolute;top:-12px;width:8px;height:12px;border-radius:1px;animation:cfall linear forwards}
+@keyframes cfall{to{transform:translateY(105vh) rotate(720deg);opacity:.9}}
 
 /* ---------- 읽기 전용 사정값 ---------- */
 .ro-val{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--ink);min-width:56px;text-align:right}
@@ -548,19 +585,27 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
 <section class="panel" data-step="1">
   <p class="eyebrow">Step 01 — Draw</p>
   <h2 class="sec">우리 조의 대상자를 뽑으세요</h2>
-  <p class="lede">조 이름을 적고 <b>대상자 뽑기</b>를 누르면 실습할 대상자가 무작위로 배정됩니다. 대상자마다 진단·병력·사정 결과가 이미 준비되어 있어, 여러분은 그 결과를 <b>해석</b>하고 <b>운동 프로그램을 설계</b>하면 됩니다.</p>
+  <p class="lede">조 이름과 조원을 적고 <b>대상자 뽑기</b>를 누르면 실습할 대상자가 무작위로 배정됩니다. 대상자마다 진단·병력·사정 결과가 이미 준비되어 있어, 여러분은 그 결과를 <b>해석</b>하고 <b>운동 프로그램을 설계</b>하면 됩니다.</p>
+
+  <div class="chart">
+    <h3>우리 조 <span class="hint">TEAM</span></h3>
+    <div class="body">
+      <div class="fld"><label class="flab">조 이름</label><input type="text" id="drawTeam" placeholder="예) 3조" maxlength="18"></div>
+      <label class="flab">조원 <span class="fsub">이름을 적고, 왼쪽 ★을 눌러 조장을 지정하세요</span></label>
+      <div id="memberList" style="margin:6px 0 8px"></div>
+      <button class="btn ghost small" id="btnAddMember" type="button">+ 조원 추가</button>
+    </div>
+  </div>
 
   <div class="draw">
     <div class="draw-card" id="drawCard">
-      <div class="draw-front" id="drawFront">
+      <div class="draw-inner" id="drawInner">
         <span class="draw-q">?</span>
-        <p>아직 배정되지 않았습니다</p>
+        <p class="draw-hint">아직 배정되지 않았습니다</p>
       </div>
-      <div class="draw-back" id="drawBack" hidden></div>
     </div>
     <div class="draw-ctl">
-      <label class="draw-team">조 이름 <input type="text" id="drawTeam" placeholder="예) 3조" maxlength="18"></label>
-      <button class="btn" id="btnDraw">대상자 뽑기</button>
+      <button class="btn" id="btnDraw">🎲 대상자 뽑기</button>
       <button class="btn ghost small" id="btnRedraw" hidden>다시 뽑기 <span id="redrawLeft"></span></button>
       <button class="btn" id="btnDrawNext" hidden>이 대상자로 시작 →</button>
     </div>
@@ -981,7 +1026,7 @@ const ROLES = [
 /* ============================================================
    STATE
    ============================================================ */
-const S = {step:1, age:null, built:null, a:{}, redraws:0, picked:new Set(), dose:{freq:3,time:15,weeks:4,rpe:11}, weekPlan:null, weekPlanKey:'', activeWeek:0, goal:'', team:'', members:['','','',''], evalRes:null};
+const S = {step:1, age:null, built:null, a:{}, redraws:0, picked:new Set(), dose:{freq:3,time:15,weeks:4,rpe:11}, weekPlan:null, weekPlanKey:'', activeWeek:0, goal:'', team:'', members:[{name:'',lead:false},{name:'',lead:false},{name:'',lead:false}], roles:['','','',''], evalRes:null};
 const DRAW_MAX = 3;
 const $ = s=>document.querySelector(s);
 const $$ = s=>Array.from(document.querySelectorAll(s));
@@ -1034,6 +1079,33 @@ function go(n){
    STEP 1 — 대상자 뽑기
    ============================================================ */
 const RISK_LABEL = {ok:['운동 가능','dbv-ok'], caution:['조건부 진행','dbv-caution'], stop:['운동 보류','dbv-caution']};
+const escAttr = s => String(s==null?'':s).replace(/"/g,'&quot;').replace(/</g,'&lt;');
+
+/* ---- 조원·조장 ---- */
+function renderMembers(){
+  $('#memberList').innerHTML = S.members.map((m,i)=>`
+    <div class="mem-row">
+      <button type="button" class="mem-star ${m.lead?'on':''}" data-lead="${i}" title="조장 지정">★</button>
+      <input type="text" class="mem-name" data-mi="${i}" value="${escAttr(m.name)}" placeholder="조원 ${i+1} 이름" maxlength="12">
+      ${S.members.length>1?`<button type="button" class="mem-del" data-del="${i}" title="삭제">✕</button>`:'<span></span>'}
+    </div>`).join('');
+}
+function bindMembers(){
+  const root=$('#memberList');
+  root.oninput = e=>{ const inp=e.target.closest('[data-mi]'); if(inp) S.members[+inp.dataset.mi].name=inp.value; };
+  root.onclick = e=>{
+    const star=e.target.closest('[data-lead]');
+    if(star){ const i=+star.dataset.lead; S.members.forEach((m,j)=>m.lead=(j===i && !m.lead)); renderMembers(); return; }
+    const del=e.target.closest('[data-del]');
+    if(del){ S.members.splice(+del.dataset.del,1); if(S.members.length<1)S.members.push({name:'',lead:false}); renderMembers(); }
+  };
+  $('#btnAddMember').onclick = ()=>{ if(S.members.length>=8)return; S.members.push({name:'',lead:false}); renderMembers(); };
+}
+function teamRoster(){
+  const named = S.members.filter(m=>m.name.trim());
+  const lead = named.find(m=>m.lead);
+  return { lead: lead?lead.name.trim():'', members: named.map(m=>m.name.trim()) };
+}
 
 // 대상자를 현재 상태에 적용하고 규칙 판정까지 실행
 function applyCase(c){
@@ -1046,41 +1118,122 @@ function applyCase(c){
   evaluate();
 }
 
+let shuffleTimer = null;
 function drawCase(isRedraw){
+  if(shuffleTimer) return;
   if(isRedraw){
     if(S.redraws >= DRAW_MAX) return;
     S.redraws++;
   }
   const usedId = S.built ? S.built.id : null;
   const pool = CASES.filter(c => c.id !== usedId);
-  const c = pool[Math.floor(Math.random() * pool.length)];
-  applyCase(c);
-  renderDraw(true);
+  const finalC = pool[Math.floor(Math.random() * pool.length)];
+
+  const card = $('#drawCard'), inner = $('#drawInner');
+  $('#btnDraw').disabled = true; $('#btnRedraw').disabled = true; $('#btnDrawNext').hidden = true;
+  card.classList.remove('pop'); card.classList.add('drawing');
+
+  let t = 0; const total = 16;
+  const tick = () => {
+    t++;
+    const rc = CASES[Math.floor(Math.random()*CASES.length)];
+    inner.classList.remove('settled');
+    inner.innerHTML = `
+      <div class="db-cat">${rc.cat}</div>
+      <div class="db-name shuf">${rc.nm}</div>
+      <div class="db-dx shuf">${rc.dx.replace(/\s*·.*$/,'')}</div>`;
+    if(t < total){
+      shuffleTimer = setTimeout(tick, 45 + Math.pow(t/total, 3) * 300);
+    } else {
+      shuffleTimer = null;
+      card.classList.remove('drawing');
+      applyCase(finalC);
+      renderDraw(true);
+      confettiBurst();
+      $('#btnDraw').disabled = false; $('#btnRedraw').disabled = false;
+    }
+  };
+  tick();
 }
 
 function renderDraw(animate){
-  const card = $('#drawCard'), front = $('#drawFront'), back = $('#drawBack');
+  const card = $('#drawCard'), inner = $('#drawInner');
   const c = S.built;
-  if(!c){ front.hidden = false; back.hidden = true; return; }
+  if(!c){
+    inner.classList.remove('settled');
+    inner.innerHTML = `<span class="draw-q">?</span><p class="draw-hint">아직 배정되지 않았습니다</p>`;
+    return;
+  }
   const risk = S.evalRes ? S.evalRes.risk : 'ok';
   const rl = RISK_LABEL[risk] || RISK_LABEL.ok;
   const g = ageObj();
-  front.hidden = true; back.hidden = false;
-  back.innerHTML = `
-    <div class="db-cat">${c.cat || '대상자'} · ${c.id.toUpperCase()}</div>
-    <div class="db-name">${c.nm}</div>
-    <div class="db-meta">${c.age}세 · ${c.sex} · ${g ? g.nm : ''}</div>
-    <div class="db-dx">${c.dx}</div>
-    <div class="db-cc">“${c.cc}”</div>
-    <span class="db-verdict ${rl[1]}">${rl[0]}</span>`;
-  if(animate){ card.classList.remove('spin'); void card.offsetWidth; card.classList.add('spin'); }
+  inner.classList.add('settled');
+  inner.innerHTML = `
+    <div class="db-illust" id="dbIllust">${illustPlaceholder(c, true)}</div>
+    <div class="db-info">
+      <div class="db-cat">${c.cat || '대상자'} · ${c.id.toUpperCase()}</div>
+      <div class="db-name">${c.nm}</div>
+      <div class="db-meta">${c.age}세 · ${c.sex} · ${g ? g.nm : ''}</div>
+      <div class="db-dx">${c.dx}</div>
+      <div class="db-cc">“${c.cc}”</div>
+      <span class="db-verdict ${rl[1]}">${rl[0]}</span>
+    </div>`;
+  if(animate){ card.classList.remove('pop'); void card.offsetWidth; card.classList.add('pop'); }
   $('#btnDraw').hidden = true;
   $('#btnDrawNext').hidden = false;
   const left = DRAW_MAX - S.redraws;
-  const rd = $('#btnRedraw');
-  rd.hidden = left <= 0;
+  $('#btnRedraw').hidden = left <= 0;
   $('#redrawLeft').textContent = left > 0 ? `(${left}회 남음)` : '';
   $$('#rail button').forEach(b => b.disabled = !reachable(+b.dataset.go));
+  fetchIllustration(c);
+}
+
+/* ---- 대상자 일러스트 (Gemini 이미지 생성, 실패 시 이모지) ---- */
+function illustPlaceholder(c, loading){
+  const emo = c.sex === '여' ? '👵' : '👴';
+  return `<div class="illust-ph ${loading?'load':''}"><span>${emo}</span>${loading?'<small>일러스트 생성 중…</small>':''}</div>`;
+}
+async function fetchIllustration(c){
+  const box = () => document.getElementById('dbIllust');
+  const setEmoji = () => { const b=box(); if(b) b.innerHTML = illustPlaceholder(c, false); };
+  if(c._illust){ const b=box(); if(b) b.innerHTML = `<img src="${c._illust}" alt="${c.nm}">`; return; }
+  if(c._illustFail){ setEmoji(); return; }
+  const useAI = AI_PROXY && AI_PROXY.indexOf('PASTE_') !== 0;
+  if(!useAI){ setEmoji(); return; }
+  const who = c.sex === '여' ? '한국인 할머니' : '한국인 할아버지';
+  const prompt =
+`${c.age}세 ${who}의 상반신 인물 일러스트 한 장. 재활운동 교육 자료용.
+표정은 온화하고 차분하며 존엄하게, 밝고 희망적인 분위기.
+따뜻한 파스텔 색감, 부드러운 플랫 벡터 일러스트레이션, 단순한 단색 배경.
+상황 맥락: ${c.cat} 관련 재활 중인 어르신. 의료적으로 자극적이거나 고통스러운 장면은 그리지 말 것. 글자 없이.`;
+  try{
+    const r = await fetch(AI_PROXY, {
+      method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({ image:true, prompt })
+    });
+    const j = await r.json();
+    if(j.image){ c._illust = j.image; const b=box(); if(b) b.innerHTML = `<img src="${j.image}" alt="${c.nm}">`; }
+    else { c._illustFail = true; setEmoji(); }
+  }catch(e){ c._illustFail = true; setEmoji(); }
+}
+
+/* ---- 컨페티 ---- */
+function confettiBurst(){
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const wrap = document.createElement('div');
+  wrap.className = 'confetti';
+  const cols = ['#0C8A66','#B0700B','#25E0A4','#4B615A','#A0281F'];
+  for(let i=0;i<70;i++){
+    const p = document.createElement('i');
+    p.style.left = Math.random()*100 + 'vw';
+    p.style.background = cols[i % cols.length];
+    p.style.animationDuration = (1.6 + Math.random()*1.4) + 's';
+    p.style.animationDelay = (Math.random()*0.25) + 's';
+    p.style.transform = `rotate(${Math.random()*360}deg)`;
+    wrap.appendChild(p);
+  }
+  document.body.appendChild(wrap);
+  setTimeout(() => wrap.remove(), 3600);
 }
 
 /* ============================================================
@@ -1089,23 +1242,31 @@ function renderDraw(animate){
 function renderCaseView(){
   const c = caseObj(), g = ageObj(); if(!c || !g) return;
   const sysList = SYS_MAP.filter(s => c.tags.includes(s.t));
+  const illust = c._illust
+    ? `<img src="${c._illust}" alt="${c.nm}">`
+    : illustPlaceholder(c, false);
   $('#caseView').innerHTML = `
     <div class="chart">
       <h3>대상자 정보 <span class="hint">CASE · ${c.id.toUpperCase()}</span></h3>
       <div class="body">
-        <div class="kv" style="margin-bottom:12px">
-          <div><b>${c.nm}</b><span>성명(가명)</span></div>
-          <div><b>${c.age}세 / ${c.sex}</b><span>연령 / 성별</span></div>
-          <div><b>${g.nm} (${g.k})</b><span>연령대</span></div>
-          <div><b>${c.meds}</b><span>투약</span></div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
+          <div class="db-illust" style="width:120px;height:138px">${illust}</div>
+          <div style="flex:1;min-width:220px">
+            <div class="kv" style="margin-bottom:10px">
+              <div><b>${c.nm}</b><span>성명(가명)</span></div>
+              <div><b>${c.age}세 / ${c.sex}</b><span>연령 / 성별</span></div>
+              <div><b>${g.nm} (${g.k})</b><span>연령대</span></div>
+              <div><b>${c.meds}</b><span>투약</span></div>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px">
+              ${sysList.map(s => `<span class="cc-sys">${s.ic} ${s.nm}</span>`).join('')}
+              ${c.tags.includes('betablocker') ? '<span class="cc-sys">💊 베타차단제</span>' : ''}
+            </div>
+          </div>
         </div>
-        <p style="margin:0 0 6px;font-size:14px"><strong>진단</strong> ${c.dx}</p>
+        <p style="margin:12px 0 6px;font-size:14px"><strong>진단</strong> ${c.dx}</p>
         <p style="margin:0 0 6px;font-size:14px"><strong>주호소</strong> “${c.cc}”</p>
-        <p style="margin:0 0 12px;font-size:14px"><strong>현병력</strong> ${c.hx}</p>
-        <div style="display:flex;flex-wrap:wrap;gap:6px">
-          ${sysList.map(s => `<span class="cc-sys">${s.ic} ${s.nm}</span>`).join('')}
-          ${c.tags.includes('betablocker') ? '<span class="cc-sys">💊 베타차단제</span>' : ''}
-        </div>
+        <p style="margin:0;font-size:14px"><strong>현병력</strong> ${c.hx}</p>
       </div>
     </div>
     <div class="chart">
@@ -1677,7 +1838,7 @@ function renderCard(){
   $('#rxCard').innerHTML = `
   <div class="rxhead">
     <h3>재활운동 처방 카드</h3>
-    <div class="meta">${S.team||'TEAM —'} · ${new Date().toLocaleDateString('ko-KR')} · ${g.nm} / ${c.id.toUpperCase()}</div>
+    <div class="meta">${S.team||'TEAM —'}${teamRoster().lead?' · 조장 '+teamRoster().lead:''} · ${new Date().toLocaleDateString('ko-KR')} · ${g.nm} / ${c.id.toUpperCase()}</div>
   </div>
   <div class="rxbody">
     <div class="rxsec">
@@ -1743,10 +1904,18 @@ function renderCard(){
     </div>
 
     <div class="rxsec">
-      <h4>Team · 4인 역할 분담</h4>
-      <div class="roles">${ROLES.map((r,i)=>`
-        <div class="role"><div class="rn">${r.n}</div><div class="rt">${r.t}</div><div class="rd">${r.d}</div>
-        <input type="text" data-mem="${i}" value="${S.members[i]}" placeholder="담당자 이름"></div>`).join('')}</div>
+      <h4>Team · 조 구성과 역할</h4>
+      ${(()=>{ const t=teamRoster(); return `
+        <p style="margin:0 0 10px;font-size:13.5px">
+          <strong>${S.team||'(조 이름 미입력)'}</strong>
+          &nbsp;·&nbsp; 조장 <strong>${t.lead||'미지정'}</strong>
+          &nbsp;·&nbsp; 조원 ${t.members.length?t.members.join(', '):'미입력'}
+        </p>`; })()}
+      <div class="roles">${ROLES.map((r,i)=>{
+        const opts = teamRoster().members;
+        return `<div class="role"><div class="rn">${r.n}</div><div class="rt">${r.t}</div><div class="rd">${r.d}</div>
+        <select data-role="${i}"><option value="">담당자 선택</option>${opts.map(n=>`<option ${S.roles[i]===n?'selected':''}>${n}</option>`).join('')}</select></div>`;
+      }).join('')}</div>
     </div>
 
     <div class="rxsec">
@@ -1756,14 +1925,14 @@ function renderCard(){
            '판정에 사용된 규칙 코드를 근거와 함께 설명할 수 있다',
            '선택한 중재 항목마다 왜 필요한지 한 문장으로 말할 수 있다',
            '질환별 금기 사항이 프로그램에 실제로 반영되어 있다',
-           '중단 기준을 4명 모두 암기하고 있다',
+           '중단 기준을 조원 모두 암기하고 있다',
            '목표 진술이 측정 가능한 형태(수치·기한 포함)로 쓰여 있다'
           ].map(t=>`<label><input type="checkbox"><span>${t}</span></label>`).join('')}
       </div>
     </div>
   </div>`;
 
-  $$('#rxCard [data-mem]').forEach(el=>el.addEventListener('input',e=>{S.members[+e.target.dataset.mem]=e.target.value;}));
+  $$('#rxCard [data-role]').forEach(el=>el.addEventListener('change',e=>{S.roles[+e.target.dataset.role]=e.target.value;}));
   $('#btnAI').addEventListener('click',aiReview);
 }
 
@@ -2160,7 +2329,7 @@ const Body3D = (()=>{
 /* ============================================================
    INIT
    ============================================================ */
-buildRail(); go(1);
+buildRail(); renderMembers(); bindMembers(); go(1);
 $('#stamp').textContent = new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit'});
 function syncTeam(v){ S.team=v; const a=$('#teamName'), b=$('#drawTeam'); if(a&&a.value!==v)a.value=v; if(b&&b.value!==v)b.value=v; }
 $('#teamName').addEventListener('input',e=>syncTeam(e.target.value));
@@ -2180,8 +2349,8 @@ $('#btnBack4b').addEventListener('click',()=>go(4));
 $('#btnBack5').addEventListener('click',()=>go(5));
 $('#btnReset').addEventListener('click',()=>{
   S.built=null;S.age=null;S.a={};S.redraws=0;S.picked.clear();S.evalRes=null;S.goal='';
-  S.weekPlan=null;S.weekPlanKey='';S.activeWeek=0;S.doseSet=false;
-  $('#drawFront').hidden=false; $('#drawBack').hidden=true;
+  S.weekPlan=null;S.weekPlanKey='';S.activeWeek=0;S.doseSet=false;S.roles=['','','',''];
+  renderDraw(false);
   $('#btnDraw').hidden=false; $('#btnRedraw').hidden=true; $('#btnDrawNext').hidden=true;
   go(1);
 });
