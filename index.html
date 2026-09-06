@@ -513,8 +513,8 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
 <!-- ===== STEP 1 ===== -->
 <section class="panel" data-step="1">
   <p class="eyebrow">Step 01 — Population</p>
-  <h2 class="sec">대상자 연령대를 고르세요</h2>
-  <p class="lede">연령대에 따라 활력징후의 정상 범위와 운동 반응이 달라집니다. 여기서 선택한 값이 이후 모든 판정 기준의 기준선이 됩니다.</p>
+  <h2 class="sec">노인 대상자의 연령대를 고르세요</h2>
+  <p class="lede">이 실습은 <b>노인 대상자</b>의 재활운동 프로그램을 구성합니다. 같은 노년이라도 전기·후기·초고령에 따라 활력징후 정상 범위와 운동 반응이 다릅니다. 여기서 선택한 값이 이후 모든 판정 기준의 기준선이 됩니다.</p>
   <div class="grid g3" id="ageGrid"></div>
 </section>
 
@@ -529,7 +529,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
     <div class="body">
       <div class="rows">
         <div class="row"><label>이름 (가명)<i>NAME</i></label><div class="in"><input type="text" id="bc_nm" placeholder="예) 김O수" maxlength="12"></div></div>
-        <div class="row"><label>나이<i>AGE</i></label><div class="in"><input type="number" id="bc_age" min="1" max="110" placeholder="세"><span class="unit">세</span></div></div>
+        <div class="row"><label>나이<i>AGE</i></label><div class="in"><input type="number" id="bc_age" min="60" max="110" placeholder="세"><span class="unit">세</span></div></div>
         <div class="row"><label>성별<i>SEX</i></label><div class="in"><select id="bc_sex"><option value="남">남</option><option value="여">여</option></select></div></div>
       </div>
     </div>
@@ -706,229 +706,15 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
 /* ============================================================
    DATA
    ============================================================ */
+// 노인 대상 전용 — 전기 노년 / 후기 노년 / 초고령
 const AGES = [
-  {id:'child', k:'07–18', nm:'아동·청소년', sub:'성장판·성장통 고려', mid:14, emo:'🧒',
-   vs:{sbp:[95,120],dbp:[55,80],hr:[70,110],rr:[16,24],spo2:[95,100],temp:[36.0,37.5]}},
-  {id:'young', k:'19–39', nm:'청년', sub:'스포츠 손상·직업성 통증', mid:29, emo:'🧑',
-   vs:{sbp:[100,129],dbp:[60,84],hr:[60,100],rr:[12,20],spo2:[95,100],temp:[36.0,37.5]}},
-  {id:'mid', k:'40–64', nm:'중년', sub:'만성질환 이환기', mid:55, emo:'🧑‍🦱',
-   vs:{sbp:[100,134],dbp:[60,84],hr:[60,100],rr:[12,20],spo2:[94,100],temp:[36.0,37.5]}},
-  {id:'senior', k:'65–84', nm:'노년', sub:'다약제·낙상 위험', mid:74, emo:'🧓',
-   vs:{sbp:[100,139],dbp:[60,89],hr:[60,100],rr:[12,22],spo2:[92,100],temp:[36.0,37.5]}},
-  {id:'oldest', k:'85+', nm:'초고령', sub:'근감소·인지 저하', mid:88, emo:'👵',
-   vs:{sbp:[100,145],dbp:[60,89],hr:[60,100],rr:[12,22],spo2:[92,100],temp:[35.8,37.5]}}
+  {id:'senior', k:'65–74', nm:'전기 노년', sub:'활동적이나 만성질환 시작', mid:69, emo:'🧓',
+   vs:{sbp:[100,139],dbp:[60,89],hr:[60,100],rr:[12,20],spo2:[93,100],temp:[36.0,37.5]}},
+  {id:'senior2', k:'75–84', nm:'후기 노년', sub:'다약제·낙상 위험·근력 저하', mid:79, emo:'🧓',
+   vs:{sbp:[100,145],dbp:[60,89],hr:[60,100],rr:[12,22],spo2:[92,100],temp:[36.0,37.5]}},
+  {id:'oldest', k:'85+', nm:'초고령', sub:'근감소·노쇠·인지 저하', mid:88, emo:'👵',
+   vs:{sbp:[100,150],dbp:[60,90],hr:[60,100],rr:[12,22],spo2:[92,100],temp:[35.8,37.5]}}
 ];
-
-const CASES = {
-child:[
- {id:'c1',nm:'김O윤',age:15,sex:'여',dx:'특발성 척추측만증 (Cobb 28°)',
-  cc:'장시간 앉아 있으면 등 통증, 어깨 높이 비대칭',
-  hx:'성장 급증기, 보조기(브레이스) 하루 18시간 착용 중',
-  meds:'없음',tags:['spine','pediatric'],
-  cautions:['성장판 손상 위험 — 고중량 저항운동·최대 근력 검사 금지','일측성 편중 부하 운동 지양','브레이스 착용 중 유산소는 흉곽 확장 제한 고려'],
-  base:{sbp:112,dbp:68,hr:82,rr:18,temp:36.6,spo2:99,pain:3,mmt:4,rom:'경도 제한',amb:'독립',fall:'저위험',cog:'명료',bg:null}},
- {id:'c2',nm:'박O호',age:12,sex:'남',dx:'중등증 지속성 기관지천식',
-  cc:'달리기 5분 후 쌕쌕거림과 기침',
-  hx:'운동유발성 기관지수축, 최근 2주 내 야간 증상 3회',
-  meds:'ICS 흡입제, 속효성 β2작용제(SABA) 필요시',tags:['pulmonary','pediatric'],
-  cautions:['운동 전 SABA 예방 흡입 및 15분 준비운동 필수','찬 공기·건조 환경 노출 회피','증상 발생 시 즉시 중단 후 SABA 사용'],
-  base:{sbp:104,dbp:62,hr:94,rr:22,temp:36.8,spo2:96,pain:0,mmt:5,rom:'정상',amb:'독립',fall:'저위험',cog:'명료',bg:null}},
- {id:'c3',nm:'이O아',age:17,sex:'여',dx:'소아청소년 비만 (BMI 31.4) · 이상지질혈증',
-  cc:'계단 오를 때 숨참, 무릎 앞쪽 통증',
-  hx:'좌식 생활, 주 0회 신체활동, 공복혈당 108 mg/dL',
-  meds:'없음',tags:['metabolic','ortho-lower','pediatric'],
-  cautions:['체중부하 관절 충격 최소화 — 점프·달리기 초기 제외','저강도에서 시작해 시간 우선 증량','자존감 고려한 비경쟁적 환경 조성'],
-  base:{sbp:126,dbp:80,hr:88,rr:19,temp:36.5,spo2:98,pain:3,mmt:4,rom:'정상',amb:'독립',fall:'저위험',cog:'명료',bg:108}},
- {id:'c4',nm:'장O우',age:9,sex:'남',dx:'경직형 뇌성마비 (GMFCS 3단계)',
-  cc:'다리가 뻣뻣해 혼자 걷기 어렵고 쉽게 넘어짐',
-  hx:'양하지 경직, 보행보조기 사용, 보툴리눔 독소 주사 치료 병행',
-  meds:'경구 근이완제, 항경련제',tags:['neuro','pediatric'],
-  cautions:['경직 악화 유발하는 급격·반동 동작 금지 — 천천히 신장','피로 시 경직 심해짐, 짧게 자주 시행','성장기 관절 구축 예방 위해 스트레칭 매일 병행'],
-  base:{sbp:104,dbp:64,hr:92,rr:20,temp:36.6,spo2:98,pain:2,mmt:3,rom:'중등도 제한',amb:'보조기구',fall:'고위험',cog:'명료',bg:null}},
- {id:'c5',nm:'윤O결',age:16,sex:'남',dx:'외상성 뇌손상 후 편마비 · 교통사고 6주',
-  cc:'우측 팔다리 힘이 없고 말이 어눌함',
-  hx:'미만성 축삭손상, 급성기 지나 재활 전동 시작, 주의집중 저하',
-  meds:'항경련제 예방적 투여',tags:['neuro','cognitive','pediatric'],
-  cautions:['피로·집중력 저하 고려해 20분 이내 단위로 분할','이차 손상 예방 — 균형 훈련 시 반드시 감독','인지 저하 동반, 지시는 짧고 명확하게'],
-  base:{sbp:118,dbp:72,hr:86,rr:18,temp:36.7,spo2:98,pain:3,mmt:2,rom:'중등도 제한',amb:'부축 필요',fall:'고위험',cog:'경도 저하',bg:null}},
- {id:'c6',nm:'조O빈',age:16,sex:'남',dx:'우측 발목 외측 인대 염좌 (2도) · 손상 2주',
-  cc:'농구하다 발목을 접질려 붓고 딛으면 아프다',
-  hx:'전거비인대 부분 손상, 부기 감소 중, 아직 절뚝거림',
-  meds:'필요시 소염진통제',tags:['ortho-lower','pediatric'],
-  cautions:['급성 부종·열감 있으면 냉찜질·거상 우선','통증 유발하는 급격한 방향전환·점프 초기 제외','발목 흔들림(불안정감) 남으면 균형 훈련 강화'],
-  base:{sbp:114,dbp:70,hr:80,rr:17,temp:36.6,spo2:99,pain:3,mmt:4,rom:'경도 제한',amb:'독립',fall:'저위험',cog:'명료',bg:null}},
- {id:'c7',nm:'문O서',age:14,sex:'여',dx:'좌측 손목 요골 원위부 골절 · 깁스 제거 후 1주',
-  cc:'깁스를 풀었는데 손목이 뻣뻣하고 힘이 안 들어간다',
-  hx:'자전거 낙상, 유합 완료, 6주 고정 후 관절 강직·근위축',
-  meds:'없음',tags:['ortho-upper','pediatric'],
-  cautions:['유합 초기 — 무거운 물건 들기·손목 과신전 금지','통증 없는 범위에서 관절가동범위부터 회복','성장판 인접 부위, 무리한 저항 운동 지양'],
-  base:{sbp:110,dbp:66,hr:78,rr:17,temp:36.5,spo2:99,pain:2,mmt:3,rom:'중등도 제한',amb:'독립',fall:'저위험',cog:'명료',bg:null}},
- {id:'c8',nm:'임O준',age:15,sex:'남',dx:'오스굿-슐라터병 (경골 결절 골단염) · 우측',
-  cc:'무릎 아래 뼈가 튀어나오고 운동하면 아프다',
-  hx:'성장 급증기 운동 과사용, 대퇴사두근 단축, 점프 시 악화',
-  meds:'없음',tags:['ortho-lower','pediatric'],
-  cautions:['성장기 과사용 손상 — 통증 유발하는 점프·전력달리기 제한','대퇴사두근·햄스트링 스트레칭 위주로 시작','통증 정도에 따라 활동량 조절, 완전 휴식보다 조절'],
-  base:{sbp:112,dbp:68,hr:80,rr:17,temp:36.6,spo2:99,pain:3,mmt:4,rom:'경도 제한',amb:'독립',fall:'저위험',cog:'명료',bg:null}}
-],
-young:[
- {id:'y1',nm:'정O민',age:24,sex:'남',dx:'전방십자인대(ACL) 재건술 후 4주',
-  cc:'무릎 굴곡 제한과 대퇴사두근 위축',
-  hx:'축구 중 비접촉성 손상, 술 후 부분 체중부하 허용 단계',
-  meds:'NSAIDs, 항응고 예방 종료',tags:['ortho-lower','postop'],
-  cautions:['개방형 운동사슬(OKC) 신전 90–40° 구간 12주까지 제한','과도한 전방 경골 전위 유발 동작 금지','슬관절 부종·열감 시 운동 보류'],
-  base:{sbp:118,dbp:74,hr:76,rr:16,temp:36.7,spo2:99,pain:4,mmt:3,rom:'중등도 제한',amb:'보조기구',fall:'중위험',cog:'명료',bg:null}},
- {id:'y2',nm:'최O경',age:34,sex:'여',dx:'요추 4-5번 추간판탈출증 (보존적 치료)',
-  cc:'우측 하지 방사통, 앉아 있기 30분 이상 곤란',
-  hx:'사무직, 하지직거상검사 45° 양성',
-  meds:'근이완제, 경구 진통제',tags:['spine'],
-  cautions:['급성기 요추 굴곡·회전 복합 동작 금지','발살바 유발 고부하 운동 금지','하지 근력 저하·배뇨장애 동반 시 즉시 의뢰'],
-  base:{sbp:122,dbp:78,hr:80,rr:17,temp:36.6,spo2:98,pain:6,mmt:4,rom:'중등도 제한',amb:'독립',fall:'저위험',cog:'명료',bg:null}},
- {id:'y3',nm:'한O수',age:28,sex:'남',dx:'제1형 당뇨병',
-  cc:'운동 시작 후 저혈당 경험 2회',
-  hx:'인슐린 다회요법, HbA1c 7.8%',
-  meds:'기저·초속효성 인슐린',tags:['metabolic'],
-  cautions:['운동 전·중·후 혈당 측정 필수','혈당 100 mg/dL 미만이면 탄수화물 15g 섭취 후 재측정','케톤 동반 고혈당 시 운동 금지'],
-  base:{sbp:120,dbp:76,hr:74,rr:16,temp:36.5,spo2:99,pain:0,mmt:5,rom:'정상',amb:'독립',fall:'저위험',cog:'명료',bg:96}},
- {id:'y4',nm:'신O재',age:31,sex:'남',dx:'흉수 손상(T10) 하반신마비 · 손상 8주',
-  cc:'다리를 전혀 움직일 수 없고 오래 앉으면 어지러움',
-  hx:'추락 사고, 완전 손상, 휠체어 적응 중, 기립성 저혈압 동반',
-  meds:'배뇨 관리약, 근경직 완화제',tags:['neuro','sarcopenia'],
-  cautions:['손상 부위 이하 감각 없음 — 피부 압박·욕창 수시 확인','기립성 저혈압 — 체위 변경 매우 천천히','자율신경 반사이상(두통·급격한 혈압상승) 시 즉시 중단'],
-  base:{sbp:96,dbp:60,hr:78,rr:16,temp:36.4,spo2:98,pain:2,mmt:0,rom:'정상',amb:'휠체어',fall:'중위험',cog:'명료',bg:null}},
- {id:'y5',nm:'구O림',age:29,sex:'여',dx:'고도비만 (BMI 41.2) · 수면무호흡 · 무릎 골관절염',
-  cc:'조금만 걸어도 숨차고 무릎이 아파 활동을 피하게 됨',
-  hx:'좌식 직업, 체중부하 관절통, 대사증후군 진단',
-  meds:'혈압약, 필요시 진통제',tags:['metabolic','ortho-lower'],
-  cautions:['체중부하 충격 최소화 — 수중·좌위 운동 우선','과도한 강도보다 지속 시간 확보가 목표','저강도에서 점진 증량, 관절통 악화 시 하중 조절'],
-  base:{sbp:138,dbp:86,hr:84,rr:18,temp:36.6,spo2:95,pain:4,mmt:4,rom:'경도 제한',amb:'독립',fall:'저위험',cog:'명료',bg:126}},
- {id:'y6',nm:'천O훈',age:26,sex:'남',dx:'우측 상지 심재성 화상 후 재활 · 피부이식 3주',
-  cc:'팔꿈치가 굳어 펴지지 않고 흉터가 당김',
-  hx:'작업장 화상, 이식부 생착 완료, 반흔 구축 진행 중',
-  meds:'진통제, 반흔 연화제',tags:['ortho-upper','postop'],
-  cautions:['이식부 장력 과도 시 손상 — 통증·당김 범위 내에서만 신장','압박의류 착용 유지, 반흔 관리 병행','감염 징후(발적·삼출·발열) 시 운동 중단'],
-  base:{sbp:122,dbp:76,hr:82,rr:17,temp:37.0,spo2:98,pain:5,mmt:3,rom:'고도 제한',amb:'독립',fall:'저위험',cog:'명료',bg:null}},
- {id:'y7',nm:'유O나',age:27,sex:'여',dx:'어깨 충돌증후군 (극상근 건병증)',
-  cc:'팔을 어깨 높이로 올릴 때 걸리듯 아프다',
-  hx:'사무·헬스 반복동작, 야간통, 유착 초기',
-  meds:'필요시 소염진통제',tags:['ortho-upper'],
-  cautions:['통증 유발하는 어깨 90° 이상 반복 거상 초기 제한','견갑골 안정화 운동 우선, 무거운 오버헤드 동작 지양','통증 범위 내에서만 저항 점진 증가'],
-  base:{sbp:116,dbp:72,hr:74,rr:16,temp:36.5,spo2:99,pain:4,mmt:4,rom:'경도 제한',amb:'독립',fall:'저위험',cog:'명료',bg:null}},
- {id:'y8',nm:'배O건',age:23,sex:'남',dx:'우측 발목 외과 골절 · 금속고정술 후 8주',
-  cc:'뼈는 붙었다는데 발목이 안 굽고 걸을 때 뻣뻣하다',
-  hx:'축구 중 골절, 유합 완료, 완전 체중부하 허용 단계',
-  meds:'없음',tags:['ortho-lower','postop'],
-  cautions:['유합 확인됨 — 관절가동범위와 균형 회복이 우선','장기 고정으로 인한 종아리 근위축, 점진적 강화','흔들림 남으면 고유수용성(균형) 훈련 강화'],
-  base:{sbp:120,dbp:74,hr:76,rr:16,temp:36.6,spo2:99,pain:3,mmt:3,rom:'중등도 제한',amb:'보조기구',fall:'저위험',cog:'명료',bg:null}},
- {id:'y9',nm:'서O빈',age:36,sex:'여',dx:'만성 아킬레스건병증 (건염)',
-  cc:'아침 첫걸음과 계단 오를 때 뒤꿈치가 아프다',
-  hx:'러닝 취미, 종아리 단축, 반복 부하로 만성화',
-  meds:'없음',tags:['ortho-lower'],
-  cautions:['통증 유발하는 급격한 점프·전력달리기 제한','종아리 편심성(내리는) 강화가 핵심, 서서히 증량','급성 통증 악화 시 부하 줄이고 냉찜질'],
-  base:{sbp:118,dbp:74,hr:72,rr:16,temp:36.5,spo2:99,pain:3,mmt:4,rom:'경도 제한',amb:'독립',fall:'저위험',cog:'명료',bg:null}}
-],
-mid:[
- {id:'m1',nm:'오O철',age:58,sex:'남',dx:'급성 심근경색 후 관상동맥중재술(PCI) 7일 · 심장재활 1기',
-  cc:'가벼운 활동에도 피로감, 재발 두려움',
-  hx:'좌심실 구혈률 45%, 고혈압·흡연력 30갑년',
-  meds:'베타차단제, 아스피린, 스타틴',tags:['cardiac','betablocker'],
-  cautions:['베타차단제 복용 — 목표심박수보다 자각강도(RPE) 우선 적용','흉통·심전도 변화 시 즉시 중단','상지 저항운동은 술 후 2주 이후 저부하로 시작'],
-  base:{sbp:128,dbp:78,hr:62,rr:18,temp:36.6,spo2:97,pain:1,mmt:4,rom:'정상',amb:'독립',fall:'저위험',cog:'명료',bg:null}},
- {id:'m2',nm:'서O주',age:62,sex:'여',dx:'뇌경색 후 좌측 편마비 · 발병 3주',
-  cc:'좌측 상지 사용 곤란, 보행 시 휘돌림',
-  hx:'우측 중대뇌동맥 영역 경색, Brunnstrom 3단계',
-  meds:'항혈소판제, 항고혈압제',tags:['neuro'],
-  cautions:['환측 견관절 아탈구 예방 — 상지 견인 금지','편측무시 여부 확인 후 환경 배치','혈압 급상승 유발 등척성 과부하 지양'],
-  base:{sbp:146,dbp:88,hr:84,rr:19,temp:36.7,spo2:96,pain:3,mmt:2,rom:'중등도 제한',amb:'부축 필요',fall:'고위험',cog:'경도 저하',bg:null}},
- {id:'m3',nm:'윤O선',age:51,sex:'여',dx:'회전근개 부분파열 봉합술 후 6주',
-  cc:'어깨 능동 거상 제한, 야간통',
-  hx:'우측 극상근 봉합, 보조기 제거 직후',
-  meds:'NSAIDs',tags:['ortho-upper','postop'],
-  cautions:['12주까지 능동 저항 외회전 금지','견관절 90° 이상 거상은 통증 범위 내에서만','무거운 물건 들기 금지'],
-  base:{sbp:124,dbp:80,hr:78,rr:17,temp:36.5,spo2:98,pain:5,mmt:3,rom:'중등도 제한',amb:'독립',fall:'저위험',cog:'명료',bg:null}},
- {id:'m4',nm:'강O식',age:56,sex:'남',dx:'제2형 당뇨병 · 고혈압 · 당뇨병성 말초신경병증',
-  cc:'발바닥 저림, 걷다가 균형 흔들림',
-  hx:'HbA1c 8.6%, 발 감각 저하(모노필라멘트 음성)',
-  meds:'메트포르민, ARB 계열 항고혈압제',tags:['metabolic','neuro'],
-  cautions:['감각 저하 — 매 운동 전후 족부 피부 확인 필수','맨발 운동 금지, 적합한 신발 착용','자율신경병증 시 기립성 저혈압 주의'],
-  base:{sbp:152,dbp:92,hr:86,rr:18,temp:36.6,spo2:97,pain:2,mmt:4,rom:'정상',amb:'독립',fall:'중위험',cog:'명료',bg:186}},
- {id:'m5',nm:'백O규',age:60,sex:'남',dx:'당뇨발 궤양 후 우측 무릎아래 절단(BKA) · 4주',
-  cc:'절단부가 아직 아프고 의족 착용 준비 중',
-  hx:'조절 안 된 당뇨 합병증, 절단부 부종, 환상통 호소',
-  meds:'인슐린, 진통제, 항혈소판제',tags:['metabolic','ortho-lower','postop','amputation'],
-  cautions:['절단부 성숙 전 과체중 부하 금지 — 붕대 압박 관리 병행','반대측 하지에 부담 집중, 균형 훈련 필수','환상통·절단부 상처 감염 징후 확인'],
-  base:{sbp:144,dbp:86,hr:88,rr:18,temp:36.9,spo2:97,pain:5,mmt:3,rom:'중등도 제한',amb:'보조기구',fall:'고위험',cog:'명료',bg:172}},
- {id:'m6',nm:'표O숙',age:63,sex:'여',dx:'당뇨병성 만성신부전 · 혈액투석 중 (주 3회)',
-  cc:'투석 다음 날 기운이 없고 다리에 힘이 빠짐',
-  hx:'투석 3년째, 근육량 감소, 좌측 팔 동정맥루(AVF) 조성',
-  meds:'인슐린, 인결합제, 혈압약',tags:['metabolic','cardiac','sarcopenia'],
-  cautions:['동정맥루 있는 팔로 혈압측정·중량부하 금지','투석 직후는 저혈압·피로로 운동 지양, 비투석일에 시행','수분·혈압 변동 크므로 활력징후 자주 확인'],
-  base:{sbp:158,dbp:88,hr:90,rr:18,temp:36.5,spo2:96,pain:1,mmt:3,rom:'정상',amb:'독립',fall:'중위험',cog:'명료',bg:148}},
- {id:'m7',nm:'남O호',age:59,sex:'남',dx:'만성 심부전 (NYHA 3단계) · 좌심실 구혈률 30%',
-  cc:'평지 조금만 걸어도 숨차고 발목이 붓는다',
-  hx:'허혈성 심근병증, 최근 체중 급증, 야간 호흡곤란',
-  meds:'베타차단제, 이뇨제, ACE억제제',tags:['cardiac','betablocker','pulmonary'],
-  cautions:['베타차단제 — 목표심박수 대신 자각강도(RPE) 적용','급격한 체중증가·부종 악화 시 운동 보류하고 보고','간헐적 저강도로 시작, 발살바(숨참기) 절대 금지'],
-  base:{sbp:110,dbp:70,hr:64,rr:22,temp:36.5,spo2:93,pain:0,mmt:3,rom:'정상',amb:'독립',fall:'중위험',cog:'명료',bg:null}}
-],
-senior:[
- {id:'s1',nm:'배O자',age:78,sex:'여',dx:'대퇴경부 골절 후 인공고관절 전치환술(THA) 5일',
-  cc:'수술 부위 통증, 서기 두려움',
-  hx:'후방 접근법, 골다공증 병력',
-  meds:'항응고제, 진통제, 칼슘·비타민D',tags:['ortho-lower','postop','frailty','ortho-precaution-tha'],
-  cautions:['THA 후방 접근 3대 금기 — 고관절 90° 이상 굴곡, 내전(다리 꼬기), 내회전','낮은 의자·변기 사용 금지','심부정맥혈전 징후(종아리 발적·부종) 확인'],
-  base:{sbp:134,dbp:80,hr:88,rr:19,temp:37.1,spo2:95,pain:5,mmt:3,rom:'고도 제한',amb:'보조기구',fall:'고위험',cog:'명료',bg:null}},
- {id:'s2',nm:'노O기',age:72,sex:'남',dx:'만성폐쇄성폐질환(COPD) GOLD 3단계',
-  cc:'50m 보행 시 심한 호흡곤란',
-  hx:'mMRC 3단계, 최근 급성악화 후 회복기',
-  meds:'LAMA/LABA 흡입제, 필요시 산소',tags:['pulmonary','frailty'],
-  cautions:['운동 중 SpO₂ 88% 미만 시 즉시 중단·산소 적용','입술 오므리기 호흡 병행','간헐적 운동(운동-휴식 교대) 형태로 구성'],
-  base:{sbp:128,dbp:76,hr:96,rr:24,temp:36.8,spo2:91,pain:0,mmt:3,rom:'정상',amb:'독립',fall:'중위험',cog:'명료',bg:null}},
- {id:'s3',nm:'문O례',age:75,sex:'여',dx:'파킨슨병 Hoehn–Yahr 2.5단계',
-  cc:'보행 중 얼어붙음(freezing), 돌아설 때 휘청임',
-  hx:'자세 불안정 시작, 약효 소진(wearing-off) 현상',
-  meds:'레보도파/카비도파',tags:['neuro','frailty'],
-  cautions:['약효 최고기(on-time)에 운동 시행','기립성 저혈압 흔함 — 체위 변경 천천히','시각·청각 신호(cueing) 활용, 좁은 통로 회피'],
-  base:{sbp:118,dbp:70,hr:78,rr:18,temp:36.5,spo2:97,pain:2,mmt:4,rom:'경도 제한',amb:'보조기구',fall:'고위험',cog:'명료',bg:null}},
- {id:'s4',nm:'황O덕',age:81,sex:'여',dx:'골다공증 (T-score −3.1) · 흉추 압박골절 병력',
-  cc:'등이 굽고 오래 서 있기 힘듦',
-  hx:'폐경 후 골다공증, 1년 전 T12 압박골절',
-  meds:'비스포스포네이트, 칼슘·비타민D',tags:['frailty','spine','osteoporosis'],
-  cautions:['척추 굴곡·회전 부하 운동 절대 금지 (윗몸일으키기·허리 비틀기)','낙상 예방 최우선 — 균형훈련은 지지물 곁에서','고충격 운동 금지, 체중부하 저충격 운동 권장'],
-  base:{sbp:136,dbp:78,hr:74,rr:17,temp:36.4,spo2:96,pain:4,mmt:3,rom:'경도 제한',amb:'독립',fall:'고위험',cog:'명료',bg:null}},
- {id:'s5',nm:'하O식',age:70,sex:'남',dx:'중대뇌동맥 뇌경색 후 중증 편마비 · 발병 2주',
-  cc:'왼팔다리를 거의 못 쓰고 삼킴도 불편하다',
-  hx:'좌측 이완성 마비, 연하곤란 동반, 앉은 자세 유지 어려움',
-  meds:'항응고제, 혈압약, 위장관 보호제',tags:['neuro','frailty'],
-  cautions:['연하곤란 — 운동 중 흡인 예방, 자세 관리 필수','환측 견관절 아탈구 예방, 상지 견인 금지','좌위 균형부터 단계적으로, 급격한 체위 변경 금지'],
-  base:{sbp:150,dbp:90,hr:82,rr:19,temp:36.8,spo2:95,pain:2,mmt:1,rom:'중등도 제한',amb:'침상안정',fall:'고위험',cog:'경도 저하',bg:null}},
- {id:'s6',nm:'권O례',age:73,sex:'여',dx:'무릎 골관절염 인공관절 전치환술(TKA) 후 5일',
-  cc:'무릎이 잘 안 굽혀지고 붓고 아프다',
-  hx:'양측 퇴행성 관절염, 우측 먼저 수술, 술 후 부종·통증',
-  meds:'항응고제, 진통제',tags:['ortho-lower','postop','frailty'],
-  cautions:['심부정맥혈전 징후(종아리 발적·부종·열감) 매일 확인','통증 범위 내 굴곡 각도 점진 증가, 무리한 부하 금지','냉찜질·거상으로 부종 관리 병행'],
-  base:{sbp:138,dbp:82,hr:84,rr:18,temp:37.2,spo2:96,pain:6,mmt:3,rom:'고도 제한',amb:'보조기구',fall:'고위험',cog:'명료',bg:null}}
-],
-oldest:[
- {id:'o1',nm:'조O남',age:87,sex:'남',dx:'낙상 후 근감소증(sarcopenia) · 노쇠',
-  cc:'화장실 가다 두 번 넘어짐, 의자에서 못 일어남',
-  hx:'악력 22kg, 보행속도 0.6 m/s, 최근 6개월 체중 5% 감소',
-  meds:'다약제 7종 복용',tags:['frailty','sarcopenia'],
-  cautions:['다약제 — 기립성 저혈압·어지럼 확인 후 시작','단백질 섭취 병행 교육 필수','앉은 자세에서 시작해 점진적 기립 훈련'],
-  base:{sbp:124,dbp:70,hr:82,rr:18,temp:36.3,spo2:95,pain:3,mmt:2,rom:'경도 제한',amb:'보조기구',fall:'고위험',cog:'명료',bg:null}},
- {id:'o2',nm:'임O순',age:90,sex:'여',dx:'알츠하이머 치매 중등도 · 보행장애',
-  cc:'지시 이해 어려움, 배회 중 넘어질 뻔함',
-  hx:'MMSE 16점, 요양시설 거주',
-  meds:'도네페질, 항우울제',tags:['neuro','frailty','cognitive'],
-  cautions:['한 번에 한 가지 단순 지시만 제공','익숙한 환경·동일 시간대 반복 시행','1:1 감독 필수, 이중과제 훈련은 금지'],
-  base:{sbp:130,dbp:74,hr:80,rr:18,temp:36.4,spo2:96,pain:2,mmt:3,rom:'경도 제한',amb:'부축 필요',fall:'고위험',cog:'중등도 저하',bg:null}},
- {id:'o3',nm:'서O출',age:86,sex:'남',dx:'흡인성 폐렴 후 기능저하 · 장기 침상안정',
-  cc:'폐렴 치료 후 기운이 없어 하루 종일 누워 지낸다',
-  hx:'2주 입원 후 근력 급감, 침상안정으로 인한 폐용성 위축',
-  meds:'항생제 종료, 다약제 복용',tags:['pulmonary','frailty','sarcopenia'],
-  cautions:['흡인 위험 — 식후 30분 눕히지 않기, 좌위 유지','침상 내 운동부터 시작해 좌위·기립 단계적 진행','과도한 초기 부하 금지, 짧게 자주 시행'],
-  base:{sbp:118,dbp:68,hr:88,rr:22,temp:37.0,spo2:93,pain:1,mmt:2,rom:'경도 제한',amb:'침상안정',fall:'고위험',cog:'명료',bg:null}}
-]
-};
 
 const VS_FIELDS = [
  {k:'sbp', nm:'수축기 혈압', en:'SYSTOLIC BP', u:'mmHg', min:60, max:260, emo:'🩸'},
@@ -1113,13 +899,11 @@ function prefillAgeHint(){
 function fillExample(){
   const g=ageObj();
   const samples={
-    child:{nm:'이O린',age:14,sex:'여',dx:'특발성 척추측만증 (Cobb 25°)',cc:'오래 앉으면 등이 아프고 어깨가 비대칭이다',hx:'성장 급증기, 브레이스 착용 중',meds:'없음',tags:['spine'],beta:false,cautions:'성장판 손상 위험 — 고중량 저항운동 금지\n일측성 편중 부하 운동 지양'},
-    young:{nm:'박O한',age:26,sex:'남',dx:'전방십자인대 재건술 후 5주',cc:'무릎이 잘 안 굽고 허벅지 힘이 빠졌다',hx:'축구 중 손상, 부분 체중부하 단계',meds:'소염진통제',tags:['ortho-lower','postop'],beta:false,cautions:'개방형 운동사슬 신전 90–40도 구간 제한\n무릎 부종·열감 시 운동 보류'},
-    mid:{nm:'정O철',age:57,sex:'남',dx:'급성 심근경색 후 스텐트 삽입 · 심장재활',cc:'조금만 움직여도 피로하고 재발이 두렵다',hx:'좌심실 구혈률 45%, 흡연력',meds:'베타차단제, 아스피린, 스타틴',tags:['cardiac'],beta:true,cautions:'흉통·심전도 변화 시 즉시 중단\n상지 저항운동은 저부하로 시작'},
-    senior:{nm:'김O자',age:76,sex:'여',dx:'대퇴경부 골절 후 인공고관절 전치환술 후 6일',cc:'수술 부위가 아프고 서기가 두렵다',hx:'후방 접근법, 골다공증 병력',meds:'항응고제, 진통제',tags:['ortho-lower','postop','frailty'],beta:false,cautions:'고관절 90도 이상 굴곡·내전·내회전 금지\n낮은 의자 사용 금지\n심부정맥혈전 징후 확인'},
-    oldest:{nm:'최O남',age:87,sex:'남',dx:'낙상 후 근감소증 · 노쇠',cc:'의자에서 혼자 못 일어나고 자주 넘어진다',hx:'악력 저하, 최근 체중 감소',meds:'다약제 복용',tags:['frailty','sarcopenia'],beta:false,cautions:'다약제 — 기립성 저혈압 확인 후 시작\n앉은 자세에서 시작해 점진적 기립'}
+    senior:{nm:'김O자',age:69,sex:'여',dx:'무릎 골관절염 · 낙상 후 활동 위축',cc:'계단·등산이 무릎이 아파 겁나서 걷기를 줄였다',hx:'6개월 전 낙상, 이후 외출 감소·다리 힘 저하',meds:'혈압약, 필요시 진통제',tags:['ortho-lower','frailty'],beta:false,cautions:'체중부하 관절 충격 최소화 — 점프·달리기 제외\n통증 악화 시 하중 조절\n균형훈련은 지지물 곁에서'},
+    senior2:{nm:'박O순',age:79,sex:'여',dx:'골다공증 · 흉추 압박골절 병력 · 자세 불안정',cc:'등이 굽고 오래 서 있기 힘들며 자주 휘청인다',hx:'폐경 후 골다공증, 1년 전 압박골절, 보행 시 지팡이',meds:'비스포스포네이트, 칼슘·비타민D',tags:['spine','osteoporosis','frailty'],beta:false,cautions:'척추 굴곡·회전 부하 운동 절대 금지 (윗몸일으키기·허리 비틀기)\n낙상 예방 최우선 — 균형훈련은 지지물 곁에서\n고충격 운동 금지, 저충격 체중부하 운동 권장'},
+    oldest:{nm:'최O남',age:87,sex:'남',dx:'낙상 후 근감소증 · 노쇠',cc:'의자에서 혼자 못 일어나고 자주 넘어진다',hx:'악력 저하, 보행속도 느림, 최근 6개월 체중 감소',meds:'다약제 7종 복용',tags:['frailty','sarcopenia'],beta:false,cautions:'다약제 — 기립성 저혈압·어지럼 확인 후 시작\n앉은 자세에서 시작해 점진적 기립 훈련\n단백질 섭취 병행 교육'}
   };
-  const ex=samples[S.age]||samples.mid;
+  const ex=samples[S.age]||samples.senior;
   $('#bc_nm').value=ex.nm; $('#bc_age').value=ex.age; $('#bc_sex').value=ex.sex;
   $('#bc_dx').value=ex.dx; $('#bc_cc').value=ex.cc; $('#bc_hx').value=ex.hx; $('#bc_meds').value=ex.meds;
   $('#bc_cautions').value=ex.cautions; $('#bc_beta').checked=ex.beta;
