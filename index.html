@@ -123,6 +123,40 @@ p.lede{color:var(--ink2);margin:0 0 22px;max-width:66ch;font-size:14.5px}
 .dot-mod{color:var(--caution)}
 .dot-sev{color:var(--alert)}
 
+/* ---------- 대상자 뽑기 ---------- */
+.draw{max-width:520px;margin:6px auto 0}
+.draw-card{
+  position:relative;border:1.5px solid var(--ink);border-radius:12px;background:#fff;
+  min-height:214px;padding:20px 22px;overflow:hidden;
+}
+.draw-card.spin{animation:drawspin .5s ease}
+@keyframes drawspin{
+  0%{transform:perspective(700px) rotateY(0);opacity:1}
+  45%{transform:perspective(700px) rotateY(90deg) scale(.94);opacity:.15}
+  55%{transform:perspective(700px) rotateY(-90deg) scale(.94);opacity:.15}
+  100%{transform:perspective(700px) rotateY(0);opacity:1}
+}
+.draw-front{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-height:174px;color:var(--ink3)}
+.draw-q{font-size:60px;font-weight:800;line-height:1;color:var(--rule)}
+.db-cat{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--signal);text-transform:uppercase}
+.db-name{font-size:23px;font-weight:800;letter-spacing:-.02em;margin:3px 0 1px}
+.db-meta{font-family:var(--mono);font-size:12px;color:var(--ink3)}
+.db-dx{font-size:14.5px;font-weight:600;margin:10px 0 6px;line-height:1.4}
+.db-cc{font-size:13px;color:var(--ink2);line-height:1.5}
+.db-verdict{display:inline-block;margin-top:12px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.04em;padding:3px 11px;border-radius:20px;color:#fff}
+.dbv-ok{background:var(--signal)}
+.dbv-caution{background:var(--caution)}
+.draw-ctl{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:16px}
+.draw-team{font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;color:var(--ink)}
+.draw-team input{font-family:var(--sans);font-size:14px;border:1px solid var(--rule);border-radius:4px;padding:6px 10px;width:130px}
+.draw-team input:focus{outline:2px solid var(--focus);border-color:var(--focus)}
+.draw-note{font-size:12px;color:var(--ink3);margin:11px 0 0}
+
+/* ---------- 읽기 전용 사정값 ---------- */
+.ro-val{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--ink);min-width:56px;text-align:right}
+.ro-val[data-s="off"]{color:var(--caution)}
+.ro-val[data-s="ok"]{color:var(--ink)}
+
 /* ---------- 대상자 만들기 폼 ---------- */
 .fld{margin-bottom:14px}
 .fld:last-child{margin-bottom:0}
@@ -512,71 +546,45 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
 
 <!-- ===== STEP 1 ===== -->
 <section class="panel" data-step="1">
-  <p class="eyebrow">Step 01 — Population</p>
-  <h2 class="sec">대상자의 연령대를 고르세요</h2>
-  <p class="lede">이 실습은 <b>50대 후반 ~ 70대</b>(중년 후기 ~ 후기 노년) 대상자의 재활운동 프로그램을 구성합니다. 같은 시기라도 연령대에 따라 활력징후 정상 범위와 운동 반응이 다릅니다. 여기서 선택한 값이 이후 모든 판정 기준의 기준선이 됩니다.</p>
-  <div class="grid g3" id="ageGrid"></div>
+  <p class="eyebrow">Step 01 — Draw</p>
+  <h2 class="sec">우리 조의 대상자를 뽑으세요</h2>
+  <p class="lede">조 이름을 적고 <b>대상자 뽑기</b>를 누르면 실습할 대상자가 무작위로 배정됩니다. 대상자마다 진단·병력·사정 결과가 이미 준비되어 있어, 여러분은 그 결과를 <b>해석</b>하고 <b>운동 프로그램을 설계</b>하면 됩니다.</p>
+
+  <div class="draw">
+    <div class="draw-card" id="drawCard">
+      <div class="draw-front" id="drawFront">
+        <span class="draw-q">?</span>
+        <p>아직 배정되지 않았습니다</p>
+      </div>
+      <div class="draw-back" id="drawBack" hidden></div>
+    </div>
+    <div class="draw-ctl">
+      <label class="draw-team">조 이름 <input type="text" id="drawTeam" placeholder="예) 3조" maxlength="18"></label>
+      <button class="btn" id="btnDraw">대상자 뽑기</button>
+      <button class="btn ghost small" id="btnRedraw" hidden>다시 뽑기 <span id="redrawLeft"></span></button>
+      <button class="btn" id="btnDrawNext" hidden>이 대상자로 시작 →</button>
+    </div>
+    <p class="draw-note">다시 뽑기는 최대 3회까지 가능합니다 (교사 확인 후 사용하세요).</p>
+  </div>
 </section>
 
 <!-- ===== STEP 2 ===== -->
 <section class="panel" data-step="2">
-  <p class="eyebrow">Step 02 — Build Case</p>
-  <h2 class="sec">대상자 직접 만들기</h2>
-  <p class="lede">팀이 맡을 대상자를 직접 설계합니다. 진단과 계통을 정하면, 이후 사정 단계의 금기 판정과 운동 추천이 여기서 고른 계통에 맞춰 작동합니다. 실제 있을 법한 사람을 상상하며 채워보세요.</p>
-
-  <div class="chart">
-    <h3>기본 정보 <span class="hint">PROFILE</span></h3>
-    <div class="body">
-      <div class="rows">
-        <div class="row"><label>이름 (가명)<i>NAME</i></label><div class="in"><input type="text" id="bc_nm" placeholder="예) 김O수" maxlength="12"></div></div>
-        <div class="row"><label>나이<i>AGE</i></label><div class="in"><input type="number" id="bc_age" min="55" max="85" placeholder="세"><span class="unit">세</span></div></div>
-        <div class="row"><label>성별<i>SEX</i></label><div class="in"><select id="bc_sex"><option value="남">남</option><option value="여">여</option></select></div></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="chart">
-    <h3>진단 · 병력 <span class="hint">DIAGNOSIS</span></h3>
-    <div class="body">
-      <div class="fld"><label class="flab">진단명</label><input type="text" id="bc_dx" placeholder="예) 뇌경색 후 좌측 편마비 · 발병 3주"></div>
-      <div class="fld"><label class="flab">주호소 <span class="fsub">대상자가 겪는 주된 불편</span></label><input type="text" id="bc_cc" placeholder="예) 왼팔다리에 힘이 없고 걷기 어렵다"></div>
-      <div class="fld"><label class="flab">현병력 <span class="fsub">경과·검사·상황</span></label><input type="text" id="bc_hx" placeholder="예) 우측 중대뇌동맥 경색, 재활 시작 단계"></div>
-      <div class="fld"><label class="flab">투약 <span class="fsub">복용 약물</span></label><input type="text" id="bc_meds" placeholder="예) 항혈소판제, 혈압약"></div>
-    </div>
-  </div>
-
-  <div class="chart">
-    <h3>계통 분류 <span class="hint">SYSTEM · 복수 선택</span></h3>
-    <div class="body">
-      <p class="fhelp">이 대상자와 관련된 몸의 계통을 모두 고르세요. 고른 계통에 맞는 운동이 이후 자동으로 추천됩니다.</p>
-      <div class="tagpick" id="bc_tags"></div>
-      <div class="fld" style="margin-top:14px">
-        <label class="flab"><input type="checkbox" id="bc_beta" style="width:auto;margin-right:7px;vertical-align:-1px;accent-color:var(--signal)">베타차단제를 복용 중</label>
-        <span class="fsub" style="display:block;margin-top:2px">체크하면 목표심박수 대신 자각강도(RPE)를 기준으로 처방합니다.</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="chart">
-    <h3>운동 금기 · 주의 <span class="hint">PRECAUTIONS</span></h3>
-    <div class="body">
-      <p class="fhelp">이 진단에서 특별히 조심해야 할 점을 적습니다. 한 줄에 하나씩, 빈칸은 자동으로 제외됩니다.</p>
-      <textarea id="bc_cautions" rows="4" placeholder="예)&#10;환측 견관절 아탈구 예방 — 상지 견인 금지&#10;혈압 급상승 유발 등척성 과부하 지양&#10;낙상 고위험 — 균형훈련은 지지물 곁에서"></textarea>
-    </div>
-  </div>
-
+  <p class="eyebrow">Step 02 — Case</p>
+  <h2 class="sec">배정된 대상자를 확인하세요</h2>
+  <p class="lede">우리 조가 맡은 대상자입니다. 진단·병력·주의사항을 팀이 함께 읽고, 이 사람에게 어떤 움직임과 운동이 필요할지 이야기해 보세요.</p>
+  <div id="caseView"></div>
   <div class="act">
-    <button class="btn" id="bc_make">대상자 확정 · 사정 시작</button>
-    <button class="btn ghost small" id="bc_example">예시로 채우기</button>
-    <span class="note" id="bc_warn"></span>
+    <button class="btn" id="btnToAssess">사정 결과 보기 →</button>
+    <button class="btn ghost small" id="btnBack1">대상자 다시 뽑기</button>
   </div>
 </section>
 
 <!-- ===== STEP 3 ===== -->
 <section class="panel" data-step="3">
   <p class="eyebrow">Step 03 — Assessment</p>
-  <h2 class="sec">대상자 몸상태 사정</h2>
-  <p class="lede">직접 측정한 값을 입력하세요. 값을 넣는 즉시 규칙 엔진이 연령별 정상범위와 운동 금기 기준에 대조합니다.</p>
+  <h2 class="sec">대상자 사정 결과</h2>
+  <p class="lede">이 대상자의 활력징후·기능 사정 결과입니다. 규칙 엔진이 연령별 정상범위·운동 기준과 대조한 <b>판정</b>과 근거를 함께 확인하세요. 값은 이미 측정·기록된 것으로, 수정하지 않습니다.</p>
 
   <div class="monitor" id="monitor" data-risk="idle">
     <svg viewBox="0 0 400 74" preserveAspectRatio="none" aria-hidden="true">
@@ -603,15 +611,14 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
   </div>
 
   <div class="verdict" id="verdict" data-risk="idle">
-    <div class="vhead"><span class="vbadge" id="vBadge">대기</span><span class="vtitle" id="vTitle">측정값을 입력하세요</span></div>
-    <div class="note" id="vDesc">모든 항목을 채우면 운동 가능 여부와 근거 규칙이 표시됩니다.</div>
+    <div class="vhead"><span class="vbadge" id="vBadge">대기</span><span class="vtitle" id="vTitle">사정 결과를 불러오는 중</span></div>
+    <div class="note" id="vDesc">잠시만 기다려 주세요.</div>
     <ul class="rules" id="vRules"></ul>
   </div>
 
   <div class="act">
-    <button class="btn ghost small" id="btnFill">모의 측정값 불러오기</button>
-    <button class="btn" id="btnToRx">사정 완료 · 프로그램 구성</button>
-    <span class="note">측정 실습을 먼저 하고, 검증용으로만 불러오기를 쓰세요.</span>
+    <button class="btn" id="btnToRx">프로그램 구성 →</button>
+    <button class="btn ghost small" id="btnBack2">대상자 정보로</button>
   </div>
 </section>
 
@@ -715,6 +722,184 @@ const AGES = [
   {id:'a7579', k:'75–79', nm:'후기 노년', sub:'근력·균형 저하 뚜렷, 다약제', mid:77, emo:'🧓',
    vs:{sbp:[100,142],dbp:[60,89],hr:[60,100],rr:[12,22],spo2:[92,100],temp:[36.0,37.5]}}
 ];
+function caseBand(age){ return age<=64 ? 'a5564' : age<=74 ? 'a6574' : 'a7579'; }
+
+/* ============================================================
+   대상자 풀 (뽑기 후보) — 55~79세
+   사정값(base)은 대부분 "운동 가능", 일부만 "조건부". "운동 보류"는 없음.
+   ============================================================ */
+const CASES = [
+ // ── 허리 ──────────────────────────────────────────────
+ {id:'h01', cat:'허리', nm:'김O수', age:62, sex:'남',
+  dx:'요추관 협착증 감압·유합술 후 6주',
+  cc:'오래 서거나 걸으면 다리가 저리고 허리가 뻣뻣하다',
+  hx:'신경인성 파행으로 수술, 급성기 지나 재활 시작, 앉아 있는 시간이 길다',
+  meds:'진통제, 근이완제', tags:['spine','postop'],
+  cautions:['요추 굴곡·회전·비틀기 부하 운동 금지 (윗몸일으키기·허리 돌리기)','발살바(숨 참고 힘주기) 유발 고부하 금지','무거운 물건 들기 제한 — 통증 없는 중립 자세 유지'],
+  base:{sbp:128,dbp:80,hr:74,rr:16,temp:36.6,spo2:97,pain:3,mmt:4,rom:'경도 제한',amb:'독립',fall:'중위험',cog:'명료',bg:null}},
+ {id:'h02', cat:'허리', nm:'정O례', age:74, sex:'여',
+  dx:'흉추 압박골절 후 8주 · 골다공증(T-score −3.0)',
+  cc:'등이 굽고 오래 서 있으면 등 가운데가 아프다',
+  hx:'폐경 후 골다공증, 낙상 없이 발생한 압박골절, 통증 감소 중',
+  meds:'비스포스포네이트, 칼슘·비타민D, 필요시 진통제', tags:['spine','frailty','osteoporosis'],
+  cautions:['척추 굴곡·회전 부하 운동 절대 금지','고충격 운동 금지, 저충격 체중부하 운동 권장','신전 위주 자세 교정, 균형훈련은 지지물 곁에서'],
+  base:{sbp:134,dbp:82,hr:76,rr:17,temp:36.5,spo2:96,pain:3,mmt:3,rom:'경도 제한',amb:'독립',fall:'중위험',cog:'명료',bg:null}},
+ {id:'h03', cat:'허리', nm:'박O민', age:58, sex:'남',
+  dx:'요추 4-5번 추간판탈출증 (보존적 치료)',
+  cc:'오른쪽 엉덩이에서 종아리로 당기는 통증, 앉아 있기 30분이 힘들다',
+  hx:'사무직, 하지직거상검사 50° 양성, 근력 저하는 없음',
+  meds:'소염진통제, 근이완제', tags:['spine'],
+  cautions:['급성기 요추 굴곡·회전 복합 동작 금지','통증이 다리로 더 퍼지면 즉시 중단','하지 근력 급격히 빠지거나 배뇨장애 시 즉시 의뢰'],
+  base:{sbp:126,dbp:80,hr:78,rr:16,temp:36.6,spo2:98,pain:4,mmt:4,rom:'경도 제한',amb:'독립',fall:'저위험',cog:'명료',bg:null}},
+ {id:'h04', cat:'허리', nm:'최O자', age:71, sex:'여',
+  dx:'퇴행성 요추 후만증 · 자세 불안정',
+  cc:'허리를 못 펴 앞으로 굽은 채 걷고 조금만 걸어도 힘들다',
+  hx:'다열근 위축, 보행 시 보행기 사용, 최근 뒤로 넘어질 뻔한 적 있음',
+  meds:'혈압약, 골다공증약', tags:['spine','frailty'],
+  cautions:['후방 낙상 고위험 — 균형·기립 훈련은 감독 하 지지물 곁에서','척추 신전근 강화, 굴곡 부하 금지','보행 시 보조기구 반드시 사용'],
+  base:{sbp:138,dbp:84,hr:80,rr:18,temp:36.5,spo2:95,pain:3,mmt:3,rom:'중등도 제한',amb:'보조기구',fall:'고위험',cog:'명료',bg:null}},
+
+ // ── 팔·손목·어깨 ─────────────────────────────────────
+ {id:'u01', cat:'팔·어깨', nm:'이O자', age:68, sex:'여',
+  dx:'좌측 손목 요골 원위부 골절 · 금속판 고정술 후 4주',
+  cc:'손목이 뻣뻣하고 힘이 안 들어가 문 손잡이 돌리기가 어렵다',
+  hx:'빙판 낙상, 골다공증 병력, 유합 진행 중, 고정 후 관절 강직·근위축',
+  meds:'칼슘·비타민D, 필요시 진통제', tags:['ortho-upper','postop','frailty'],
+  cautions:['유합 초기 — 손목 체중지지·과신전, 무거운 물건 들기 금지','통증 없는 범위에서 관절가동범위부터 회복','부종 관리(거상) 병행, 반대손 과사용 주의'],
+  base:{sbp:130,dbp:82,hr:76,rr:16,temp:36.6,spo2:97,pain:3,mmt:3,rom:'중등도 제한',amb:'독립',fall:'중위험',cog:'명료',bg:null}},
+ {id:'u02', cat:'팔·어깨', nm:'강O호', age:60, sex:'남',
+  dx:'우측 어깨 회전근개(극상근) 봉합술 후 6주',
+  cc:'팔을 어깨 높이 위로 올리기 어렵고 밤에 어깨가 쑤신다',
+  hx:'반복 사용 손상, 봉합 후 보조기 착용 종료, 능동 운동 시작 단계',
+  meds:'필요시 소염진통제', tags:['ortho-upper','postop'],
+  cautions:['봉합부 보호 — 저항성 외회전·과도한 능동 거상 12주까지 제한','무거운 물건 들기·갑작스러운 견인 금지','통증 범위 내에서만 능동보조운동'],
+  base:{sbp:124,dbp:78,hr:72,rr:15,temp:36.6,spo2:98,pain:3,mmt:3,rom:'중등도 제한',amb:'독립',fall:'저위험',cog:'명료',bg:null}},
+ {id:'u03', cat:'팔·어깨', nm:'윤O경', age:57, sex:'여',
+  dx:'어깨 유착성 관절낭염(오십견) · 결빙기',
+  cc:'어깨가 굳어 머리 빗기·옷 입기가 안 되고 밤에 아파 잠을 설친다',
+  hx:'당뇨 전단계, 3개월 전부터 가동범위 급감, 야간통 심함',
+  meds:'소염진통제', tags:['ortho-upper'],
+  cautions:['통증 유발하는 강한 스트레칭 금지 — 통증 직전까지만','도수치료·온열 후 능동보조운동 병행','통증 증가 시 활동량 줄이고 재평가'],
+  base:{sbp:122,dbp:78,hr:74,rr:16,temp:36.5,spo2:98,pain:3,mmt:4,rom:'고도 제한',amb:'독립',fall:'저위험',cog:'명료',bg:null}},
+ {id:'u04', cat:'팔·어깨', nm:'서O덕', age:75, sex:'여',
+  dx:'우측 상완골 근위부 골절 (보존적 치료) 후 5주',
+  cc:'팔을 앞으로 들 때 어깨가 아프고 힘이 없다',
+  hx:'가정 내 낙상, 비전위 골절로 보존치료, 삼각건 제거 후 재활 시작',
+  meds:'칼슘·비타민D, 필요시 진통제', tags:['ortho-upper','frailty'],
+  cautions:['유합 확인 전 저항운동 금지, 진자운동·능동보조운동부터','통증 없는 범위에서 점진적 거상','반대손 과사용·낙상 재발 주의'],
+  base:{sbp:136,dbp:82,hr:78,rr:17,temp:36.6,spo2:96,pain:3,mmt:3,rom:'중등도 제한',amb:'독립',fall:'중위험',cog:'명료',bg:null}},
+ {id:'u05', cat:'팔·어깨', nm:'임O철', age:63, sex:'남',
+  dx:'좌측 주관절(팔꿈치) 골절 수술 후 관절 강직',
+  cc:'팔꿈치가 끝까지 펴지지도 굽혀지지도 않아 세수가 불편하다',
+  hx:'유합 완료, 8주 고정 후 관절낭 구축·근위축, 도수치료 병행 중',
+  meds:'없음', tags:['ortho-upper','postop'],
+  cautions:['과격한 수동 신전 금지 — 이소성 골화 위험','통증·부종 증가 시 냉찜질 후 강도 낮춤','능동 가동범위 회복 우선, 저항은 후반부'],
+  base:{sbp:126,dbp:80,hr:74,rr:16,temp:36.6,spo2:98,pain:3,mmt:3,rom:'중등도 제한',amb:'독립',fall:'저위험',cog:'명료',bg:null}},
+
+ // ── 뇌·신경 ──────────────────────────────────────────
+ {id:'n01', cat:'뇌·신경', nm:'하O식', age:66, sex:'남',
+  dx:'중대뇌동맥 뇌경색 후 좌측 편마비 · 발병 4주',
+  cc:'왼팔다리에 힘이 없고 왼쪽으로 자꾸 기운다',
+  hx:'우측 MCA 경색, 좌측 근력 저하·감각 둔화, 앉은 균형 회복 중',
+  meds:'항혈소판제, 혈압약, 스타틴', tags:['neuro','frailty'],
+  cautions:['환측 견관절 아탈구 예방 — 상지 견인 금지, 지지대 사용','좌측 감각 저하 — 피부 압박·마찰 손상 확인','급격한 체위 변경 금지, 균형훈련은 감독 하에'],
+  base:{sbp:138,dbp:84,hr:78,rr:17,temp:36.6,spo2:96,pain:2,mmt:3,rom:'경도 제한',amb:'보조기구',fall:'중위험',cog:'명료',bg:null}},
+ {id:'n02', cat:'뇌·신경', nm:'박O철', age:76, sex:'남',
+  dx:'고혈압성 뇌출혈 개두술·혈종 제거 후 5주 · 우측 편마비',
+  cc:'오른쪽 팔다리에 힘이 없고 말이 어눌하며 쉽게 지친다',
+  hx:'수술 후 급성기 지나 재활 전동, 주의집중·지구력 저하, 좌위 유지 훈련 중',
+  meds:'항경련제, 혈압약, 항혈전제', tags:['neuro','cognitive','frailty'],
+  cautions:['혈압 급상승 유발 등척성 과부하·발살바 금지','피로·집중력 저하 — 20분 이내로 나눠 자주 휴식','환측 견관절 아탈구 예방, 상지 견인 금지'],
+  base:{sbp:138,dbp:86,hr:80,rr:18,temp:36.6,spo2:96,pain:2,mmt:2,rom:'경도 제한',amb:'부축 필요',fall:'중위험',cog:'경도 저하',bg:null}},
+ {id:'n03', cat:'뇌·신경', nm:'김O순', age:70, sex:'여',
+  dx:'뇌졸중 후 편마비 · 환측 견관절 아탈구·어깨-손 증후군 동반',
+  cc:'마비된 어깨가 빠질 것처럼 아프고 손이 붓고 뻣뻣하다',
+  hx:'발병 7주, 이완성 마비로 견관절 하방 아탈구, 손 부종·이질통',
+  meds:'항혈소판제, 신경통 약, 혈압약', tags:['neuro','ortho-upper','frailty'],
+  cautions:['환측 어깨 무리한 거상·견인 절대 금지 — 통증 유발','손 부종 관리(거상·압박), 온열·능동보조운동 병행','통증 범위 내에서만, 통증 증가 시 즉시 중단'],
+  base:{sbp:134,dbp:82,hr:78,rr:17,temp:36.6,spo2:97,pain:4,mmt:3,rom:'중등도 제한',amb:'보조기구',fall:'중위험',cog:'명료',bg:null}},
+ {id:'n04', cat:'뇌·신경', nm:'조O남', age:72, sex:'남',
+  dx:'우뇌 뇌경색 후 좌측 편마비 · 편측 무시(neglect) 동반',
+  cc:'왼쪽 물건에 자주 부딪히고 왼쪽을 잘 안 쳐다본다',
+  hx:'발병 5주, 좌측 공간·신체 무시, 식판 왼쪽 음식 남김, 낙상 2회',
+  meds:'항혈소판제, 혈압약', tags:['neuro','cognitive','frailty'],
+  cautions:['편측 무시 — 활동 시 환측을 향하도록 배치, 1:1 감독 필수','좌측 공간 인지 훈련 병행, 이중과제 금지','낙상 고위험 — 균형·보행 훈련은 반드시 보조자 동반'],
+  base:{sbp:136,dbp:82,hr:80,rr:17,temp:36.5,spo2:96,pain:1,mmt:3,rom:'경도 제한',amb:'부축 필요',fall:'고위험',cog:'경도 저하',bg:null}},
+ {id:'n05', cat:'뇌·신경', nm:'문O례', age:69, sex:'여',
+  dx:'파킨슨병 Hoehn–Yahr 2단계',
+  cc:'걸을 때 발이 잘 안 떨어지고 방향을 바꿀 때 휘청인다',
+  hx:'자세 반사 저하 시작, 약효 소진(wearing-off) 경미, 서동·경직',
+  meds:'레보도파/카비도파', tags:['neuro','frailty'],
+  cautions:['약효 최고기(on-time)에 운동 시행','기립성 저혈압 흔함 — 체위 변경 천천히','시각·청각 신호(cueing) 활용, 좁은 통로·급회전 회피'],
+  base:{sbp:124,dbp:78,hr:76,rr:16,temp:36.5,spo2:97,pain:1,mmt:4,rom:'경도 제한',amb:'보조기구',fall:'고위험',cog:'명료',bg:null}},
+ {id:'n06', cat:'뇌·신경', nm:'신O우', age:64, sex:'남',
+  dx:'소뇌경색 후 실조(ataxia)·균형장애 · 발병 6주',
+  cc:'똑바로 서면 흔들리고 손으로 물건 집을 때 손이 떨린다',
+  hx:'우측 소뇌 경색, 몸통 실조·측정이상, 넓은 지지면 보행',
+  meds:'항혈소판제, 혈압약', tags:['neuro','frailty'],
+  cautions:['낙상 고위험 — 균형훈련은 지지물·보조자 곁에서만','빠른 방향 전환·좁은 지지면 과제는 후반부로','피로 시 실조 악화 — 짧게 자주, 정확도 우선'],
+  base:{sbp:126,dbp:80,hr:74,rr:16,temp:36.5,spo2:98,pain:0,mmt:4,rom:'정상',amb:'보조기구',fall:'고위험',cog:'명료',bg:null}},
+
+ // ── 무릎·고관절·하지 ────────────────────────────────
+ {id:'l01', cat:'무릎·고관절', nm:'권O례', age:73, sex:'여',
+  dx:'무릎 골관절염 인공관절 전치환술(TKA) 후 4주',
+  cc:'무릎이 끝까지 안 굽혀지고 계단 내려갈 때 불안하다',
+  hx:'양측 퇴행성 관절염, 우측 먼저 수술, 부종 감소 중',
+  meds:'항응고제 종료, 진통제', tags:['ortho-lower','postop','frailty'],
+  cautions:['심부정맥혈전 징후(종아리 발적·부종·열감) 확인','통증 범위 내 굴곡 각도 점진 증가, 무리한 부하 금지','냉찜질·거상으로 부종 관리 병행'],
+  base:{sbp:132,dbp:80,hr:78,rr:17,temp:36.7,spo2:97,pain:3,mmt:3,rom:'중등도 제한',amb:'보조기구',fall:'중위험',cog:'명료',bg:null}},
+ {id:'l02', cat:'무릎·고관절', nm:'배O자', age:78, sex:'여',
+  dx:'고관절 인공관절 전치환술(THA, 후방 접근) 후 5주',
+  cc:'수술한 다리로 서기가 무섭고 양말 신기가 안 된다',
+  hx:'대퇴경부 골절로 수술, 골다공증 병력, 보행기 사용',
+  meds:'항응고제, 칼슘·비타민D, 진통제', tags:['ortho-lower','postop','frailty'],
+  cautions:['후방 접근 3대 금기 — 고관절 90° 이상 굴곡, 내전(다리 꼬기), 내회전','낮은 의자·좌변기 사용 금지','심부정맥혈전 징후 확인, 보행 시 보조기구 필수'],
+  base:{sbp:138,dbp:84,hr:80,rr:18,temp:36.6,spo2:95,pain:3,mmt:3,rom:'중등도 제한',amb:'보조기구',fall:'중위험',cog:'명료',bg:null}},
+ {id:'l03', cat:'무릎·고관절', nm:'오O근', age:77, sex:'남',
+  dx:'대퇴골 전자간부 골절 내고정술 후 6주',
+  cc:'다친 다리에 체중을 실으면 사타구니가 아프고 절뚝거린다',
+  hx:'가정 내 낙상, 부분 체중부하 허용 단계, 근력·지구력 저하',
+  meds:'항응고제, 진통제, 골다공증약', tags:['ortho-lower','postop','frailty'],
+  cautions:['허용된 체중부하 범위 준수 — 통증 심하면 하중 조절','고관절 외전근 강화 우선, 급격한 회전 금지','낙상 재발 고위험 — 보행 훈련은 감독 하에'],
+  base:{sbp:136,dbp:82,hr:82,rr:18,temp:36.6,spo2:95,pain:3,mmt:3,rom:'경도 제한',amb:'보조기구',fall:'중위험',cog:'명료',bg:null}},
+ {id:'l04', cat:'무릎·고관절', nm:'김O옥', age:65, sex:'여',
+  dx:'무릎 골관절염(보존적 치료) · 낙상 후 활동 위축',
+  cc:'계단·비탈이 무릎이 아파 겁나서 외출을 줄였다',
+  hx:'6개월 전 낙상, 이후 활동량 급감·대퇴사두근 위축, 체중 증가',
+  meds:'혈압약, 필요시 진통제', tags:['ortho-lower','frailty'],
+  cautions:['체중부하 관절 충격 최소화 — 점프·달리기 초기 제외','통증 악화 시 하중·활동량 조절','대퇴사두근 강화 우선, 균형훈련은 지지물 곁에서'],
+  base:{sbp:134,dbp:82,hr:80,rr:17,temp:36.6,spo2:97,pain:3,mmt:4,rom:'경도 제한',amb:'독립',fall:'중위험',cog:'명료',bg:null}},
+
+ // ── 전신 ────────────────────────────────────────────
+ {id:'g01', cat:'전신', nm:'최O남', age:77, sex:'남',
+  dx:'낙상 후 근감소증(sarcopenia) · 노쇠',
+  cc:'의자에서 혼자 일어나기 힘들고 걸음이 느려졌다',
+  hx:'악력 저하, 보행속도 0.7 m/s, 최근 6개월 체중 5% 감소, 다약제',
+  meds:'다약제 6종 복용', tags:['frailty','sarcopenia'],
+  cautions:['다약제 — 기립성 저혈압·어지럼 확인 후 시작','앉은 자세에서 시작해 점진적 기립 훈련','단백질 섭취 병행 교육, 짧게 자주 시행'],
+  base:{sbp:126,dbp:76,hr:80,rr:18,temp:36.4,spo2:95,pain:2,mmt:2,rom:'경도 제한',amb:'보조기구',fall:'중위험',cog:'명료',bg:null}},
+ {id:'g02', cat:'전신', nm:'노O기', age:70, sex:'남',
+  dx:'만성폐쇄성폐질환(COPD) GOLD 2단계',
+  cc:'조금 빨리 걷거나 계단을 오르면 숨이 차다',
+  hx:'흡연력 40갑년, mMRC 2단계, 최근 급성악화 없이 안정기',
+  meds:'LAMA/LABA 흡입제', tags:['pulmonary','frailty'],
+  cautions:['운동 중 SpO₂ 88% 미만 시 즉시 중단·휴식','입술 오므리기 호흡 병행, 준비운동 충분히','간헐적 운동(운동-휴식 교대) 형태로 구성'],
+  base:{sbp:132,dbp:80,hr:84,rr:19,temp:36.6,spo2:91,pain:0,mmt:4,rom:'정상',amb:'독립',fall:'저위험',cog:'명료',bg:null}},
+ {id:'g03', cat:'전신', nm:'한O수', age:61, sex:'남',
+  dx:'제2형 당뇨병 · 말초신경병증',
+  cc:'발바닥 감각이 둔하고 저리며 오래 걸으면 균형이 흔들린다',
+  hx:'HbA1c 7.6%, 양측 발 보호감각 저하, 발 궤양 병력은 없음',
+  meds:'메트포르민, 혈압약', tags:['metabolic'],
+  cautions:['운동 전·후 혈당 측정, 저혈당(간식) 대비','발 감각 저하 — 운동 전후 발 상태 확인, 잘 맞는 신발','맨발 운동·과도한 발 압박 활동 회피'],
+  base:{sbp:130,dbp:82,hr:78,rr:16,temp:36.6,spo2:98,pain:1,mmt:4,rom:'정상',amb:'독립',fall:'중위험',cog:'명료',bg:132}},
+ {id:'g04', cat:'전신', nm:'유O식', age:64, sex:'남',
+  dx:'관상동맥우회술(CABG) 후 심장재활 3주',
+  cc:'가슴뼈 부위가 당기고 조금만 움직여도 피로하며 재발이 두렵다',
+  hx:'3혈관 질환으로 수술, 좌심실 구혈률 50%, 흉골 유합 진행 중',
+  meds:'베타차단제, 아스피린, 스타틴', tags:['cardiac','postop','betablocker'],
+  cautions:['흉골 보호 8주 — 상지로 밀기·당기기·5kg 이상 들기 금지','흉통·부정맥·과도한 호흡곤란 시 즉시 중단','베타차단제 복용 — 심박수 대신 자각강도(RPE)로 강도 관리'],
+  base:{sbp:118,dbp:74,hr:64,rr:16,temp:36.5,spo2:97,pain:2,mmt:4,rom:'경도 제한',amb:'독립',fall:'저위험',cog:'명료',bg:null}}
+];
 
 const VS_FIELDS = [
  {k:'sbp', nm:'수축기 혈압', en:'SYSTOLIC BP', u:'mmHg', min:60, max:260, emo:'🩸'},
@@ -796,14 +981,15 @@ const ROLES = [
 /* ============================================================
    STATE
    ============================================================ */
-const S = {step:1, age:null, built:null, a:{}, picked:new Set(), dose:{freq:3,time:15,weeks:4,rpe:11}, weekPlan:null, weekPlanKey:'', activeWeek:0, goal:'', team:'', members:['','','',''], evalRes:null};
+const S = {step:1, age:null, built:null, a:{}, redraws:0, picked:new Set(), dose:{freq:3,time:15,weeks:4,rpe:11}, weekPlan:null, weekPlanKey:'', activeWeek:0, goal:'', team:'', members:['','','',''], evalRes:null};
+const DRAW_MAX = 3;
 const $ = s=>document.querySelector(s);
 const $$ = s=>Array.from(document.querySelectorAll(s));
 const ageObj = ()=>AGES.find(a=>a.id===S.age);
 const caseObj = ()=>S.built;
 
 const STEPS = [
- {n:'01',t:'연령대'},{n:'02',t:'대상자 만들기'},{n:'03',t:'사정'},{n:'04',t:'프로그램'},{n:'05',t:'주차별 계획'},{n:'06',t:'처방카드'}
+ {n:'01',t:'대상자 뽑기'},{n:'02',t:'대상자 확인'},{n:'03',t:'사정 결과'},{n:'04',t:'프로그램'},{n:'05',t:'주차별 계획'},{n:'06',t:'처방카드'}
 ];
 
 /* ============================================================
@@ -819,7 +1005,7 @@ function buildRail(){
 }
 function reachable(n){
   if(n<=1) return true;
-  if(n===2) return !!S.age;
+  if(n===2) return !!S.built;
   if(n===3) return !!S.built;
   if(n===4) return !!S.evalRes;
   if(n===5) return !!S.evalRes && S.picked.size>0;
@@ -836,6 +1022,8 @@ function go(n){
     b.dataset.done = i<n?'1':'0';
     b.disabled = !reachable(i);
   });
+  if(n===2) renderCaseView();
+  if(n===3) renderAssess();
   if(n===4) renderProgram();
   if(n===5) renderSchedule();
   if(n===6) renderCard();
@@ -843,23 +1031,93 @@ function go(n){
 }
 
 /* ============================================================
-   STEP 1 & 2
+   STEP 1 — 대상자 뽑기
    ============================================================ */
-function renderAges(){
-  $('#ageGrid').innerHTML = AGES.map(a=>`
-    <button class="pick" data-age="${a.id}">
-      <span class="k"><span class="emo">${a.emo}</span> ${a.k}</span>
-      <div class="nm">${a.nm}</div>
-      <div class="sub">${a.sub}</div>
-      <div class="dx">정상 SBP ${a.vs.sbp[0]}–${a.vs.sbp[1]} · HR ${a.vs.hr[0]}–${a.vs.hr[1]} · SpO₂ ≥${a.vs.spo2[0]}</div>
-    </button>`).join('');
-  $('#ageGrid').addEventListener('click',e=>{
-    const b=e.target.closest('[data-age]'); if(!b) return;
-    S.age=b.dataset.age; S.built=null; S.evalRes=null; S.picked.clear();
-    $$('#ageGrid .pick').forEach(p=>p.dataset.on = p.dataset.age===S.age?'1':'0');
-    prefillAgeHint(); setTimeout(()=>go(2),160);
-  });
+const RISK_LABEL = {ok:['운동 가능','dbv-ok'], caution:['조건부 진행','dbv-caution'], stop:['운동 보류','dbv-caution']};
+
+// 대상자를 현재 상태에 적용하고 규칙 판정까지 실행
+function applyCase(c){
+  S.built = c;
+  S.age = caseBand(c.age);
+  S.a = Object.assign({}, c.base);
+  if(S.a.bg == null) delete S.a.bg;   // 대사질환 아니면 혈당 항목 제외
+  S.picked.clear(); S.doseSet = false; S.goal = '';
+  S.weekPlan = null; S.weekPlanKey = ''; S.activeWeek = 0;
+  evaluate();
 }
+
+function drawCase(isRedraw){
+  if(isRedraw){
+    if(S.redraws >= DRAW_MAX) return;
+    S.redraws++;
+  }
+  const usedId = S.built ? S.built.id : null;
+  const pool = CASES.filter(c => c.id !== usedId);
+  const c = pool[Math.floor(Math.random() * pool.length)];
+  applyCase(c);
+  renderDraw(true);
+}
+
+function renderDraw(animate){
+  const card = $('#drawCard'), front = $('#drawFront'), back = $('#drawBack');
+  const c = S.built;
+  if(!c){ front.hidden = false; back.hidden = true; return; }
+  const risk = S.evalRes ? S.evalRes.risk : 'ok';
+  const rl = RISK_LABEL[risk] || RISK_LABEL.ok;
+  const g = ageObj();
+  front.hidden = true; back.hidden = false;
+  back.innerHTML = `
+    <div class="db-cat">${c.cat || '대상자'} · ${c.id.toUpperCase()}</div>
+    <div class="db-name">${c.nm}</div>
+    <div class="db-meta">${c.age}세 · ${c.sex} · ${g ? g.nm : ''}</div>
+    <div class="db-dx">${c.dx}</div>
+    <div class="db-cc">“${c.cc}”</div>
+    <span class="db-verdict ${rl[1]}">${rl[0]}</span>`;
+  if(animate){ card.classList.remove('spin'); void card.offsetWidth; card.classList.add('spin'); }
+  $('#btnDraw').hidden = true;
+  $('#btnDrawNext').hidden = false;
+  const left = DRAW_MAX - S.redraws;
+  const rd = $('#btnRedraw');
+  rd.hidden = left <= 0;
+  $('#redrawLeft').textContent = left > 0 ? `(${left}회 남음)` : '';
+  $$('#rail button').forEach(b => b.disabled = !reachable(+b.dataset.go));
+}
+
+/* ============================================================
+   STEP 2 — 대상자 확인
+   ============================================================ */
+function renderCaseView(){
+  const c = caseObj(), g = ageObj(); if(!c || !g) return;
+  const sysList = SYS_MAP.filter(s => c.tags.includes(s.t));
+  $('#caseView').innerHTML = `
+    <div class="chart">
+      <h3>대상자 정보 <span class="hint">CASE · ${c.id.toUpperCase()}</span></h3>
+      <div class="body">
+        <div class="kv" style="margin-bottom:12px">
+          <div><b>${c.nm}</b><span>성명(가명)</span></div>
+          <div><b>${c.age}세 / ${c.sex}</b><span>연령 / 성별</span></div>
+          <div><b>${g.nm} (${g.k})</b><span>연령대</span></div>
+          <div><b>${c.meds}</b><span>투약</span></div>
+        </div>
+        <p style="margin:0 0 6px;font-size:14px"><strong>진단</strong> ${c.dx}</p>
+        <p style="margin:0 0 6px;font-size:14px"><strong>주호소</strong> “${c.cc}”</p>
+        <p style="margin:0 0 12px;font-size:14px"><strong>현병력</strong> ${c.hx}</p>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          ${sysList.map(s => `<span class="cc-sys">${s.ic} ${s.nm}</span>`).join('')}
+          ${c.tags.includes('betablocker') ? '<span class="cc-sys">💊 베타차단제</span>' : ''}
+        </div>
+      </div>
+    </div>
+    <div class="chart">
+      <h3>운동 금기 · 주의 <span class="hint">PRECAUTIONS</span></h3>
+      <div class="body">
+        <ul style="margin:0;padding-left:18px;font-size:13.5px;color:var(--ink2);line-height:1.65">
+          ${c.cautions.map(x => `<li>${x}</li>`).join('')}
+        </ul>
+      </div>
+    </div>`;
+}
+
 // 진단 계통 → 아이콘·라벨 매핑 (태그 우선순위 순)
 const SYS_MAP = [
  {t:'cardiac', ic:'🫀', nm:'심장'},
@@ -880,140 +1138,56 @@ function caseSystem(c){
   return {ic:'🏥', nm:'일반'};
 }
 
-/* ---------- 대상자 직접 만들기 ---------- */
-// 계통 태그 선택 UI 렌더
-function renderTagPicker(){
-  $('#bc_tags').innerHTML = SYS_MAP.map(s=>
-    `<button type="button" data-tag="${s.t}"><span class="tgi">${s.ic}</span>${s.nm}</button>`).join('');
-  $('#bc_tags').onclick=e=>{
-    const b=e.target.closest('[data-tag]'); if(!b) return;
-    b.dataset.sel = b.dataset.sel==='1'?'0':'1';
-  };
-}
-// 연령대 선택 시 나이 칸에 힌트값 제공
-function prefillAgeHint(){
-  const g=ageObj(); if(!g) return;
-  const el=$('#bc_age'); if(el && !el.value) el.value=g.mid;
-}
-// 예시 자동 채우기 (선택된 연령대에 어울리는 샘플)
-function fillExample(){
-  const g=ageObj();
-  const samples={
-    a5564:{nm:'김O수',age:62,sex:'남',dx:'요추관 협착증 감압·유합술 후 6주',cc:'오래 서거나 걸으면 다리가 저리고 허리가 뻣뻣하다',hx:'신경인성 파행으로 수술, 급성기 지나 재활 시작, 앉아 있는 시간 길다',meds:'진통제, 근이완제',tags:['spine','postop'],beta:false,cautions:'요추 굴곡·회전·비틀기 부하 운동 금지 (윗몸일으키기·허리 돌리기)\n발살바(숨 참고 힘주기) 유발 고부하 금지\n무거운 물건 들기 제한 — 통증 없는 중립 자세 유지'},
-    a6574:{nm:'이O자',age:68,sex:'여',dx:'낙상 후 좌측 손목 요골 원위부 골절 · 금속판 고정술 후 4주',cc:'손목이 뻣뻣하고 힘이 안 들어가 문 손잡이 돌리기가 어렵다',hx:'빙판 낙상, 골다공증 병력, 유합 진행 중, 고정 기간 후 관절 강직·근위축',meds:'칼슘·비타민D, 필요시 진통제',tags:['ortho-upper','postop','frailty'],beta:false,cautions:'유합 초기 — 손목 체중지지·과신전, 무거운 물건 들기 금지\n통증 없는 범위에서 관절가동범위부터 회복\n부종 관리(거상) 병행, 반대손 과사용 주의'},
-    a7579:{nm:'박O철',age:76,sex:'남',dx:'고혈압성 뇌출혈 개두술·혈종 제거 후 5주 · 우측 편마비',cc:'오른쪽 팔다리에 힘이 없고 말이 어눌하며 쉽게 지친다',hx:'수술 후 급성기 지나 재활 전동, 주의집중·지구력 저하, 앉은 자세 유지 훈련 중',meds:'항경련제, 혈압약, 항혈전제',tags:['neuro','cognitive','frailty'],beta:false,cautions:'혈압 급상승 유발 등척성 과부하·발살바 금지\n피로·집중력 저하 — 20분 이내로 나눠 자주 휴식\n환측 견관절 아탈구 예방, 상지 견인 금지\n낙상 고위험 — 균형훈련은 감독 하 지지물 곁에서'}
-  };
-  const ex=samples[S.age]||samples.a5564;
-  $('#bc_nm').value=ex.nm; $('#bc_age').value=ex.age; $('#bc_sex').value=ex.sex;
-  $('#bc_dx').value=ex.dx; $('#bc_cc').value=ex.cc; $('#bc_hx').value=ex.hx; $('#bc_meds').value=ex.meds;
-  $('#bc_cautions').value=ex.cautions; $('#bc_beta').checked=ex.beta;
-  $$('#bc_tags [data-tag]').forEach(b=>b.dataset.sel = ex.tags.includes(b.dataset.tag)?'1':'0');
-}
-// 폼 → 대상자 객체 생성
-function makeCase(){
-  const nm=$('#bc_nm').value.trim()||'무명 대상자';
-  const age=parseInt($('#bc_age').value)|| (ageObj()?ageObj().mid:50);
-  const sex=$('#bc_sex').value;
-  const dx=$('#bc_dx').value.trim();
-  const tags=$$('#bc_tags [data-tag][data-sel="1"]').map(b=>b.dataset.tag);
-  const warn=$('#bc_warn');
-  if(!dx){ warn.textContent='진단명을 입력해야 사정을 시작할 수 있습니다.'; warn.style.color='var(--alert)'; return; }
-  if(tags.length===0){ warn.textContent='계통을 최소 하나 이상 선택하세요. 운동 추천의 기준이 됩니다.'; warn.style.color='var(--alert)'; return; }
-  warn.textContent='';
-  if($('#bc_beta').checked) tags.push('betablocker');
-  const cautions=$('#bc_cautions').value.split('\n').map(s=>s.trim()).filter(Boolean);
-  S.built={
-    id:'custom', nm, age, sex,
-    dx,
-    cc:$('#bc_cc').value.trim()||'(주호소 미입력)',
-    hx:$('#bc_hx').value.trim()||'(현병력 미입력)',
-    meds:$('#bc_meds').value.trim()||'없음',
-    tags,
-    cautions: cautions.length?cautions:['입력된 특이 금기 없음 — 일반 안전 수칙을 따릅니다.'],
-    base:{bg:null} // 직접 만들기에서는 사정값을 학생이 Step3에서 입력
-  };
-  S.evalRes=null; S.picked.clear(); S.a={};
-  renderAssess(); go(3);
-}
-
 /* ============================================================
-   STEP 3 — ASSESSMENT
+   STEP 3 — 사정 결과 (읽기 전용)
    ============================================================ */
 function renderAssess(){
-  const c=caseObj(); if(!c) return;
+  const c=caseObj(), g=ageObj(); if(!c||!g) return;
+  S.a = Object.assign({}, c.base);   // 배정된 사정값 고정
+  if(S.a.bg == null) delete S.a.bg;
+
   $('#caseBrief').innerHTML = `
-    <h3>대상자 정보 <span class="hint">CASE BRIEF · ${c.id.toUpperCase()}</span></h3>
+    <h3>대상자 요약 <span class="hint">CASE BRIEF · ${c.id.toUpperCase()}</span></h3>
     <div class="body">
-      <div class="kv" style="margin-bottom:12px">
-        <div><b>${c.nm}</b><span>성명</span></div>
-        <div><b>${c.age} / ${c.sex}</b><span>연령 / 성별</span></div>
-        <div><b>${c.meds}</b><span>투약</span></div>
+      <div class="kv" style="margin-bottom:10px">
+        <div><b>${c.nm}</b><span>성명(가명)</span></div>
+        <div><b>${c.age}세 / ${c.sex}</b><span>연령 / 성별</span></div>
+        <div><b>${g.nm}</b><span>연령대</span></div>
       </div>
-      <p style="margin:0 0 6px;font-size:14px"><strong>진단</strong> ${c.dx}</p>
-      <p style="margin:0 0 6px;font-size:14px"><strong>주호소</strong> ${c.cc}</p>
-      <p style="margin:0 0 12px;font-size:14px"><strong>현병력</strong> ${c.hx}</p>
-      <h4 style="font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;color:var(--ink3);margin:0 0 6px">DISEASE-SPECIFIC PRECAUTIONS</h4>
-      <ul style="margin:0;padding-left:17px;font-size:13.3px;color:var(--ink2)">
-        ${c.cautions.map(x=>`<li>${x}</li>`).join('')}
-      </ul>
+      <p style="margin:0 0 4px;font-size:14px"><strong>진단</strong> ${c.dx}</p>
+      <p style="margin:0;font-size:13px;color:var(--ink2)"><strong>주의</strong> ${c.cautions.join(' · ')}</p>
     </div>`;
 
-  $('#vsRows').innerHTML = VS_FIELDS.map(f=>`
-    <div class="row">
-      <label for="in_${f.k}"><span class="femo">${f.emo}</span>${f.nm}<i>${f.en}</i></label>
+  const inRange = (k,v) => { const r=g.vs[k]; return v>=r[0] && v<=r[1]; };
+  $('#vsRows').innerHTML = VS_FIELDS.map(f=>{
+    const v = S.a[f.k];
+    const state = (v===undefined) ? '' : (inRange(f.k,v) ? 'ok' : 'off');
+    return `<div class="row">
+      <label><span class="femo">${f.emo}</span>${f.nm}<i>${f.en}</i></label>
       <div class="in">
-        <input type="number" id="in_${f.k}" data-f="${f.k}" min="${f.min}" max="${f.max}" step="${f.step||1}" inputmode="decimal">
+        <span class="ro-val" data-s="${state}">${v===undefined?'—':v}</span>
         <span class="unit">${f.u}</span>
         <span class="flagdot" id="dot_${f.k}"></span>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 
   let fn = FN_FIELDS.map(f=>{
-    const ctl = f.type==='num'
-      ? `<input type="number" id="in_${f.k}" data-f="${f.k}" min="${f.min}" max="${f.max}"><span class="unit">${f.u}</span>`
-      : `<select id="in_${f.k}" data-f="${f.k}"><option value="">선택</option>${f.opt.map(o=>`<option>${o}</option>`).join('')}</select>`;
-    return `<div class="row"><label for="in_${f.k}"><span class="femo">${f.emo}</span>${f.nm}<i>${f.en}</i></label><div class="in">${ctl}<span class="flagdot" id="dot_${f.k}"></span></div></div>`;
+    const v = S.a[f.k];
+    const shown = (v===undefined) ? '—' : (f.type==='num' ? `${v} ${f.u}` : v);
+    return `<div class="row">
+      <label><span class="femo">${f.emo}</span>${f.nm}<i>${f.en}</i></label>
+      <div class="in"><span class="ro-val">${shown}</span><span class="flagdot" id="dot_${f.k}"></span></div>
+    </div>`;
   }).join('');
-  if(c.tags.includes('metabolic')){
-    fn += `<div class="row"><label for="in_bg"><span class="femo">🍬</span>공복/운동 전 혈당<i>BLOOD GLUCOSE</i></label>
-      <div class="in"><input type="number" id="in_bg" data-f="bg" min="20" max="600"><span class="unit">mg/dL</span><span class="flagdot" id="dot_bg"></span></div></div>`;
+  if(c.tags.includes('metabolic') && S.a.bg!=null){
+    fn += `<div class="row">
+      <label><span class="femo">🍬</span>공복/운동 전 혈당<i>BLOOD GLUCOSE</i></label>
+      <div class="in"><span class="ro-val">${S.a.bg} mg/dL</span><span class="flagdot" id="dot_bg"></span></div>
+    </div>`;
   }
   $('#fnRows').innerHTML = fn;
 
-  $$('#vsRows [data-f], #fnRows [data-f]').forEach(el=>{
-    el.addEventListener('input',onAssessInput);
-    el.addEventListener('change',onAssessInput);
-  });
-  S.a={}; evaluate();
-}
-
-function onAssessInput(e){
-  const k=e.target.dataset.f, v=e.target.value;
-  if(v==='') delete S.a[k];
-  else S.a[k] = isNaN(+v)||e.target.tagName==='SELECT' ? v : +v;
-  evaluate();
-}
-
-function fillMock(){
-  const c=caseObj(), g=ageObj(); if(!c||!g) return;
-  const mid=(r)=>(r[0]+r[1])/2, span=(r)=>(r[1]-r[0]);
-  const rnd=(r,bias=0.5)=>Math.round(r[0]+span(r)*bias + (Math.random()*2-1)*span(r)*0.18);
-  // 연령대 정상범위 안쪽에서 살짝 흔들어 생성
-  const vals={
-    sbp:rnd(g.vs.sbp,0.55), dbp:rnd(g.vs.dbp,0.5), hr:rnd(g.vs.hr,0.45),
-    rr:rnd(g.vs.rr,0.4), temp:Math.round((mid(g.vs.temp)+ (Math.random()*2-1)*0.3)*10)/10,
-    spo2:Math.min(100,rnd(g.vs.spo2,0.7)),
-    pain:Math.floor(Math.random()*4), // 0~3
-    mmt:3+Math.floor(Math.random()*2), // 3~4
-    rom:['정상','경도 제한','중등도 제한'][Math.floor(Math.random()*3)],
-    amb:['독립','독립','보조기구'][Math.floor(Math.random()*3)],
-    fall:['저위험','중위험'][Math.floor(Math.random()*2)],
-    cog:'명료'
-  };
-  if(c.tags.includes('metabolic')) vals.bg=110+Math.floor(Math.random()*80); // 110~190
-  Object.keys(vals).forEach(k=>{
-    const el=$('#in_'+k); if(el){el.value=vals[k]; S.a[k]=vals[k];}
-  });
   evaluate();
 }
 
@@ -1986,10 +2160,17 @@ const Body3D = (()=>{
 /* ============================================================
    INIT
    ============================================================ */
-buildRail(); renderAges(); renderTagPicker(); go(1);
+buildRail(); go(1);
 $('#stamp').textContent = new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit'});
-$('#teamName').addEventListener('input',e=>{S.team=e.target.value;});
-$('#btnFill').addEventListener('click',fillMock);
+function syncTeam(v){ S.team=v; const a=$('#teamName'), b=$('#drawTeam'); if(a&&a.value!==v)a.value=v; if(b&&b.value!==v)b.value=v; }
+$('#teamName').addEventListener('input',e=>syncTeam(e.target.value));
+$('#drawTeam').addEventListener('input',e=>syncTeam(e.target.value));
+$('#btnDraw').addEventListener('click',()=>drawCase(false));
+$('#btnRedraw').addEventListener('click',()=>drawCase(true));
+$('#btnDrawNext').addEventListener('click',()=>go(2));
+$('#btnToAssess').addEventListener('click',()=>go(3));
+$('#btnBack1').addEventListener('click',()=>go(1));
+$('#btnBack2').addEventListener('click',()=>go(2));
 $('#btnToRx').addEventListener('click',()=>go(4));
 $('#btnToSchedule').addEventListener('click',()=>{ if(S.picked.size===0){alert('중재 항목을 1개 이상 선택하세요.');return;} go(5); });
 $('#btnToCard').addEventListener('click',()=>go(6));
@@ -1997,14 +2178,11 @@ $('#btnReautoWeeks').addEventListener('click',()=>{ S.weekPlan=autoWeekPlan(); S
 $('#btnBack3').addEventListener('click',()=>go(3));
 $('#btnBack4b').addEventListener('click',()=>go(4));
 $('#btnBack5').addEventListener('click',()=>go(5));
-$('#bc_make').addEventListener('click',makeCase);
-$('#bc_example').addEventListener('click',fillExample);
 $('#btnReset').addEventListener('click',()=>{
-  S.age=null;S.built=null;S.a={};S.picked.clear();S.evalRes=null;S.goal='';S.weekPlan=null;S.weekPlanKey='';
-  $$('#ageGrid .pick').forEach(p=>p.dataset.on='0');
-  ['bc_nm','bc_age','bc_dx','bc_cc','bc_hx','bc_meds','bc_cautions'].forEach(id=>{const el=$('#'+id);if(el)el.value='';});
-  $('#bc_beta').checked=false;
-  $$('#bc_tags [data-tag]').forEach(b=>b.dataset.sel='0');
+  S.built=null;S.age=null;S.a={};S.redraws=0;S.picked.clear();S.evalRes=null;S.goal='';
+  S.weekPlan=null;S.weekPlanKey='';S.activeWeek=0;S.doseSet=false;
+  $('#drawFront').hidden=false; $('#drawBack').hidden=true;
+  $('#btnDraw').hidden=false; $('#btnRedraw').hidden=true; $('#btnDrawNext').hidden=true;
   go(1);
 });
 </script>
