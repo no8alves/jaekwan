@@ -529,8 +529,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
 .bl-tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.04em;padding:1px 5px;border-radius:2px;font-weight:600}
 .bodywrap{display:grid;grid-template-columns:1fr 172px;gap:14px;align-items:start}
 @media(max-width:620px){.bodywrap{grid-template-columns:1fr}}
-#bodyCanvas{width:100%;height:340px;display:block;border:1px solid var(--rule);border-radius:6px;
-  background:radial-gradient(120% 90% at 50% 15%,#F4F8F1,#DDE7D8);touch-action:none;cursor:grab}
+#bodyCanvas{width:100%;height:340px;display:block;border:1px solid var(--rule);border-radius:6px;  background:radial-gradient(120% 90% at 50% 15%,#F4F8F1,#DDE7D8);touch-action:none;cursor:grab}
 #bodyCanvas:active{cursor:grabbing}
 .bodylegend{display:flex;flex-direction:column;gap:9px;font-size:11.5px}
 .bl-row{display:grid;grid-template-columns:12px 1fr;gap:7px;line-height:1.35;color:var(--ink2)}
@@ -538,6 +537,22 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
 .bl-row b{color:var(--ink);font-weight:600;font-size:11.5px}
 .bl-empty{color:var(--ink3)}
 .bodyfall{font-size:12.5px;color:var(--ink3);padding:24px 12px;text-align:center;line-height:1.6}
+/* 회복 시뮬레이션 */
+.recwrap{display:grid;grid-template-columns:1fr 190px;gap:16px;align-items:start}
+@media(max-width:640px){.recwrap{grid-template-columns:1fr}}
+#recCanvasHost,#coverCanvasHost{display:block}
+.rec-ctl{display:flex;align-items:center;gap:12px;margin-top:14px;flex-wrap:wrap}
+.rec-ctl input[type=range]{flex:1;min-width:160px;accent-color:var(--signal);cursor:pointer}
+.rec-week{font-family:var(--mono);font-size:12.5px;font-weight:700;color:var(--signal);white-space:nowrap;min-width:120px}
+@media print{#recoveryChart{display:none !important}}
+/* 회복 탭 */
+.rec-tabs{display:flex;gap:0;border-bottom:2px solid var(--rule);margin:4px 0 14px}
+.rec-tab{flex:1;background:none;border:none;padding:10px 8px;cursor:pointer;font-family:var(--sans);font-size:14px;font-weight:600;color:var(--ink3);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s}
+.rec-tab[data-on="1"]{color:var(--ink);border-bottom-color:var(--signal)}
+.rec-pane{display:none}.rec-pane[data-on="1"]{display:block}
+.realwrap{width:100%}
+.realcanvas{width:100%;height:400px;display:block;border:1px solid var(--rule);border-radius:6px;background:radial-gradient(120% 90% at 50% 12%,#F6F9F3,#E4EDDD);touch-action:none;cursor:grab}
+.realcanvas:active{cursor:grabbing}
 .check{display:grid;gap:5px}
 .check label{display:grid;grid-template-columns:auto 1fr;gap:9px;font-size:13.3px;align-items:start;cursor:pointer}
 .check input{margin-top:4px;accent-color:var(--signal)}
@@ -695,7 +710,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
     <div class="body">
       <p class="ex-guide">선택한 운동이 실제로 목표하는 신체 부위입니다. 드래그해서 돌려볼 수 있습니다. <b class="bl-tag" style="background:#DCEEE6;color:#0C8A66">초록</b> 대상자 문제부위를 다룸 · <b class="bl-tag" style="background:#F3E1DF;color:#A0281F">빨강</b> 관련 없거나 금기인 부위 · <b class="bl-tag" style="background:#FAF0DC;color:#B0700B">노랑</b> 문제부위인데 프로그램에 없음</p>
       <div class="bodywrap">
-        <canvas id="bodyCanvas"></canvas>
+        <div id="coverCanvasHost"><canvas id="bodyCanvas"></canvas></div>
         <div class="bodylegend" id="bodyLegend"></div>
       </div>
     </div>
@@ -741,6 +756,39 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
   <p class="eyebrow">Step 06 — Record</p>
   <h2 class="sec">처방 카드 · 기록</h2>
   <p class="lede">발표와 제출용 최종 산출물입니다. 주차별 계획까지 담겨 있으며, 인쇄하면 카드만 A4로 출력됩니다.</p>
+
+  <div class="chart" id="recoveryChart">
+    <h3>회복 시뮬레이션 <span class="hint">RECOVERY OVER TIME</span></h3>
+    <div class="body">
+      <p class="ex-guide">우리 조가 설계한 프로그램을 <b id="recWeeks">4</b>주간 진행했을 때, 대상자의 문제 부위가 어떻게 회복되는지 시간 흐름으로 보여줍니다. 치료 전에는 문제 부위가 <b style="color:#C0392B">빨강(아픔)</b>이고, 프로그램이 <b>다루는</b> 부위는 시간이 지나며 <b style="color:#E0A93B">주황</b>을 거쳐 <b style="color:#2E9E77">초록(회복)</b>으로 바뀝니다. 프로그램이 <b>다루지 못한</b> 부위는 4주가 지나도 빨강 그대로 남습니다.</p>
+
+      <div class="rec-tabs">
+        <button class="rec-tab" data-rtab="real" data-on="1">🧍 사실적 모델</button>
+        <button class="rec-tab" data-rtab="paint">🎨 부위 색칠 분석</button>
+      </div>
+
+      <!-- 탭1: 사실적 모델 -->
+      <div class="rec-pane" data-rpane="real" data-on="1">
+        <p class="ex-guide" style="margin-top:2px">실제 인체 모델로 회복을 봅니다. 회복될수록 자세가 곧게 펴지고 혈색이 돕니다. (부위별 세부 분석은 옆 탭에서)</p>
+        <div id="realCanvasHost" class="realwrap"></div>
+      </div>
+
+      <!-- 탭2: 부위 색칠 -->
+      <div class="rec-pane" data-rpane="paint">
+        <div class="recwrap">
+          <div id="recCanvasHost"></div>
+          <div class="bodylegend" id="recLegend"></div>
+        </div>
+      </div>
+
+      <div class="rec-ctl">
+        <button class="btn" id="btnRecPlay">▶ 4주 회복 재생</button>
+        <input type="range" id="recSlider" min="0" max="100" value="0" step="1">
+        <span class="rec-week" id="recWeekLabel">치료 시작 전</span>
+      </div>
+    </div>
+  </div>
+
   <div class="rx" id="rxCard"></div>
   <div class="act">
     <button class="btn" onclick="window.print()">인쇄 · PDF 저장</button>
@@ -755,6 +803,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script>
 /* ============================================================
    DATA
@@ -1070,10 +1119,23 @@ function go(n){
   });
   if(n===2) renderCaseView();
   if(n===3) renderAssess();
-  if(n===4) renderProgram();
+  if(n===4){ moveBodyCanvas(4); renderProgram(); }
   if(n===5) renderSchedule();
-  if(n===6) renderCard();
+  if(n===6){ moveBodyCanvas(6); renderCard(); initRecovery(); }
   window.scrollTo({top:0,behavior:'smooth'});
+}
+// 3D 캔버스(단일 WebGL 컨텍스트)를 현재 단계의 자리로 이동
+function moveBodyCanvas(step){
+  const host = step===6 ? document.querySelector('#recCanvasHost') : document.querySelector('#coverCanvasHost');
+  if(!host) return;
+  const cv=document.getElementById('bodyCanvas');
+  if(cv){ if(cv.parentElement!==host) host.appendChild(cv); }
+  else {
+    // 폴백(3D 없음): 안내 문구를 현재 host에 표시
+    const fb=document.querySelector('.bodyfall');
+    if(fb && fb.parentElement!==host) host.appendChild(fb);
+  }
+  if(window.Body3D&&Body3D.resizeNow) Body3D.resizeNow();
 }
 
 /* ============================================================
@@ -1847,6 +1909,44 @@ function weekOneLine(wk, nDays, uniq, avgTime, avgRpe, phase, beta){
   const phaseWord = phase==='초기'?'적응하며 기초를 다지는' : phase==='중기'?'강도를 올려가는' : '목표 수준으로 마무리하는';
   return `${phaseWord} 주. 주 ${nDays}회 ${focusName} 중심으로 ${uniq.length}종을 회당 약 ${avgTime}분씩 ${intensity} 수행합니다.`;
 }
+function initRecovery(){
+  Body3D.ensure();
+  RealBody.ensure();
+  const W=S.dose.weeks||4;
+  const wl=$('#recWeeks'); if(wl) wl.textContent=W;
+  const slider=$('#recSlider'), label=$('#recWeekLabel'), playBtn=$('#btnRecPlay');
+  if(!slider) return;
+  const setP=(p)=>{
+    Body3D.setRecovery(p);
+    if(window.RealBody) RealBody.applyRecovery(p);
+    const wk = p<=0 ? 0 : Math.min(W, Math.ceil(p*W));
+    label.textContent = p<=0 ? '치료 시작 전' : (wk>=W ? `${W}주 후 · 프로그램 완료` : `${wk}주차 진행 중`);
+  };
+  setP(0); slider.value=0;
+  slider.oninput = e=>{ setP((+e.target.value)/100); };
+  // 회복 탭 전환
+  $$('.rec-tab').forEach(tb=>tb.onclick=()=>{
+    const t=tb.dataset.rtab;
+    $$('.rec-tab').forEach(x=>x.dataset.on=x.dataset.rtab===t?'1':'0');
+    $$('.rec-pane').forEach(x=>x.dataset.on=x.dataset.rpane===t?'1':'0');
+    if(t==='real'&&window.RealBody) RealBody.resizeNow();
+    if(t==='paint'&&window.Body3D&&Body3D.resizeNow){ moveBodyCanvas(6); Body3D.resizeNow(); }
+  });
+  let anim=null;
+  playBtn.onclick = ()=>{
+    if(anim){ cancelAnimationFrame(anim); anim=null; }
+    const dur=4200, t0=performance.now();
+    playBtn.disabled=true; playBtn.textContent='재생 중…';
+    const stepFn=(now)=>{
+      let t=Math.min(1,(now-t0)/dur);
+      const p=t*t*(3-2*t);
+      slider.value=Math.round(p*100); setP(p);
+      if(t<1){ anim=requestAnimationFrame(stepFn); }
+      else { anim=null; playBtn.disabled=false; playBtn.textContent='▶ 다시 재생'; }
+    };
+    anim=requestAnimationFrame(stepFn);
+  };
+}
 function renderCard(){
   const c=caseObj(), a=S.a, res=S.evalRes, k=karvonen(), g=ageObj();
   const beta=c.tags.includes('betablocker');
@@ -2229,24 +2329,41 @@ function programRegions(){
 }
 
 const Body3D = (()=>{
-  const COL={neutral:0xC7D1C3, good:0x2E9E77, bad:0xC0392B, gap:0xE0A93B, skin:0xBFC9BC};
+  const COL={neutral:0xC7D1C3, good:0x2E9E77, bad:0xC0392B, gap:0xE0A93B, skin:0xBFC9BC, healed:0x2FCE86, ailing:0xD14B3C, mending:0xE0A93B};
   let ready=false, renderer, scene, cam, human, mats={}, rot={x:-0.08,y:0.5}, drag=false, last=null, ro;
 
-  function mat(c){ return new THREE.MeshStandardMaterial({color:c,roughness:.85}); }
-  function limb(x0,y0,x1,y1,r){
+  function mat(c){ return new THREE.MeshStandardMaterial({color:c,roughness:.72,metalness:.05}); }
+
+  // 회전체(Lathe)로 근육형 사지 — 양끝은 가늘고 중간이 볼록한 캡슐/근육 실루엣
+  function taper(len, r0, rMid, r1, c){
+    const N=10, pts=[];
+    for(let i=0;i<=N;i++){
+      const t=i/N;
+      // 근육 배: 사인 곡선으로 중간이 볼록하게
+      const base=r0+(r1-r0)*t;
+      const belly=Math.sin(Math.PI*t)*(rMid-(r0+r1)/2);
+      pts.push(new THREE.Vector2(Math.max(0.001,base+belly), t*len));
+    }
+    const g=new THREE.LatheGeometry(pts, 16);
+    g.translate(0,-len/2,0);
+    return new THREE.Mesh(g, mat(c||COL.neutral));
+  }
+  // 두 점을 잇는 근육형 세그먼트 (r0=시작 두께, rMid=중간, r1=끝)
+  function limb(x0,y0,x1,y1, r0,rMid,r1, c){
     const dx=x1-x0, dy=y1-y0, len=Math.hypot(dx,dy);
-    const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,len,12), mat(COL.neutral));
+    const m=taper(len, r0, rMid!=null?rMid:r0*1.15, r1!=null?r1:r0, c);
     m.position.set((x0+x1)/2,(y0+y1)/2,0);
     m.rotation.z=Math.atan2(-dx,dy);
     return m;
   }
   function ball(x,y,r,c){
-    const m=new THREE.Mesh(new THREE.SphereGeometry(r,16,12), mat(c||COL.neutral));
+    const m=new THREE.Mesh(new THREE.SphereGeometry(r,20,16), mat(c||COL.neutral));
     m.position.set(x,y,0); return m;
   }
-  function boxMesh(x,y,z,w,h,d){
-    const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d), mat(COL.neutral));
-    m.position.set(x,y,z); return m;
+  // 타원 단면 몸통 — 구를 눌러 흉곽/골반 느낌
+  function torso(x,y,z, w,h,d, c){
+    const m=new THREE.Mesh(new THREE.SphereGeometry(1,24,18), mat(c||COL.neutral));
+    m.scale.set(w,h,d); m.position.set(x,y,z); return m;
   }
 
   function build(){
@@ -2254,22 +2371,54 @@ const Body3D = (()=>{
     const reg=(name,mesh)=>{ mats[name]=mesh.material; human.add(mesh); return mesh; };
     const skin=mesh=>{ mesh.material=mat(COL.skin); human.add(mesh); return mesh; };
 
-    reg('head', ball(0,1.62,0.135));
-    skin(ball(0,1.45,0.055));                                    // neck
-    reg('chest', boxMesh(0,1.16,0,0.36,0.34,0.20));
-    reg('core',  boxMesh(0,0.84,0,0.30,0.30,0.17));
-    reg('back',  boxMesh(0,1.02,-0.115,0.30,0.62,0.05));
-    skin(ball(-0.235,1.32,0.075)); skin(ball(0.235,1.32,0.075)); // shoulders
-    reg('armL', limb(-0.235,1.30,-0.31,0.70,0.052));
-    reg('armR', limb(0.235,1.30,0.31,0.70,0.052));
-    reg('hipL', ball(-0.11,0.63,0.078));
-    reg('hipR', ball(0.11,0.63,0.078));
-    reg('legL', limb(-0.11,0.60,-0.13,0.02,0.07));
-    reg('legR', limb(0.11,0.60,0.13,0.02,0.07));
-    skin(ball(-0.13,0.0,0.06)); skin(ball(0.13,0.0,0.06));       // feet
+    // 머리 + 목
+    reg('head', ball(0,1.63,0.125));
+    skin(taper(0.10,0.052,0.058,0.06)).position.set(0,1.47,0); // neck
 
-    human.position.y=-0.8;
+    // 몸통: 가슴(흉곽) + 코어(복부) + 등(척추면)
+    reg('chest', torso(0,1.20,0, 0.20,0.19,0.13));
+    reg('core',  torso(0,0.90,0, 0.165,0.17,0.11));
+    reg('back',  torso(0,1.05,-0.085, 0.17,0.32,0.045));
+    // 어깨 근육
+    skin(ball(-0.205,1.34,0.078)); skin(ball(0.205,1.34,0.078));
+
+    // 팔: 위팔(굵게)–팔꿈치–아래팔(가늘게)–손
+    reg('armL', limb(-0.205,1.30,-0.275,0.98, 0.062,0.07,0.05));
+    skin(ball(-0.278,0.96,0.045));
+    reg('armL2', limb(-0.278,0.95,-0.315,0.66, 0.048,0.052,0.036));
+    mats['armL2']=mats['armL']; // 아래팔도 armL 색과 연동
+    skin(ball(-0.32,0.63,0.045)); // 손
+
+    reg('armR', limb(0.205,1.30,0.275,0.98, 0.062,0.07,0.05));
+    skin(ball(0.278,0.96,0.045));
+    reg('armR2', limb(0.278,0.95,0.315,0.66, 0.048,0.052,0.036));
+    mats['armR2']=mats['armR'];
+    skin(ball(0.32,0.63,0.045));
+
+    // 골반·고관절
+    reg('hipL', ball(-0.10,0.66,0.088));
+    reg('hipR', ball(0.10,0.66,0.088));
+
+    // 다리: 허벅지(굵게)–무릎–종아리(가늘게)–발
+    reg('legL', limb(-0.10,0.62,-0.115,0.32, 0.088,0.10,0.062));
+    skin(ball(-0.118,0.30,0.058)); // 무릎
+    reg('legL2', limb(-0.118,0.29,-0.13,0.02, 0.058,0.07,0.038));
+    mats['legL2']=mats['legL'];
+    skin(footMesh(-0.13,-0.01)); // 발
+
+    reg('legR', limb(0.10,0.62,0.115,0.32, 0.088,0.10,0.062));
+    skin(ball(0.118,0.30,0.058));
+    reg('legR2', limb(0.118,0.29,0.13,0.02, 0.058,0.07,0.038));
+    mats['legR2']=mats['legR'];
+    skin(footMesh(0.13,-0.01));
+
+    human.position.y=-0.72;
     scene.add(human);
+  }
+  // 발 — 앞으로 길쭉한 박스
+  function footMesh(x,y){
+    const m=new THREE.Mesh(new THREE.BoxGeometry(0.075,0.045,0.15), mat(COL.skin));
+    m.position.set(x,y,0.045); return m;
   }
 
   function ensure(){
@@ -2286,9 +2435,10 @@ const Body3D = (()=>{
     cam.position.set(0,0.15,3.15);
     renderer=new THREE.WebGLRenderer({canvas:cv, antialias:true, alpha:true});
     renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-    scene.add(new THREE.AmbientLight(0xffffff,0.75));
-    const dir=new THREE.DirectionalLight(0xffffff,0.7); dir.position.set(1.4,2,2.2); scene.add(dir);
-    const dir2=new THREE.DirectionalLight(0xffffff,0.28); dir2.position.set(-1.5,0.5,-1.5); scene.add(dir2);
+    scene.add(new THREE.AmbientLight(0xffffff,0.6));
+    const dir=new THREE.DirectionalLight(0xffffff,0.85); dir.position.set(1.4,2,2.2); scene.add(dir);
+    const dir2=new THREE.DirectionalLight(0xbfd4ff,0.35); dir2.position.set(-1.8,0.5,-1.2); scene.add(dir2);
+    const rim=new THREE.DirectionalLight(0xffffff,0.4); rim.position.set(0,1.5,-2.5); scene.add(rim);
     build(); resize();
 
     cv.addEventListener('pointerdown',e=>{drag=true;last={x:e.clientX,y:e.clientY};cv.setPointerCapture(e.pointerId);});
@@ -2306,17 +2456,49 @@ const Body3D = (()=>{
     const w=cv.clientWidth||360, h=cv.clientHeight||340;
     renderer.setSize(w,h,false); cam.aspect=w/h; cam.updateProjectionMatrix();
   }
+  let postureZ=0;
   function loop(){
     if(!ready||!renderer) return;
     if(!drag) rot.y+=0.0035;
-    human.rotation.set(rot.x,rot.y,0);
+    human.rotation.set(rot.x,rot.y,postureZ);
     renderer.render(scene,cam);
     requestAnimationFrame(loop);
   }
   function setRegion(name,hex){ const m=mats[name]; if(m) m.color.setHex(hex); }
+  // 두 hex 색을 t(0~1)로 보간
+  function lerpHex(a,b,t){
+    const ar=(a>>16)&255,ag=(a>>8)&255,ab=a&255, br=(b>>16)&255,bg=(b>>8)&255,bb=b&255;
+    const r=Math.round(ar+(br-ar)*t),g=Math.round(ag+(bg-ag)*t),bl=Math.round(ab+(bb-ab)*t);
+    return (r<<16)|(g<<8)|bl;
+  }
+  // 세 색을 t(0~1)로 잇는 2구간 보간 (빨강→주황→초록)
+  function lerp3(c0,c1,c2,t){
+    return t<0.5 ? lerpHex(c0,c1,t/0.5) : lerpHex(c1,c2,(t-0.5)/0.5);
+  }
+  // 회복 진행도 p(0=치료 전, 1=마지막 주).
+  // 다루는 문제부위: 빨강(아픔)→주황(회복중)→초록(회복)으로 뚜렷하게 변화.
+  function setRecovery(p){
+    if(!ready||!S.built||!S.evalRes) return;
+    const cr=caseRegions(), {hit,bad}=programRegions();
+    BODY_REGIONS.forEach(r=>{
+      if(bad.has(r)){ setRegion(r,COL.bad); return; }                 // 금기 부위: 회복 대상 아님
+      if(hit.has(r)&&cr.has(r)){                                       // 다루는 문제부위 → 크게 회복
+        setRegion(r, lerp3(COL.ailing, COL.mending, COL.healed, p)); return;
+      }
+      if(cr.has(r)&&!hit.has(r)){                                      // 문제인데 미포함 → 끝까지 아픈 빨강으로 남음
+        setRegion(r, COL.ailing); return;
+      }
+      setRegion(r,COL.neutral);                                        // 무관한 부위
+    });
+    if(human){
+      postureZ = -0.07*(1-p);            // 굽은 자세 → 곧게 (더 크게)
+      const s=1+0.04*p; human.scale.set(s,s,s);
+    }
+  }
 
   function update(){
     if(!ready) return;
+    if(human){ postureZ=0; human.scale.set(1,1,1); } // 회복 자세 리셋
     if(!S.built||!S.evalRes){ BODY_REGIONS.forEach(r=>setRegion(r,COL.neutral)); renderLegend({}); return; }
     const cr=caseRegions(), {hit,bad}=programRegions();
     const buckets={good:[],bad:[],gap:[],none:[]};
@@ -2342,8 +2524,91 @@ const Body3D = (()=>{
       row('E0A93B','문제부위인데 미포함', b.gap) +
       `<div class="bodyhint" style="font-size:11px;color:var(--ink3);margin-top:2px">회색은 이 대상자와 무관한 부위입니다.</div>`;
   }
-  return {ensure, update};
+  return {ensure, update, setRecovery, resizeNow:()=>{ if(ready&&renderer) resize(); }, hasHuman:()=>!!human};
 })();
+window.Body3D = Body3D;
+
+/* ============================================================
+   RealBody — 사실적 GLB 인체 모델 (Ready Player Me 데모 아바타)
+   실패 시 자동으로 부위 색칠 탭으로 넘어가는 안전장치 포함
+   ============================================================ */
+const RealBody = (()=>{
+  // Ready Player Me 공개 데모 아바타 (three.js 예제에서 널리 쓰이는 형태의 CORS 허용 GLB)
+  const MODEL_URL = 'https://models.readyplayer.me/64bfa15f0e72c63d7c3934a6.glb';
+  let ready=false, failed=false, renderer, scene, cam, avatar, mixer, rot={y:0.2}, drag=false, last=null, tint=null, baseY=0;
+  function fallback(msg){
+    failed=true;
+    const host=document.getElementById('realCanvasHost'); if(host) host.innerHTML=
+      `<div class="bodyfall">사실적 모델을 불러오지 못했습니다${msg?` (${msg})`:''}.<br>‘부위 색칠 분석’ 탭에서 회복을 확인하세요.</div>`;
+    // 자동으로 부위 색칠 탭으로 전환
+    const paintTab=document.querySelector('.rec-tab[data-rtab="paint"]');
+    if(paintTab) paintTab.click();
+  }
+  function ensure(){
+    if(ready||failed) return;
+    const host=document.getElementById('realCanvasHost'); if(!host) return;
+    if(typeof THREE==='undefined'||typeof THREE.GLTFLoader==='undefined'){ fallback('3D 라이브러리 차단'); return; }
+    const cv=document.createElement('canvas'); cv.className='realcanvas'; host.appendChild(cv);
+    scene=new THREE.Scene();
+    cam=new THREE.PerspectiveCamera(30, cv.clientWidth/cv.clientHeight||1.2, 0.1, 100);
+    cam.position.set(0,0.9,3.6);
+    renderer=new THREE.WebGLRenderer({canvas:cv, antialias:true, alpha:true});
+    renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+    scene.add(new THREE.AmbientLight(0xffffff,0.85));
+    const d1=new THREE.DirectionalLight(0xffffff,1.0); d1.position.set(1.5,3,2.5); scene.add(d1);
+    const d2=new THREE.DirectionalLight(0xcfe0ff,0.4); d2.position.set(-2,1,-1.5); scene.add(d2);
+    resize(); new ResizeObserver(resize).observe(cv);
+    cv.addEventListener('pointerdown',e=>{drag=true;last=e.clientX;cv.setPointerCapture(e.pointerId);});
+    cv.addEventListener('pointermove',e=>{ if(!drag)return; rot.y+=(e.clientX-last)*0.01; last=e.clientX; });
+    ['pointerup','pointercancel','pointerleave'].forEach(ev=>cv.addEventListener(ev,()=>drag=false));
+    // 로드 타임아웃 안전장치
+    const guard=setTimeout(()=>{ if(!avatar&&!failed) fallback('불러오기 시간 초과'); }, 12000);
+    try{
+      new THREE.GLTFLoader().load(MODEL_URL, gltf=>{
+        clearTimeout(guard);
+        avatar=gltf.scene;
+        // 크기·위치 정규화
+        const box=new THREE.Box3().setFromObject(avatar);
+        const size=box.getSize(new THREE.Vector3()), center=box.getCenter(new THREE.Vector3());
+        const scale=1.7/(size.y||1.7); avatar.scale.setScalar(scale);
+        const box2=new THREE.Box3().setFromObject(avatar); baseY=-box2.min.y;
+        avatar.position.set(-center.x*scale, baseY-0.05, -center.z*scale);
+        // 피부/재질에 회복 틴트를 걸 수 있게 원색 저장
+        avatar.traverse(o=>{ if(o.isMesh&&o.material){ o.material=o.material.clone(); o.userData.base=o.material.color?o.material.color.clone():null; } });
+        scene.add(avatar); ready=true; loop(); applyRecovery(recProgress);
+      }, undefined, err=>{ clearTimeout(guard); fallback('모델 주소 오류'); });
+    }catch(e){ clearTimeout(guard); fallback(); }
+  }
+  function resize(){
+    if(!renderer) return; const cv=renderer.domElement, w=cv.clientWidth||360, h=cv.clientHeight||380;
+    renderer.setSize(w,h,false); cam.aspect=w/h; cam.updateProjectionMatrix();
+  }
+  let recProgress=0;
+  function loop(){
+    if(!ready||!renderer) return;
+    if(!drag) rot.y+=0.004;
+    if(avatar) avatar.rotation.y=rot.y;
+    renderer.render(scene,cam); requestAnimationFrame(loop);
+  }
+  // 회복 진행도 p: 회복될수록 혈색(붉은기 없어지고 건강한 톤) + 자세 곧게
+  function applyRecovery(p){
+    recProgress=p;
+    if(!ready||!avatar) return;
+    avatar.rotation.z = -0.06*(1-p);       // 굽은 자세 → 곧게
+    avatar.position.y = baseY-0.05 - 0.04*(1-p); // 살짝 웅크림 → 폄
+    // 아픈 상태(창백/붉은기) → 회복(건강한 톤): 전체를 살짝 물들임
+    avatar.traverse(o=>{
+      if(o.isMesh&&o.material&&o.material.color&&o.userData.base){
+        const base=o.userData.base;
+        // p=0: 살짝 칙칙하게, p=1: 원래 혈색
+        const dull=0.82+0.18*p;
+        o.material.color.setRGB(base.r*dull, base.g*dull, base.b*(0.9+0.1*p));
+      }
+    });
+  }
+  return {ensure, applyRecovery, resizeNow:()=>{ if(ready) resize(); }, isFailed:()=>failed};
+})();
+window.RealBody = RealBody;
 
 /* ============================================================
    INIT
