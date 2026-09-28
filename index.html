@@ -769,7 +769,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
 
       <!-- 탭1: 사실적 모델 -->
       <div class="rec-pane" data-rpane="real" data-on="1">
-        <p class="ex-guide" style="margin-top:2px">실제 인체 모델로 회복을 봅니다. 회복될수록 자세가 곧게 펴지고 혈색이 돕니다. (부위별 세부 분석은 옆 탭에서)</p>
+        <p class="ex-guide" style="margin-top:2px">실제 인체 모델로 회복을 봅니다. 치료 전에는 몸이 앞으로 굽고 어둡고 위축된 모습이다가, 회복될수록 자세가 곧게 서고 밝고 생기 있게 바뀝니다. 드래그로 돌려볼 수 있습니다. (부위별 세부 분석은 옆 탭에서)</p>
         <div id="realCanvasHost" class="realwrap"></div>
       </div>
 
@@ -2533,8 +2533,8 @@ window.Body3D = Body3D;
    실패 시 자동으로 부위 색칠 탭으로 넘어가는 안전장치 포함
    ============================================================ */
 const RealBody = (()=>{
-  // Ready Player Me 공개 데모 아바타 (three.js 예제에서 널리 쓰이는 형태의 CORS 허용 GLB)
-  const MODEL_URL = 'https://models.readyplayer.me/64bfa15f0e72c63d7c3934a6.glb';
+  // three.js 공식 예제 인체 모델 (우리가 쓰는 three@0.128.0과 동일 CDN, CORS 검증됨)
+  const MODEL_URL = 'https://raw.githubusercontent.com/mrdoob/three.js/r128/examples/models/gltf/Soldier.glb';
   let ready=false, failed=false, renderer, scene, cam, avatar, mixer, rot={y:0.2}, drag=false, last=null, tint=null, baseY=0;
   function fallback(msg){
     failed=true;
@@ -2550,8 +2550,8 @@ const RealBody = (()=>{
     if(typeof THREE==='undefined'||typeof THREE.GLTFLoader==='undefined'){ fallback('3D 라이브러리 차단'); return; }
     const cv=document.createElement('canvas'); cv.className='realcanvas'; host.appendChild(cv);
     scene=new THREE.Scene();
-    cam=new THREE.PerspectiveCamera(30, cv.clientWidth/cv.clientHeight||1.2, 0.1, 100);
-    cam.position.set(0,0.9,3.6);
+    cam=new THREE.PerspectiveCamera(32, cv.clientWidth/cv.clientHeight||1.2, 0.1, 100);
+    cam.position.set(0,0.95,4.2);
     renderer=new THREE.WebGLRenderer({canvas:cv, antialias:true, alpha:true});
     renderer.setPixelRatio(Math.min(devicePixelRatio,2));
     scene.add(new THREE.AmbientLight(0xffffff,0.85));
@@ -2571,10 +2571,11 @@ const RealBody = (()=>{
         const box=new THREE.Box3().setFromObject(avatar);
         const size=box.getSize(new THREE.Vector3()), center=box.getCenter(new THREE.Vector3());
         const scale=1.7/(size.y||1.7); avatar.scale.setScalar(scale);
+        avatar.userData.normScale=scale;
         const box2=new THREE.Box3().setFromObject(avatar); baseY=-box2.min.y;
         avatar.position.set(-center.x*scale, baseY-0.05, -center.z*scale);
-        // 피부/재질에 회복 틴트를 걸 수 있게 원색 저장
-        avatar.traverse(o=>{ if(o.isMesh&&o.material){ o.material=o.material.clone(); o.userData.base=o.material.color?o.material.color.clone():null; } });
+        // 재질에 회복 표현을 걸 수 있게 원색 저장
+        avatar.traverse(o=>{ if(o.isMesh&&o.material){ o.material=Array.isArray(o.material)?o.material[0].clone():o.material.clone(); o.userData.base=o.material.color?o.material.color.clone():null; } });
         scene.add(avatar); ready=true; loop(); applyRecovery(recProgress);
       }, undefined, err=>{ clearTimeout(guard); fallback('모델 주소 오류'); });
     }catch(e){ clearTimeout(guard); fallback(); }
@@ -2590,19 +2591,29 @@ const RealBody = (()=>{
     if(avatar) avatar.rotation.y=rot.y;
     renderer.render(scene,cam); requestAnimationFrame(loop);
   }
-  // 회복 진행도 p: 회복될수록 혈색(붉은기 없어지고 건강한 톤) + 자세 곧게
+  // 회복 진행도 p: 회복될수록 자세가 곧게 서고 몸이 밝고 생기있게
   function applyRecovery(p){
     recProgress=p;
     if(!ready||!avatar) return;
-    avatar.rotation.z = -0.06*(1-p);       // 굽은 자세 → 곧게
-    avatar.position.y = baseY-0.05 - 0.04*(1-p); // 살짝 웅크림 → 폄
-    // 아픈 상태(창백/붉은기) → 회복(건강한 톤): 전체를 살짝 물들임
+    // 자세: 아플 땐 앞으로 굽고 축 처짐 → 회복되면 곧게 서고 살짝 커짐
+    avatar.rotation.z = -0.14*(1-p);              // 옆으로 기운 굽은 자세 → 곧게
+    avatar.rotation.x = 0.10*(1-p);               // 앞으로 수그린 자세 → 폄
+    avatar.position.y = baseY-0.05 - 0.09*(1-p);  // 웅크려 낮아짐 → 바로 섬
+    const sc=avatar.userData.normScale||1;
+    avatar.scale.setScalar(sc*(0.96+0.04*p));     // 위축 → 활력
+    // 명도: 아플 땐 어둡고 칙칙(창백) → 회복되면 밝고 혈색
     avatar.traverse(o=>{
       if(o.isMesh&&o.material&&o.material.color&&o.userData.base){
         const base=o.userData.base;
-        // p=0: 살짝 칙칙하게, p=1: 원래 혈색
-        const dull=0.82+0.18*p;
-        o.material.color.setRGB(base.r*dull, base.g*dull, base.b*(0.9+0.1*p));
+        const bright=0.6+0.4*p;                   // p=0 어둡게, p=1 원래 밝기
+        o.material.color.setRGB(
+          Math.min(1,base.r*bright*(1+0.12*p)),   // 회복 시 붉은 혈색 약간 강조
+          base.g*bright,
+          base.b*bright
+        );
+        if(o.material.emissive){                  // 회복될수록 은은한 생기
+          o.material.emissive.setRGB(0.02*p,0.04*p,0.02*p);
+        }
       }
     });
   }
