@@ -529,7 +529,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
 .bl-tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.04em;padding:1px 5px;border-radius:2px;font-weight:600}
 .bodywrap{display:grid;grid-template-columns:1fr 172px;gap:14px;align-items:start}
 @media(max-width:620px){.bodywrap{grid-template-columns:1fr}}
-#bodyCanvas{width:100%;height:340px;display:block;border:1px solid var(--rule);border-radius:6px;  background:radial-gradient(120% 90% at 50% 15%,#F4F8F1,#DDE7D8);touch-action:none;cursor:grab}
+#bodyCanvas{width:100%;height:340px;display:block;border:1px solid #1A2630;border-radius:6px;  background:radial-gradient(120% 95% at 50% 18%,#2E3F4B 0%,#1A2630 55%,#101820 100%);touch-action:none;cursor:grab}
 #bodyCanvas:active{cursor:grabbing}
 .bodylegend{display:flex;flex-direction:column;gap:9px;font-size:11.5px}
 .bl-row{display:grid;grid-template-columns:12px 1fr;gap:7px;line-height:1.35;color:var(--ink2)}
@@ -551,8 +551,8 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
 .rec-tab[data-on="1"]{color:var(--ink);border-bottom-color:var(--signal)}
 .rec-pane{display:none}.rec-pane[data-on="1"]{display:block}
 .realwrap{width:100%;position:relative}
-.realcanvas{width:100%;height:440px;display:block;border:1px solid var(--rule);border-radius:6px;background:radial-gradient(120% 90% at 50% 12%,#F6F9F3,#E4EDDD);touch-action:none;cursor:grab}
-.realstatus{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--ink2);pointer-events:none}
+.realcanvas{width:100%;height:440px;display:block;border:1px solid #1A2630;border-radius:6px;background:radial-gradient(120% 95% at 50% 18%,#2E3F4B 0%,#1A2630 55%,#101820 100%);touch-action:none;cursor:grab}
+.realstatus{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:#C9D6DC;pointer-events:none}
 .real-views{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
 .real-views button{border:1px solid var(--rule);background:#fff;border-radius:16px;padding:5px 13px;font-size:12.5px;cursor:pointer;color:var(--ink2);font-family:inherit}
 .real-views button[data-on="1"]{background:var(--ink);color:#F3F7F0;border-color:var(--ink)}
@@ -2826,9 +2826,10 @@ const RealBody = (()=>{
     cam.position.set(0,0.95,4.1); cam.lookAt(0,0.93,0);
     renderer=new THREE.WebGLRenderer({canvas:cv, antialias:true, alpha:true});
     renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-    scene.add(new THREE.HemisphereLight(0xffffff,0xb9c4b3,0.75));
+    scene.add(new THREE.HemisphereLight(0xffffff,0x2a3640,0.8));
     const d1=new THREE.DirectionalLight(0xffffff,0.9); d1.position.set(1.6,2.6,2.6); scene.add(d1);
     const d2=new THREE.DirectionalLight(0xdfe8ff,0.45); d2.position.set(-2,1.2,-2); scene.add(d2);
+    const rim=new THREE.DirectionalLight(0x9fd8ff,0.7); rim.position.set(0,2.2,-3.2); scene.add(rim); // 뒤쪽 윤곽 조명
     resize(); new ResizeObserver(resize).observe(cv);
     cv.addEventListener('pointerdown',e=>{drag=true;last={x:e.clientX,y:e.clientY};cv.setPointerCapture(e.pointerId);});
     cv.addEventListener('pointermove',e=>{ if(!drag)return; rot.y+=(e.clientX-last.x)*0.01; rot.x=Math.max(-0.5,Math.min(0.5,rot.x+(e.clientY-last.y)*0.006)); last={x:e.clientX,y:e.clientY}; });
@@ -2869,6 +2870,11 @@ const RealBody = (()=>{
     const scale=1.7/(size.y||1.7); avatar.scale.setScalar(scale);
     baseY=-box.min.y*scale-0.02;
     avatar.position.set(-center.x*scale, baseY, -center.z*scale);
+    // 발밑 바닥 원판: 발이 바닥에 닿는 동작을 알아보기 쉽게
+    const floor=new THREE.Mesh(new THREE.CircleGeometry(0.62,64), new THREE.MeshBasicMaterial({color:0x3C5260,transparent:true,opacity:0.55}));
+    floor.rotation.x=-Math.PI/2; floor.position.y=-0.021; scene.add(floor);
+    const ring=new THREE.Mesh(new THREE.RingGeometry(0.60,0.63,64), new THREE.MeshBasicMaterial({color:0x6F8FA0,transparent:true,opacity:0.6}));
+    ring.rotation.x=-Math.PI/2; ring.position.y=-0.019; scene.add(ring);
     scene.add(avatar); ready=true; status(''); loop(); applyRecovery(recProgress);
   }
   function resize(){
