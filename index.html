@@ -662,6 +662,28 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
 .talk textarea{width:100%;box-sizing:border-box}
 .talk-sum{margin:0;padding-left:20px;display:grid;gap:5px;font-size:13.5px;line-height:1.5}
 .talk-sum b{margin-right:6px}
+
+/* ---------- 주차별 진행 재생 ---------- */
+.prog-ctl{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.spd{font-size:12.5px;color:var(--ink2);display:flex;align-items:center;gap:6px}
+.spd select{font-family:inherit;font-size:12.5px;padding:5px 8px;border:1px solid var(--rule);border-radius:6px;background:#fff}
+.cap-sub{font-size:11.5px;color:#BFE9D6;margin-left:4px}
+.recprog{margin-top:14px}
+.rp-h{font-size:13.5px;font-weight:700;margin-bottom:8px}
+.rp-h span{display:block;font-size:11.5px;font-weight:400;color:var(--ink3);margin-top:2px;line-height:1.45}
+.rp-wrap{overflow-x:auto}
+.rp-table{border-collapse:separate;border-spacing:4px;min-width:420px;width:100%}
+.rp-table th{font-size:11.5px;color:var(--ink3);font-weight:600;padding:4px 2px;border-radius:6px}
+.rp-table th.on{background:var(--ink);color:#F3F7F0}
+.rp-table td{text-align:center;vertical-align:middle;padding:3px 2px;border-radius:8px}
+.rp-table td.on{background:#E7F1EC}
+.rp-reg{text-align:left!important;font-size:12.5px;font-weight:600;white-space:nowrap}
+.rp-cell{display:inline-block;min-width:48px;padding:4px 6px;border-radius:12px;color:#fff;font-family:var(--mono);font-size:12px;font-weight:700;text-shadow:0 1px 1px rgba(0,0,0,.25)}
+.rp-table td i{display:block;font-style:normal;font-size:10px;color:var(--ink3);margin-top:2px}
+.rp-fin{font-size:12px;font-weight:700;white-space:nowrap}
+.rp-now{margin-top:8px;font-size:12.5px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.rp-now span{background:var(--band);border-radius:14px;padding:3px 10px}
+.rp-now i{font-style:normal;color:var(--ink3);font-size:11px;margin-left:3px}
 </style>
 </head>
 <body>
@@ -917,7 +939,12 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
         <div class="real-ex">
           <div class="real-ex-h">🏃 우리 조 운동 동작 보기 <span>버튼을 누르면 그 운동을 하는 모습이 나오고, 그 운동이 쓰는 근육이 빛납니다.</span></div>
           <div class="real-ex-chips" id="realExChips"></div>
-          <button class="btn" id="btnProgramPlay">🎬 우리 프로그램 진행 보기</button>
+          <div class="prog-ctl">
+            <button class="btn" id="btnProgramPlay">🎬 우리 프로그램 주차별로 보기</button>
+            <label class="spd">재생 속도
+              <select id="progSpeed"><option value="0.55">느리게</option><option value="1" selected>보통</option><option value="1.8">빠르게</option></select>
+            </label>
+          </div>
         </div>
         <div class="real-legend">
           <span><i style="background:#D14B3C"></i>아픔·금기</span>
@@ -938,10 +965,11 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
       </div>
 
       <div class="rec-ctl">
-        <button class="btn" id="btnRecPlay">▶ 4주 회복 재생</button>
+        <button class="btn ghost small" id="btnRecPlay">▶ 색 변화만 보기</button>
         <input type="range" id="recSlider" min="0" max="100" value="0" step="1">
         <span class="rec-week" id="recWeekLabel">치료 시작 전</span>
       </div>
+      <div class="recprog" id="recProgress"></div>
     </div>
   </div>
 
@@ -2333,24 +2361,64 @@ function weekOneLine(wk, nDays, uniq, avgTime, avgRpe, phase, beta){
   const phaseWord = phase==='초기'?'적응하며 기초를 다지는' : phase==='중기'?'강도를 올려가는' : '목표 수준으로 마무리하는';
   return `${phaseWord} 주. 주 ${nDays}회 ${focusName} 중심으로 ${uniq.length}종을 회당 약 ${avgTime}분씩 ${intensity} 수행합니다.`;
 }
+// 주차별 계획 → 부위별 회복도. 교육용 단순 모델:
+// 한 주에 그 부위를 운동한 날이 3일 이상이면 그 주 몫(1/W)을 모두, 적으면 날수에 비례해 회복
+function weeklyRecovery(){
+  if(!S.weekPlan||S.weekPlanKey!==planKey()){ S.weekPlan=autoWeekPlan(); S.weekPlanKey=planKey(); }
+  const wp=S.weekPlan, W=wp.length, cr=caseRegions(), {hit,bad}=programRegions();
+  const regOf=id=>{ const r=EX_REGIONS[id]; return r==='CASE'?[...cr]:(r||[]); };
+  const weeks=wp.map(wk=>{ const cnt={}, rd={}; let days=0;
+    wk.days.forEach(d=>{ if(d.rest||!d.ex.length) return; days++;
+      const ids=new Set(d.ex.map(e=>e.id)), rs=new Set();
+      ids.forEach(id=>{ cnt[id]=(cnt[id]||0)+1; regOf(id).forEach(r=>rs.add(r)); });
+      rs.forEach(r=>rd[r]=(rd[r]||0)+1); });
+    return {w:wk.w, goal:wk.goal, days, cnt, ids:EX_LIB.filter(x=>cnt[x.id]).map(x=>x.id), rd}; });
+  const cum={};
+  BODY_REGIONS.forEach(r=>{ let acc=0; cum[r]=[0]; weeks.forEach(wk=>{ acc+=Math.min(1,(wk.rd[r]||0)/3)/W; cum[r].push(Math.min(1,acc)); }); });
+  return {W, weeks, cum, cr, hit, bad};
+}
 function initRecovery(){
   Body3D.ensure();
   RealBody.ensure();
-  const W=S.dose.weeks||4;
+  const WR=weeklyRecovery(), W=WR.W;
   const wl=$('#recWeeks'); if(wl) wl.textContent=W;
   const slider=$('#recSlider'), label=$('#recWeekLabel'), playBtn=$('#btnRecPlay');
   if(!slider) return;
-  const setP=(p)=>{
-    Body3D.setRecovery(p);
-    if(window.RealBody) RealBody.applyRecovery(p);
-    const wk = p<=0 ? 0 : Math.min(W, Math.ceil(p*W));
-    label.textContent = p<=0 ? '치료 시작 전' : (wk>=W ? `${W}주 후 · 프로그램 완료` : `${wk}주차 진행 중`);
+  const probRegs=BODY_REGIONS.filter(r=>WR.cr.has(r));
+  const mapAt=p=>{ const wf=Math.max(0,Math.min(W,p*W)), k=Math.floor(wf), f=wf-k, m={};
+    BODY_REGIONS.forEach(r=>{ const c=WR.cum[r]; m[r]=c[k]+((c[Math.min(k+1,W)])-c[k])*f; }); return m; };
+  const hex=v=>{ const c=(t=>{const L=(a,b,t)=>{const ar=(a>>16)&255,ag=(a>>8)&255,ab=a&255,br=(b>>16)&255,bg=(b>>8)&255,bb=b&255;return (Math.round(ar+(br-ar)*t)<<16)|(Math.round(ag+(bg-ag)*t)<<8)|Math.round(ab+(bb-ab)*t);};
+      return t<0.5?L(0xD14B3C,0xE0A93B,t/0.5):L(0xE0A93B,0x2FCE86,(t-0.5)/0.5);})(v); return '#'+c.toString(16).padStart(6,'0'); };
+  const verdict=(r,v)=>WR.bad.has(r)?'금기 부위':v>=0.9?'회복':v>=0.5?'호전':v>0?'조금 호전':'변화 없음 ⚠';
+  // 주차별 진척도 표
+  const drawTable=(curW)=>{
+    const el=$('#recProgress'); if(!el) return;
+    if(!probRegs.length){ el.innerHTML=''; return; }
+    const head=`<tr><th>문제 부위</th>${WR.weeks.map(wk=>`<th class="${wk.w===curW?'on':''}">${wk.w}주</th>`).join('')}<th>${W}주 후</th></tr>`;
+    const rows=probRegs.map(r=>{ const fin=WR.cum[r][W];
+      return `<tr><td class="rp-reg">${REGION_KO[r]}</td>${WR.weeks.map((wk,i)=>{ const v=WR.cum[r][i+1], d=wk.rd[r]||0;
+        return `<td class="${wk.w===curW?'on':''}"><span class="rp-cell" style="background:${WR.bad.has(r)?'#C0392B':hex(v)}">${WR.bad.has(r)?'금기':Math.round(v*100)+'%'}</span><i>${d?`주 ${d}회`:'운동 없음'}</i></td>`; }).join('')}
+        <td class="rp-fin">${verdict(r,fin)}</td></tr>`; }).join('');
+    const week=WR.weeks.find(wk=>wk.w===curW);
+    el.innerHTML=`<div class="rp-h">📈 주차별 진척도 <span>우리 조 주차별 계획대로 했을 때 문제 부위가 얼마나 회복되는지 (교육용 단순 모델: 그 부위를 주 3회 이상 운동하면 한 주 몫이 모두 회복)</span></div>
+      <div class="rp-wrap"><table class="rp-table">${head}${rows}</table></div>
+      ${week?`<div class="rp-now"><b>${week.w}주차 운동</b> ${week.ids.map(id=>{const x=EX_LIB.find(e=>e.id===id);return `<span>${x.icon||''} ${x.nm.split(' (')[0]} <i>주 ${week.cnt[id]}회</i></span>`;}).join('')||'<span>운동 없음</span>'}</div>`:''}`;
   };
-  setP(0); slider.value=0;
+  let curW=0;
+  const setP=(p)=>{
+    const map=mapAt(p);
+    Body3D.setRecovery(p,map);
+    if(window.RealBody) RealBody.applyRecovery(p,map);
+    const wk = p<=0 ? 0 : Math.min(W, Math.ceil(p*W-1e-9));
+    label.textContent = p<=0 ? '치료 시작 전' : (p>=1 ? `${W}주 후 · 프로그램 완료` : `${wk}주차 진행 중`);
+    if(wk!==curW){ curW=wk; drawTable(wk); }
+  };
+  curW=-1; setP(0); slider.value=0;
   let anim=null;
-  let prog=null; // 프로그램 진행 애니메이션
-  const stopProg=()=>{ if(prog){ cancelAnimationFrame(prog); prog=null; const b=$('#btnProgramPlay'); if(b){ b.disabled=false; b.textContent='🎬 우리 프로그램 진행 보기'; } } };
-  slider.oninput = e=>{ stopProg(); setP((+e.target.value)/100); };
+  let prog=null; // 주차별 진행 재생 상태
+  const progBtn=$('#btnProgramPlay');
+  const stopProg=()=>{ if(prog){ cancelAnimationFrame(prog.raf); prog=null; if(progBtn){ progBtn.textContent='🎬 우리 프로그램 주차별로 보기'; } } };
+  slider.oninput = e=>{ stopProg(); RealBody.setExercise(null); setP((+e.target.value)/100); };
   // ── 운동 동작 보기 ──
   const host=$('#realCanvasHost');
   let cap=$('#realCaption'); if(host&&!cap){ cap=document.createElement('div'); cap.id='realCaption'; cap.className='realcaption'; host.appendChild(cap); }
@@ -2359,43 +2427,68 @@ function initRecovery(){
   const regText=id=>{ const r=EX_REGIONS[id]; const regs=r==='CASE'?[...caseRegions()]:(r||[]);
     return [...new Set(regs.map(x=>REGION_KO[x]))].join(', ')||'전신'; };
   const exName=x=>x.nm.replace(/\s*\(.*?\)\s*/g,'');
+  const nameOf=id=>{ const x=EX_LIB.find(e=>e.id===id); return x?x.nm.split(' (')[0]:id; };
   const chips=$('#realExChips');
+  const markChip=id=>chips&&chips.querySelectorAll('[data-rex]').forEach(c=>c.dataset.on=(c.dataset.rex===(id||''))?'1':'0');
   if(chips){
     chips.innerHTML='<button data-rex="" data-on="1">서 있기</button>'+picked.map(x=>`<button data-rex="${x.id}">${x.icon||''} ${exName(x)}</button>`).join('');
     chips.onclick=e=>{
       const b=e.target.closest('[data-rex]'); if(!b) return;
-      stopProg();
-      chips.querySelectorAll('[data-rex]').forEach(x=>x.dataset.on=(x===b)?'1':'0');
-      const id=b.dataset.rex, x=EX_LIB.find(e=>e.id===id);
+      stopProg(); markChip(b.dataset.rex);
+      const id=b.dataset.rex;
       RealBody.setExercise(id||null);
       caption(id?`<b>${exMotionText(id)}</b><br>쓰는 근육(빛남): ${regText(id)}`:'');
     };
   }
-  // ── 프로그램 진행 보기: 고른 운동을 차례로 하며 4주 회복이 함께 진행 ──
-  const progBtn=$('#btnProgramPlay');
+  // ── 주차별로 보기: 주차 소개 → 그 주 운동만 차례로 → 다음 주 (회복은 그 주 운동량만큼) ──
+  const speed=()=>+($('#progSpeed')&&$('#progSpeed').value||1);
+  const INTRO=3200, PER=4200, REST=2600;
+  const buildTimeline=()=>{
+    const segs=[], wkRange=[]; let t=0;
+    WR.weeks.forEach((wk,i)=>{ const st=t;
+      const prev=i?WR.weeks[i-1].ids:[], added=wk.ids.filter(id=>!prev.includes(id)), removed=prev.filter(id=>!wk.ids.includes(id));
+      segs.push({type:'intro', w:wk.w, t0:t, dur:INTRO, added, removed}); t+=INTRO;
+      if(!wk.ids.length){ segs.push({type:'rest', w:wk.w, t0:t, dur:REST}); t+=REST; }
+      wk.ids.forEach(id=>{ segs.push({type:'ex', w:wk.w, id, t0:t, dur:PER}); t+=PER; });
+      wkRange.push([st,t]); });
+    return {segs, wkRange, total:t};
+  };
+  const pAt=(TL,t)=>{ for(let i=0;i<TL.wkRange.length;i++){ const [a,b]=TL.wkRange[i]; if(t<b) return (i+(t-a)/(b-a))/W; } return 1; };
+  const showSeg=seg=>{
+    const wk=WR.weeks[seg.w-1];
+    if(seg.type==='intro'){ RealBody.setExercise(null); markChip('');
+      caption(`<b>📅 ${seg.w}주차 시작</b> · 주 ${wk.days}회 운동 · ${wk.ids.length}가지`
+        +(seg.added.length?`<br>➕ 새로 추가: ${seg.added.map(nameOf).join(', ')}`:'')
+        +(seg.removed.length?`<br>➖ 이번 주 빠짐: ${seg.removed.map(nameOf).join(', ')}`:'')
+        +(wk.goal?`<br>🎯 ${wk.goal}`:'')); }
+    else if(seg.type==='rest'){ RealBody.setExercise(null); markChip(''); caption(`<b>${seg.w}주차</b> · 배치된 운동이 없습니다 → 이번 주는 회복이 멈춥니다.`); }
+    else { RealBody.setExercise(seg.id); markChip(seg.id);
+      caption(`<b>${seg.w}주차</b> · ${exMotionText(seg.id)} <span class="cap-sub">주 ${wk.cnt[seg.id]}회</span><br>쓰는 근육(빛남): ${regText(seg.id)}`); }
+  };
   if(progBtn) progBtn.onclick=()=>{
-    if(!picked.length){ caption('선택된 운동이 없습니다.'); return; }
-    stopProg(); if(anim){ cancelAnimationFrame(anim); anim=null; }
+    if(prog){ prog.playing=!prog.playing; progBtn.textContent=prog.playing?'⏸ 일시정지':'▶ 계속 보기'; prog.last=performance.now(); return; }
+    if(!WR.weeks.some(wk=>wk.ids.length)){ caption('주차별 계획에 배치된 운동이 없습니다.'); return; }
+    if(anim){ cancelAnimationFrame(anim); anim=null; playBtn.disabled=false; }
     const realTab=document.querySelector('.rec-tab[data-rtab="real"]');
     if(realTab&&realTab.dataset.on!=='1'&&!RealBody.isFailed()) realTab.click(); // 해부 모델 실패 시엔 부위 색칠 탭에서 진행
-    const per=5200, total=Math.max(per*picked.length, 16000), t0=performance.now();
-    progBtn.disabled=true; progBtn.textContent='진행 중…';
-    let lastIdx=-1;
+    const TL=buildTimeline();
+    prog={TL, t:0, playing:true, last:performance.now(), seg:-1, raf:0};
+    progBtn.textContent='⏸ 일시정지';
     const stepFn=now=>{
-      const el=now-t0, p=Math.min(1, el/total);
+      if(!prog) return;
+      if(prog.playing) prog.t+=(now-prog.last)*speed();
+      prog.last=now;
+      const t=Math.min(prog.t,TL.total), p=pAt(TL,t);
       slider.value=Math.round(p*100); setP(p);
-      const idx=Math.floor(el/per)%picked.length, x=picked[idx];
-      if(idx!==lastIdx){ lastIdx=idx; RealBody.setExercise(x.id);
-        chips&&chips.querySelectorAll('[data-rex]').forEach(c=>c.dataset.on=(c.dataset.rex===x.id)?'1':'0'); }
-      const wk=Math.max(1,Math.min(W,Math.ceil(p*W)));
-      caption(`<b>${wk}주차</b> · ${exMotionText(x.id)}<br>쓰는 근육(빛남): ${regText(x.id)}`);
-      if(p<1){ prog=requestAnimationFrame(stepFn); }
-      else { prog=null; RealBody.setExercise(null);
-        chips&&chips.querySelectorAll('[data-rex]').forEach(c=>c.dataset.on=(c.dataset.rex==='')?'1':'0');
-        caption(`<b>${W}주 프로그램 완료</b> — 초록: 회복된 근육 · 빨강: 프로그램이 놓친 근육 (뒷면도 확인해 보세요)`);
-        progBtn.disabled=false; progBtn.textContent='🎬 다시 보기'; }
+      const si=TL.segs.findIndex(sg=>t>=sg.t0&&t<sg.t0+sg.dur);
+      if(si!==prog.seg&&si>=0){ prog.seg=si; showSeg(TL.segs[si]); }
+      if(t<TL.total){ prog.raf=requestAnimationFrame(stepFn); }
+      else { prog=null; RealBody.setExercise(null); markChip(''); setP(1);
+        const fin=probRegs.map(r=>`${REGION_KO[r]} ${WR.bad.has(r)?'금기':Math.round(WR.cum[r][W]*100)+'%'}`).join(' · ');
+        caption(`<b>✅ ${W}주 프로그램 완료</b><br>${fin}<br><span class="cap-sub">아래 표에서 주차별로 어디가 얼마나 좋아졌는지 확인하세요. 뒷면도 돌려보세요.</span>`);
+        progBtn.textContent='🎬 다시 보기'; }
     };
-    prog=requestAnimationFrame(stepFn);
+    prog.raf=requestAnimationFrame(stepFn);
   };
   // 회복 탭 전환
   $$('.rec-tab').forEach(tb=>tb.onclick=()=>{
@@ -2405,17 +2498,17 @@ function initRecovery(){
     if(t==='real'&&window.RealBody) RealBody.resizeNow();
     if(t==='paint'&&window.Body3D&&Body3D.resizeNow){ moveBodyCanvas(7); Body3D.resizeNow(); }
   });
+  // 색 변화만 빠르게: 한 주에 3초씩
   playBtn.onclick = ()=>{
     stopProg(); RealBody.setExercise(null); caption('');
     if(anim){ cancelAnimationFrame(anim); anim=null; }
-    const dur=4200, t0=performance.now();
+    const dur=3000*W/speed(), t0=performance.now();
     playBtn.disabled=true; playBtn.textContent='재생 중…';
     const stepFn=(now)=>{
-      let t=Math.min(1,(now-t0)/dur);
-      const p=t*t*(3-2*t);
-      slider.value=Math.round(p*100); setP(p);
+      const t=Math.min(1,(now-t0)/dur);
+      slider.value=Math.round(t*100); setP(t);
       if(t<1){ anim=requestAnimationFrame(stepFn); }
-      else { anim=null; playBtn.disabled=false; playBtn.textContent='▶ 다시 재생'; }
+      else { anim=null; playBtn.disabled=false; playBtn.textContent='▶ 색 변화만 다시 보기'; }
     };
     anim=requestAnimationFrame(stepFn);
   };
@@ -2977,13 +3070,13 @@ const Body3D = (()=>{
   }
   // 회복 진행도 p(0=치료 전, 1=마지막 주).
   // 다루는 문제부위: 빨강(아픔)→주황(회복중)→초록(회복)으로 뚜렷하게 변화.
-  function setRecovery(p){
+  function setRecovery(p,map){
     if(!ready||!S.built||!S.evalRes) return;
     const cr=caseRegions(), {hit,bad}=programRegions();
     BODY_REGIONS.forEach(r=>{
       if(bad.has(r)){ setRegion(r,COL.bad); return; }                 // 금기 부위: 회복 대상 아님
-      if(hit.has(r)&&cr.has(r)){                                       // 다루는 문제부위 → 크게 회복
-        setRegion(r, lerp3(COL.ailing, COL.mending, COL.healed, p)); return;
+      if(hit.has(r)&&cr.has(r)){                                       // 다루는 문제부위 → 주차별 운동량만큼 회복
+        setRegion(r, lerp3(COL.ailing, COL.mending, COL.healed, map&&map[r]!=null?map[r]:p)); return;
       }
       if(cr.has(r)&&!hit.has(r)){                                      // 문제인데 미포함 → 끝까지 아픈 빨강으로 남음
         setRegion(r, COL.ailing); return;
@@ -3043,7 +3136,7 @@ const RealBody = (()=>{
            ailing:0xD14B3C, mending:0xE0A93B, healed:0x2FCE86};
   let ready=false, failed=false, renderer, scene, cam, avatar, rot={x:0,y:0.35}, drag=false, last=null, baseY=0, auto=true;
   const regionMeshes={}; // 부위 → [mesh]
-  let recProgress=0, mode='recovery';
+  let recProgress=0, recMap=null, mode='recovery';
 
   function lerpHex(a,b,t){const ar=(a>>16)&255,ag=(a>>8)&255,ab=a&255,br=(b>>16)&255,bg=(b>>8)&255,bb=b&255;
     return (Math.round(ar+(br-ar)*t)<<16)|(Math.round(ag+(bg-ag)*t)<<8)|Math.round(ab+(bb-ab)*t);}
@@ -3465,18 +3558,18 @@ const RealBody = (()=>{
       else paint(r,C.neutral);
     });
   }
-  function refresh(){ if(mode==='coverage') applyCoverage(); else applyRecovery(recProgress); }
+  function refresh(){ if(mode==='coverage') applyCoverage(); else applyRecovery(recProgress,recMap); }
   function setMode(m){ mode=m; setExercise(null); refresh(); }
   // 회복 진행도 p: 부위 색칠 탭과 같은 규칙으로 '근육 단위' 색칠
-  function applyRecovery(p){
-    recProgress=p;
+  function applyRecovery(p,map){
+    recProgress=p; recMap=map||null;
     if(mode==='coverage') return;
     if(!ready) return;
     if(!S.built||!S.evalRes){ BODY_REGIONS.forEach(r=>paint(r,C.neutral)); return; }
     const cr=caseRegions(), {hit,bad}=programRegions();
     BODY_REGIONS.forEach(r=>{
       if(bad.has(r)) paint(r,C.bad);                                         // 금기 부위
-      else if(hit.has(r)&&cr.has(r)) paint(r, lerp3(C.ailing,C.mending,C.healed,p)); // 다루는 문제부위 → 회복
+      else if(hit.has(r)&&cr.has(r)) paint(r, lerp3(C.ailing,C.mending,C.healed,recMap&&recMap[r]!=null?recMap[r]:p)); // 다루는 문제부위 → 주차별 운동량만큼 회복
       else if(cr.has(r)) paint(r,C.ailing);                                  // 문제인데 미포함 → 그대로 아픔
       else paint(r,C.neutral);                                               // 무관
     });
