@@ -550,8 +550,24 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
 .rec-tab{flex:1;background:none;border:none;padding:10px 8px;cursor:pointer;font-family:var(--sans);font-size:14px;font-weight:600;color:var(--ink3);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s}
 .rec-tab[data-on="1"]{color:var(--ink);border-bottom-color:var(--signal)}
 .rec-pane{display:none}.rec-pane[data-on="1"]{display:block}
-.realwrap{width:100%}
-.realcanvas{width:100%;height:400px;display:block;border:1px solid var(--rule);border-radius:6px;background:radial-gradient(120% 90% at 50% 12%,#F6F9F3,#E4EDDD);touch-action:none;cursor:grab}
+.realwrap{width:100%;position:relative}
+.realcanvas{width:100%;height:440px;display:block;border:1px solid var(--rule);border-radius:6px;background:radial-gradient(120% 90% at 50% 12%,#F6F9F3,#E4EDDD);touch-action:none;cursor:grab}
+.realstatus{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--ink2);pointer-events:none}
+.real-views{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.real-views button{border:1px solid var(--rule);background:#fff;border-radius:16px;padding:5px 13px;font-size:12.5px;cursor:pointer;color:var(--ink2);font-family:inherit}
+.real-views button[data-on="1"]{background:var(--ink);color:#F3F7F0;border-color:var(--ink)}
+.real-ex{margin-top:12px;padding:12px 14px;background:var(--band);border-radius:8px}
+.real-ex-h{font-size:13px;font-weight:700;margin-bottom:8px}
+.real-ex-h span{display:block;font-size:11.5px;font-weight:400;color:var(--ink3);margin-top:2px}
+.real-ex-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.real-ex-chips button{border:1px solid var(--rule);background:#fff;border-radius:16px;padding:5px 12px;font-size:12.5px;cursor:pointer;font-family:inherit;color:var(--ink)}
+.real-ex-chips button[data-on="1"]{background:var(--signal);color:#fff;border-color:var(--signal)}
+.realcaption{position:absolute;left:10px;right:10px;top:10px;padding:8px 12px;border-radius:8px;background:rgba(18,48,42,.82);color:#F3F7F0;font-size:13px;line-height:1.45;pointer-events:none;display:none}
+.realcaption b{color:#8FF0C0}
+.real-legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;font-size:12px;color:var(--ink2)}
+.real-legend span{display:flex;align-items:center;gap:5px}
+.real-legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
+.real-credit{font-size:10.5px;color:var(--ink3);margin:8px 0 0;line-height:1.5}
 .realcanvas:active{cursor:grabbing}
 .check{display:grid;gap:5px}
 .check label{display:grid;grid-template-columns:auto 1fr;gap:9px;font-size:13.3px;align-items:start;cursor:pointer}
@@ -769,8 +785,27 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
 
       <!-- 탭1: 사실적 모델 -->
       <div class="rec-pane" data-rpane="real" data-on="1">
-        <p class="ex-guide" style="margin-top:2px">실제 인체 모델로 회복을 봅니다. 치료 전에는 몸이 앞으로 굽고 어둡고 위축된 모습이다가, 회복될수록 자세가 곧게 서고 밝고 생기 있게 바뀝니다. 드래그로 돌려볼 수 있습니다. (부위별 세부 분석은 옆 탭에서)</p>
+        <p class="ex-guide" style="margin-top:2px">실제 인체 근육 해부 모델입니다. 대상자의 문제 부위 <b>근육</b>이 치료 전 <b style="color:#C0392B">빨강</b>에서 시작해, 우리 조 프로그램이 다루는 근육은 <b style="color:#E0A93B">주황</b>을 거쳐 <b style="color:#2E9E77">초록</b>으로 회복됩니다. 드래그해서 앞·뒤·옆을 돌려보세요.</p>
         <div id="realCanvasHost" class="realwrap"></div>
+        <div class="real-views">
+          <button data-rview="front">앞면</button>
+          <button data-rview="side">옆면</button>
+          <button data-rview="back">뒷면 (등 근육)</button>
+          <button data-rview="auto" data-on="1">⟳ 자동 회전</button>
+        </div>
+        <div class="real-ex">
+          <div class="real-ex-h">🏃 우리 조 운동 동작 보기 <span>버튼을 누르면 그 운동을 하는 모습이 나오고, 그 운동이 쓰는 근육이 빛납니다.</span></div>
+          <div class="real-ex-chips" id="realExChips"></div>
+          <button class="btn" id="btnProgramPlay">🎬 우리 프로그램 진행 보기</button>
+        </div>
+        <div class="real-legend">
+          <span><i style="background:#D14B3C"></i>아픔·금기</span>
+          <span><i style="background:#E0A93B"></i>회복 중</span>
+          <span><i style="background:#2FCE86"></i>회복됨</span>
+          <span><i style="background:#D9C9BF"></i>관련 없는 근육</span>
+          <span><i style="background:#EEE7D8"></i>뼈대</span>
+        </div>
+        <p class="real-credit">해부학 모델: “Z-Anatomy – The libre 3D atlas of anatomy” (CC BY-SA 4.0) · “BodyParts3D, The Database Center for Life Science” (CC BY-SA 2.1 JP) · 경량화 버전 fitmitwith-anatomy-atlas (CC BY-SA 4.0)</p>
       </div>
 
       <!-- 탭2: 부위 색칠 -->
@@ -1923,7 +1958,56 @@ function initRecovery(){
     label.textContent = p<=0 ? '치료 시작 전' : (wk>=W ? `${W}주 후 · 프로그램 완료` : `${wk}주차 진행 중`);
   };
   setP(0); slider.value=0;
-  slider.oninput = e=>{ setP((+e.target.value)/100); };
+  let anim=null;
+  let prog=null; // 프로그램 진행 애니메이션
+  const stopProg=()=>{ if(prog){ cancelAnimationFrame(prog); prog=null; const b=$('#btnProgramPlay'); if(b){ b.disabled=false; b.textContent='🎬 우리 프로그램 진행 보기'; } } };
+  slider.oninput = e=>{ stopProg(); setP((+e.target.value)/100); };
+  // ── 운동 동작 보기 ──
+  const host=$('#realCanvasHost');
+  let cap=$('#realCaption'); if(host&&!cap){ cap=document.createElement('div'); cap.id='realCaption'; cap.className='realcaption'; host.appendChild(cap); }
+  const caption=html=>{ if(cap){ cap.innerHTML=html||''; cap.style.display=html?'block':'none'; } };
+  const picked=EX_LIB.filter(x=>S.picked.has(x.id));
+  const regText=id=>{ const r=EX_REGIONS[id]; const regs=r==='CASE'?[...caseRegions()]:(r||[]);
+    return [...new Set(regs.map(x=>REGION_KO[x]))].join(', ')||'전신'; };
+  const exName=x=>x.nm.replace(/\s*\(.*?\)\s*/g,'');
+  const chips=$('#realExChips');
+  if(chips){
+    chips.innerHTML='<button data-rex="" data-on="1">서 있기</button>'+picked.map(x=>`<button data-rex="${x.id}">${x.icon||''} ${exName(x)}</button>`).join('');
+    chips.onclick=e=>{
+      const b=e.target.closest('[data-rex]'); if(!b) return;
+      stopProg();
+      chips.querySelectorAll('[data-rex]').forEach(x=>x.dataset.on=(x===b)?'1':'0');
+      const id=b.dataset.rex, x=EX_LIB.find(e=>e.id===id);
+      RealBody.setExercise(id||null);
+      caption(id?`<b>${exName(x)}</b> — ${RealBody.motionLabel(id)}<br>쓰는 근육(빛남): ${regText(id)}`:'');
+    };
+  }
+  // ── 프로그램 진행 보기: 고른 운동을 차례로 하며 4주 회복이 함께 진행 ──
+  const progBtn=$('#btnProgramPlay');
+  if(progBtn) progBtn.onclick=()=>{
+    if(!picked.length){ caption('선택된 운동이 없습니다.'); return; }
+    stopProg(); if(anim){ cancelAnimationFrame(anim); anim=null; }
+    const realTab=document.querySelector('.rec-tab[data-rtab="real"]');
+    if(realTab&&realTab.dataset.on!=='1'&&!RealBody.isFailed()) realTab.click(); // 해부 모델 실패 시엔 부위 색칠 탭에서 진행
+    const per=5200, total=Math.max(per*picked.length, 16000), t0=performance.now();
+    progBtn.disabled=true; progBtn.textContent='진행 중…';
+    let lastIdx=-1;
+    const stepFn=now=>{
+      const el=now-t0, p=Math.min(1, el/total);
+      slider.value=Math.round(p*100); setP(p);
+      const idx=Math.floor(el/per)%picked.length, x=picked[idx];
+      if(idx!==lastIdx){ lastIdx=idx; RealBody.setExercise(x.id);
+        chips&&chips.querySelectorAll('[data-rex]').forEach(c=>c.dataset.on=(c.dataset.rex===x.id)?'1':'0'); }
+      const wk=Math.max(1,Math.min(W,Math.ceil(p*W)));
+      caption(`<b>${wk}주차</b> · ${exName(x)} (${RealBody.motionLabel(x.id)})<br>쓰는 근육(빛남): ${regText(x.id)}`);
+      if(p<1){ prog=requestAnimationFrame(stepFn); }
+      else { prog=null; RealBody.setExercise(null);
+        chips&&chips.querySelectorAll('[data-rex]').forEach(c=>c.dataset.on=(c.dataset.rex==='')?'1':'0');
+        caption(`<b>${W}주 프로그램 완료</b> — 초록: 회복된 근육 · 빨강: 프로그램이 놓친 근육 (뒷면도 확인해 보세요)`);
+        progBtn.disabled=false; progBtn.textContent='🎬 다시 보기'; }
+    };
+    prog=requestAnimationFrame(stepFn);
+  };
   // 회복 탭 전환
   $$('.rec-tab').forEach(tb=>tb.onclick=()=>{
     const t=tb.dataset.rtab;
@@ -1932,8 +2016,8 @@ function initRecovery(){
     if(t==='real'&&window.RealBody) RealBody.resizeNow();
     if(t==='paint'&&window.Body3D&&Body3D.resizeNow){ moveBodyCanvas(6); Body3D.resizeNow(); }
   });
-  let anim=null;
   playBtn.onclick = ()=>{
+    stopProg(); RealBody.setExercise(null); caption('');
     if(anim){ cancelAnimationFrame(anim); anim=null; }
     const dur=4200, t0=performance.now();
     playBtn.disabled=true; playBtn.textContent='재생 중…';
@@ -2529,97 +2613,304 @@ const Body3D = (()=>{
 window.Body3D = Body3D;
 
 /* ============================================================
-   RealBody — 사실적 GLB 인체 모델 (Ready Player Me 데모 아바타)
-   실패 시 자동으로 부위 색칠 탭으로 넘어가는 안전장치 포함
+   RealBody — 해부학 근육 모델 (Z-Anatomy / BodyParts3D 기반, CC BY-SA 4.0)
+   218개 근육을 앱의 10개 부위로 묶어 회복을 근육 단위로 색칠.
+   ① 저장소 models/ 폴더 → ② 원본 저장소 순으로 시도, 모두 실패 시 부위 색칠 탭으로 전환
    ============================================================ */
+const ANAT_KEY_REGION={"deltoid_anterior":"arm","deltoid_lateral":"arm","deltoid_posterior":"arm","supraspinatus":"arm","infraspinatus":"arm","subscapularis":"arm","teres_minor":"arm","teres_major":"arm","rectus_femoris":"leg","vastus_lateralis":"leg","vastus_medialis":"leg","vastus_intermedius":"leg","biceps_femoris_long":"leg","biceps_femoris_short":"leg","semitendinosus":"leg","semimembranosus":"leg","sartorius":"leg","adductor_magnus":"leg","adductor_longus":"leg","adductor_brevis":"leg","gracilis":"leg","pectineus":"leg","pectoralis_major_clavicular":"chest","pectoralis_major_sternocostal":"chest","pectoralis_major_abdominal":"chest","pectoralis_minor":"chest","serratus_anterior":"chest","trapezius_upper":"back","trapezius_middle":"back","trapezius_lower":"back","latissimus_dorsi":"back","rhomboid_major":"back","rhomboid_minor":"back","levator_scapulae":"back","serratus_posterior_inferior":"back","serratus_posterior_superior":"back","iliocostalis_lumborum":"back","iliocostalis_thoracis":"back","longissimus_thoracis":"back","spinalis_thoracis":"back","multifidus_lumborum":"back","rectus_abdominis":"core","transversus_abdominis":"core","external_oblique":"core","internal_oblique":"core","quadratus_lumborum":"core","sternocleidomastoid":"head","scalenus_medius":"head","scalenus_anterior":"head","scalenus_posterior":"head","splenius_capitis":"head","splenius_colli":"head","biceps_brachii_long":"arm","biceps_brachii_short":"arm","brachialis":"arm","coracobrachialis":"arm","triceps_long":"arm","triceps_lateral":"arm","triceps_medial":"arm","brachioradialis_muscle":"arm","flexor_carpi_radialis":"arm","palmaris_longus_muscle":"arm","humeral_head_of_flexor_carpi_ulnaris":"arm","ulnar_head_of_flexor_carpi_ulnaris":"arm","humero_ulnar_head_of_flexor_digitorum_superficialis":"arm","radial_head_of_flexor_digitorum_superficialis":"arm","flexor_digitorum_profundus":"arm","flexor_pollicis_longus":"arm","pronator_quadratus":"arm","superficial_head_of_pronator_teres":"arm","deep_head_of_pronator_teres":"arm","supinator":"arm","extensor_digitorum":"arm","ulnar_head_of_extensor_carpi_ulnaris":"arm","humeral_head_of_extensor_carpi_ulnaris":"arm","extensor_carpi_radialis_longus":"arm","extensor_carpi_radialis_brevis":"arm","anconeus_muscle":"arm","extensor_digiti_minimi":"arm","abductor_pollicis_longus":"arm","extensor_indicis":"arm","extensor_pollicis_brevis":"arm","extensor_pollicis_longus":"arm","gluteus_maximus":"hip","gluteus_medius":"hip","gluteus_minimus":"hip","iliacus":"hip","psoas_major":"hip","tensor_fasciae_latae":"hip","piriformis":"hip","quadratus_femoris":"hip","obturator_internus":"hip","obturator_externus":"hip","gemellus_inferior":"hip","gemellus_superior":"hip","gastrocnemius_lateral":"leg","gastrocnemius_medial":"leg","soleus":"leg","plantaris":"leg","tibialis_anterior":"leg","tibialis_posterior":"leg","fibularis_longus":"leg","fibularis_brevis":"leg","fibularis_tertius":"leg","extensor_digitorum_longus":"leg","extensor_hallucis_longus":"leg","flexor_digitorum_longus":"leg","flexor_hallucis_longus":"leg","popliteus":"leg"};
 const RealBody = (()=>{
-  // three.js 공식 예제 인체 모델 (우리가 쓰는 three@0.128.0과 동일 CDN, CORS 검증됨)
-  const MODEL_URL = 'https://raw.githubusercontent.com/mrdoob/three.js/r128/examples/models/gltf/Soldier.glb';
-  let ready=false, failed=false, renderer, scene, cam, avatar, mixer, rot={y:0.2}, drag=false, last=null, tint=null, baseY=0;
+  const MODEL_URLS = [
+    'models/full-body-male-mobile.glb',
+    'https://raw.githubusercontent.com/slfresh/fitmitwith-anatomy-atlas/master/models/full-body-male-mobile.glb'
+  ];
+  const C={neutral:0xD9C9BF, bone:0xEEE7D8, tissue:0xE4DCCF, bad:0xC0392B,
+           ailing:0xD14B3C, mending:0xE0A93B, healed:0x2FCE86};
+  let ready=false, failed=false, renderer, scene, cam, avatar, rot={x:0,y:0.35}, drag=false, last=null, baseY=0, auto=true;
+  const regionMeshes={}; // 부위 → [mesh]
+  let recProgress=0;
+
+  function lerpHex(a,b,t){const ar=(a>>16)&255,ag=(a>>8)&255,ab=a&255,br=(b>>16)&255,bg=(b>>8)&255,bb=b&255;
+    return (Math.round(ar+(br-ar)*t)<<16)|(Math.round(ag+(bg-ag)*t)<<8)|Math.round(ab+(bb-ab)*t);}
+  function lerp3(c0,c1,c2,t){ return t<0.5?lerpHex(c0,c1,t/0.5):lerpHex(c1,c2,(t-0.5)/0.5); }
+
+  function status(msg){ const s=document.getElementById('realStatus'); if(s){ s.textContent=msg||''; s.style.display=msg?'flex':'none'; } }
   function fallback(msg){
-    failed=true;
+    failed=true; status('');
     const host=document.getElementById('realCanvasHost'); if(host) host.innerHTML=
-      `<div class="bodyfall">사실적 모델을 불러오지 못했습니다${msg?` (${msg})`:''}.<br>‘부위 색칠 분석’ 탭에서 회복을 확인하세요.</div>`;
-    // 자동으로 부위 색칠 탭으로 전환
-    const paintTab=document.querySelector('.rec-tab[data-rtab="paint"]');
-    if(paintTab) paintTab.click();
+      `<div class="bodyfall">해부학 모델을 불러오지 못했습니다${msg?` (${msg})`:''}.<br>‘부위 색칠 분석’ 탭에서 회복을 확인하세요.</div>`;
+    const paintTab=document.querySelector('.rec-tab[data-rtab="paint"]'); if(paintTab) paintTab.click();
   }
+  // 메시 이름 → 앱 부위 (예: 'vastus_lateralis_left__mobile.002' → 'legL')
+  function regionOf(name){
+    const id=(name||'').split('__')[0];
+    let side='', key=id;
+    if(id.endsWith('_left')){ side='L'; key=id.slice(0,-5); }
+    else if(id.endsWith('_right')){ side='R'; key=id.slice(0,-6); }
+    const r=ANAT_KEY_REGION[key]; if(!r) return null;
+    return (r==='arm'||r==='hip'||r==='leg') ? r+(side||'L') : r;
+  }
+
+  /* ---------- 자동 리깅: 17개 뼈대 + 근육별 가중치 ---------- */
+  // 관절 위치(미터, 모델 좌표: Y위, +Z앞, +X 해부학적 왼쪽) — 근육 위치로 측정
+  const JOINTS={
+    pelvis:[0,0.92,0], spine:[0,1.08,-0.02], chest:[0,1.28,-0.03], neck:[0,1.46,-0.02], head:[0,1.58,0],
+    clavL:[0.05,1.40,-0.02], upperArmL:[0.185,1.37,-0.03], foreArmL:[0.215,1.085,-0.02], handL:[0.265,0.84,0],
+    clavR:[-0.05,1.40,-0.02], upperArmR:[-0.185,1.37,-0.03], foreArmR:[-0.215,1.085,-0.02], handR:[-0.265,0.84,0],
+    thighL:[0.09,0.88,0], shinL:[0.095,0.45,0], footL:[0.085,0.08,-0.03],
+    thighR:[-0.09,0.88,0], shinR:[-0.095,0.45,0], footR:[-0.085,0.08,-0.03]
+  };
+  const PARENT={spine:'pelvis',chest:'spine',neck:'chest',head:'neck',
+    clavL:'chest',upperArmL:'clavL',foreArmL:'upperArmL',handL:'foreArmL',
+    clavR:'chest',upperArmR:'clavR',foreArmR:'upperArmR',handR:'foreArmR',
+    thighL:'pelvis',shinL:'thighL',footL:'shinL',thighR:'pelvis',shinR:'thighR',footR:'shinR'};
+  // 가중치 계산용 뼈 선분(시작→끝)
+  const SEG={pelvis:[[0,0.80,0],[0,1.08,-0.02]], spine:[[0,1.08,-0.02],[0,1.28,-0.03]], chest:[[0,1.28,-0.03],[0,1.46,-0.02]],
+    neck:[[0,1.46,-0.02],[0,1.58,0]], head:[[0,1.58,0],[0,1.72,0]],
+    clavL:[[0.05,1.40,-0.02],[0.185,1.37,-0.03]], upperArmL:[[0.185,1.37,-0.03],[0.215,1.085,-0.02]], foreArmL:[[0.215,1.085,-0.02],[0.265,0.84,0]], handL:[[0.265,0.84,0],[0.29,0.68,0.01]],
+    clavR:[[-0.05,1.40,-0.02],[-0.185,1.37,-0.03]], upperArmR:[[-0.185,1.37,-0.03],[-0.215,1.085,-0.02]], foreArmR:[[-0.215,1.085,-0.02],[-0.265,0.84,0]], handR:[[-0.265,0.84,0],[-0.29,0.68,0.01]],
+    thighL:[[0.09,0.88,0],[0.095,0.45,0]], shinL:[[0.095,0.45,0],[0.085,0.08,-0.03]], footL:[[0.085,0.08,-0.03],[0.09,0.02,0.13]],
+    thighR:[[-0.09,0.88,0],[-0.095,0.45,0]], shinR:[[-0.095,0.45,0],[-0.085,0.08,-0.03]], footR:[[-0.085,0.08,-0.03],[-0.09,0.02,0.13]]};
+  const BONE_NAMES=Object.keys(JOINTS);
+  // 부위 → 붙을 수 있는 뼈 후보 (팔 근육이 다리에 딸려가는 등 오류 방지)
+  function candidates(cls){
+    const s=cls.slice(-1);
+    if(cls.startsWith('arm')) return ['chest','clav'+s,'upperArm'+s,'foreArm'+s,'hand'+s];
+    if(cls.startsWith('leg')) return ['pelvis','thigh'+s,'shin'+s,'foot'+s];
+    if(cls.startsWith('hip')) return ['pelvis','spine','thigh'+s];
+    if(cls==='head') return ['chest','neck','head'];
+    return ['pelvis','spine','chest','neck','clavL','clavR'];
+  }
+  // 뼈대·힘줄처럼 한 덩어리 메시는 정점 위치로 부위 판별
+  function classifyPoint(x,y){
+    const ax=Math.abs(x), s=x>=0?'L':'R';
+    if(y>1.47&&ax<0.13) return 'head';
+    const armT = y>1.3?0.16 : (y>0.95?0.165:0.18);
+    if(y<=1.45&&y>=0.55&&ax>armT) return 'arm'+s;
+    if(y<0.80) return 'leg'+s;
+    if(y<0.95) return 'hip'+s;
+    return 'trunk';
+  }
+  function segDist(p,a,b){
+    const abx=b[0]-a[0],aby=b[1]-a[1],abz=b[2]-a[2];
+    let t=((p[0]-a[0])*abx+(p[1]-a[1])*aby+(p[2]-a[2])*abz)/(abx*abx+aby*aby+abz*abz);
+    t=Math.max(0,Math.min(1,t));
+    const dx=p[0]-(a[0]+abx*t),dy=p[1]-(a[1]+aby*t),dz=p[2]-(a[2]+abz*t);
+    return Math.sqrt(dx*dx+dy*dy+dz*dz);
+  }
+  let bones={}, skeleton=null, skinned=[];
+  function rig(root, meshes){
+    // 뼈대 계층 생성 (휴지 자세 회전 없음 → 월드 회전 = 누적 로컬 회전)
+    BONE_NAMES.forEach(n=>{ const b=new THREE.Bone(); b.name=n; bones[n]=b; });
+    BONE_NAMES.forEach(n=>{
+      const w=JOINTS[n], p=PARENT[n];
+      if(p){ const pw=JOINTS[p]; bones[n].position.set(w[0]-pw[0],w[1]-pw[1],w[2]-pw[2]); bones[p].add(bones[n]); }
+      else { bones[n].position.set(w[0],w[1],w[2]); root.add(bones[n]); }
+    });
+    bones.pelvis.userData.rest=bones.pelvis.position.clone();
+    const boneList=BONE_NAMES.map(n=>bones[n]);
+    const idxOf={}; BONE_NAMES.forEach((n,i)=>idxOf[n]=i);
+    meshes.forEach(o=>{
+      const g=o.geometry, pos=g.attributes.position, n=pos.count;
+      const cls=o.userData.cls; // 근육이면 부위, 아니면 null(정점마다 판별)
+      const si=new Uint16Array(n*4), sw=new Float32Array(n*4);
+      const p=[0,0,0];
+      for(let v=0;v<n;v++){
+        p[0]=pos.getX(v); p[1]=pos.getY(v); p[2]=pos.getZ(v);
+        const cand=candidates(cls||classifyPoint(p[0],p[1]));
+        const ws=cand.map(b=>{ const d=segDist(p,SEG[b][0],SEG[b][1]); return [idxOf[b], 1/Math.pow(d+0.006,4)]; })
+                     .sort((a,b)=>b[1]-a[1]).slice(0,3);
+        const tot=ws.reduce((s,w)=>s+w[1],0);
+        ws.forEach((w,k)=>{ si[v*4+k]=w[0]; sw[v*4+k]=w[1]/tot; });
+      }
+      g.setAttribute('skinIndex',new THREE.Uint16BufferAttribute(si,4));
+      g.setAttribute('skinWeight',new THREE.Float32BufferAttribute(sw,4));
+      o.material.skinning=true;
+      const sm=new THREE.SkinnedMesh(g,o.material); sm.name=o.name; sm.frustumCulled=false; sm.userData=o.userData;
+      o.parent.add(sm); o.parent.remove(o); skinned.push(sm);
+    });
+    root.updateMatrixWorld(true);
+    skeleton=new THREE.Skeleton(boneList);
+    skinned.forEach(sm=>sm.bind(skeleton));
+    return skinned;
+  }
+
+  /* ---------- 운동 동작 (각도: 라디안, 부드러운 반복) ---------- */
+  const L1=0.43, L2=0.37; // 허벅지·정강이 길이
+  const ease=t=>0.5-0.5*Math.cos(2*Math.PI*t);        // 0→1→0
+  const sw=t=>Math.sin(2*Math.PI*t);                   // -1~1
+  function squatPose(th,P){ // th: 고관절 굴곡, 발은 바닥 고정
+    const ph=th*0.45;
+    P.thighL=[-th,0,0]; P.thighR=[-th,0,0]; P.shinL=[th+ph,0,0]; P.shinR=[th+ph,0,0];
+    P.footL=[-ph,0,0]; P.footR=[-ph,0,0]; P.spine=[th*0.35,0,0]; P.chest=[th*0.15,0,0];
+    P.root=[0, L1*Math.cos(th)+L2*Math.cos(ph)-(L1+L2), -(L1*Math.sin(th)-L2*Math.sin(ph))];
+    return P;
+  }
+  const MOTIONS={
+    sts:{label:'앉았다 일어서기', period:3.6, pose:t=>{ const e=ease(t); const P=squatPose(1.15*e,{}); P.upperArmL=[-1.2*e,0,0]; P.upperArmR=[-1.2*e,0,0]; return P; }},
+    squat:{label:'미니 스쿼트', period:3.0, pose:t=>{ const e=ease(t); const P=squatPose(0.6*e,{}); P.upperArmL=[-0.9*e,0,0]; P.upperArmR=[-0.9*e,0,0]; return P; }},
+    walk:{label:'제자리 걷기', period:1.3, pose:t=>{ const a=sw(t), kL=Math.max(0,-Math.cos(2*Math.PI*t)), kR=Math.max(0,Math.cos(2*Math.PI*t));
+      return {thighL:[-0.45*a-0.15*kL,0,0], thighR:[0.45*a-0.15*kR,0,0], shinL:[0.75*kL,0,0], shinR:[0.75*kR,0,0],
+        upperArmL:[0.35*a,0,0.08], upperArmR:[-0.35*a,0,-0.08], foreArmL:[-0.35,0,0], foreArmR:[-0.35,0,0], root:[0,-0.012*(kL+kR),0]}; }},
+    march:{label:'제자리 높이 걷기', period:1.6, pose:t=>{ const hL=Math.max(0,sw(t)), hR=Math.max(0,-sw(t));
+      return {thighL:[-1.1*hL,0,0], thighR:[-1.1*hR,0,0], shinL:[1.4*hL,0,0], shinR:[1.4*hR,0,0], footL:[-0.25*hL,0,0], footR:[-0.25*hR,0,0],
+        upperArmL:[0.5*sw(t),0,0.05], upperArmR:[-0.5*sw(t),0,-0.05], foreArmL:[-0.9,0,0], foreArmR:[-0.9,0,0]}; }},
+    raise:{label:'팔 들어올리기(관절가동범위)', period:4.2, pose:t=>{ const e=ease(t);
+      return {upperArmL:[-2.7*e,0,0.1*e], upperArmR:[-2.7*e,0,-0.1*e], chest:[-0.08*e,0,0], thighL:[-0.35*ease(t+0.5),0,0], shinL:[0.6*ease(t+0.5),0,0]}; }},
+    band:{label:'밴드 당기기·팔 굽히기', period:2.4, pose:t=>{ const e=ease(t); const P=squatPose(0.18,{});
+      P.upperArmL=[0.35*e,0,0.05]; P.upperArmR=[0.35*e,0,-0.05]; P.foreArmL=[-2.0*e,0,0]; P.foreArmR=[-2.0*e,0,0]; return P; }},
+    hold:{label:'자세 유지(등척성 수축)', period:2.2, pose:t=>{ const P=squatPose(0.42,{}); P.upperArmL=[-1.4,0,0]; P.upperArmR=[-1.4,0,0];
+      P.root[0]=0.002*sw(t*6); return P; }},
+    balance:{label:'한 발 서기(균형)', period:6.0, pose:t=>{ const left=t<0.5, u=ease((t%0.5)*2); const s=left?'L':'R', o=left?'R':'L', sgn=left?1:-1;
+      const P={}; P['thigh'+s]=[-1.0*u,0,0]; P['shin'+s]=[1.3*u,0,0]; P['upperArmL']=[0,0,0.55*u]; P['upperArmR']=[0,0,-0.55*u];
+      P['thigh'+o]=[0,0,-0.05*sgn*u]; P.root=[-0.035*sgn*u+0.006*Math.sin(t*40),0,0]; P.spine=[0,0,0.05*sgn*u]; return P; }},
+    stretch:{label:'옆구리 스트레칭', period:5.0, pose:t=>{ const a=sw(t), up=Math.min(1,ease(t)*1.6+0.4);
+      return {upperArmL:[0,0,2.8*up], upperArmR:[0,0,-2.8*up], foreArmL:[0,0,0.3], foreArmR:[0,0,-0.3], spine:[0,0,0.22*a], chest:[0,0,0.18*a]}; }},
+    posture:{label:'가슴 펴기(W 자세)', period:3.4, pose:t=>{ const e=ease(t);
+      return {upperArmL:[0.25*e,0,1.2], upperArmR:[0.25*e,0,-1.2], foreArmL:[0,0,1.55], foreArmR:[0,0,-1.55],
+        spine:[-0.12*e,0,0], chest:[-0.1*e,0,0], clavL:[0,0.12*e,0], clavR:[0,-0.12*e,0], neck:[-0.08*e,0,0]}; }},
+    breath:{label:'호흡 운동', period:4.5, pose:t=>{ const e=ease(t);
+      return {spine:[-0.06*e,0,0], chest:[-0.08*e,0,0], clavL:[0,0,0.1*e], clavR:[0,0,-0.1*e], upperArmL:[0.1*e,0,0.4*e], upperArmR:[0.1*e,0,-0.4*e], neck:[-0.1*e,0,0]}; }},
+    shift:{label:'좌우 체중 이동', period:3.2, pose:t=>{ const a=sw(t);
+      return {root:[0.05*a,-0.01*Math.abs(a),0], thighL:[0,0,-0.06*a], thighR:[0,0,-0.06*a], spine:[0,0,-0.06*a], upperArmL:[0,0,0.15], upperArmR:[0,0,-0.15]}; }},
+    reach:{label:'앞으로 뻗어 집기(일상동작)', period:3.6, pose:t=>{ const e=ease(t); const P=squatPose(0.45*e,{});
+      P.spine=[0.55*e,0,0]; P.upperArmL=[-1.5*e,0,0]; P.upperArmR=[-1.5*e,0,0]; return P; }},
+    idle:{label:'', period:4.5, pose:t=>({chest:[-0.015*ease(t),0,0], upperArmL:[0,0,0.04], upperArmR:[0,0,-0.04]})}
+  };
+  // 앱의 16개 중재 항목 → 동작
+  const EX_MOTION={aarom:'raise', rom:'raise', iso:'hold', band:'band', aerobic:'march', interval:'march', aqua:'walk',
+    balance:'balance', gait:'walk', breath:'breath', adl:'reach', stump:'shift', sts:'sts', posture:'posture', stretch:'stretch', cognitive:'march'};
+  let curMotion='idle', motionT0=performance.now(), targetRegions=new Set(), frozenT=null;
+  const cur={}; // 현재 각도(부드러운 전환용)
+  function setExercise(exId){
+    frozenT=null;
+    curMotion = exId ? (EX_MOTION[exId]||'march') : 'idle';
+    motionT0=performance.now();
+    let regs=[];
+    if(exId&&typeof EX_REGIONS!=='undefined'){ const r=EX_REGIONS[exId]; regs = r==='CASE' ? [...caseRegions()] : (r||[]); }
+    targetRegions=new Set(regs);
+    if(!exId) regionMats.forEach(m=>m.emissive&&m.emissive.setHex(0));
+    return MOTIONS[curMotion].label;
+  }
+  function animate(now){
+    if(!skeleton) return;
+    const M=MOTIONS[curMotion], t=frozenT!=null?frozenT:((now-motionT0)/1000/M.period)%1;
+    const P=M.pose(t);
+    const k=frozenT!=null?1:0.18; // 전환 부드러움
+    BONE_NAMES.forEach(n=>{
+      const tg=P[n]||[0,0,0], c=cur[n]||(cur[n]=[0,0,0]);
+      for(let i=0;i<3;i++) c[i]+=(tg[i]-c[i])*k;
+      bones[n].rotation.set(c[0],c[1],c[2]);
+    });
+    const r=P.root||[0,0,0], c=cur.root||(cur.root=[0,0,0]);
+    for(let i=0;i<3;i++) c[i]+=(r[i]-c[i])*k;
+    const rest=bones.pelvis.userData.rest; bones.pelvis.position.set(rest.x+c[0],rest.y+c[1],rest.z+c[2]);
+    // 이 운동이 쓰는 근육: 회복 색은 유지한 채 박동하듯 빛남
+    if(curMotion!=='idle'){
+      const glow=0.12+0.28*(0.5+0.5*Math.sin(now/1000*Math.PI*2/ (M.period/2)));
+      Object.keys(regionMeshes).forEach(rg=>{
+        const on=targetRegions.has(rg);
+        regionMeshes[rg].forEach(o=>{ const m=o.material; if(on){ m.emissive.copy(m.color).multiplyScalar(glow); } else m.emissive.setHex(0); });
+      });
+    }
+  }
+
   function ensure(){
-    if(ready||failed) return;
+    if(ready||failed||renderer) return;
     const host=document.getElementById('realCanvasHost'); if(!host) return;
     if(typeof THREE==='undefined'||typeof THREE.GLTFLoader==='undefined'){ fallback('3D 라이브러리 차단'); return; }
     const cv=document.createElement('canvas'); cv.className='realcanvas'; host.appendChild(cv);
+    const st=document.createElement('div'); st.id='realStatus'; st.className='realstatus'; host.appendChild(st);
+    status('해부학 모델 불러오는 중… (약 2.5MB)');
     scene=new THREE.Scene();
-    cam=new THREE.PerspectiveCamera(32, cv.clientWidth/cv.clientHeight||1.2, 0.1, 100);
-    cam.position.set(0,0.95,4.2);
+    cam=new THREE.PerspectiveCamera(30, cv.clientWidth/cv.clientHeight||1.2, 0.05, 50);
+    cam.position.set(0,0.95,4.1); cam.lookAt(0,0.93,0);
     renderer=new THREE.WebGLRenderer({canvas:cv, antialias:true, alpha:true});
     renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-    scene.add(new THREE.AmbientLight(0xffffff,0.85));
-    const d1=new THREE.DirectionalLight(0xffffff,1.0); d1.position.set(1.5,3,2.5); scene.add(d1);
-    const d2=new THREE.DirectionalLight(0xcfe0ff,0.4); d2.position.set(-2,1,-1.5); scene.add(d2);
+    scene.add(new THREE.HemisphereLight(0xffffff,0xb9c4b3,0.75));
+    const d1=new THREE.DirectionalLight(0xffffff,0.9); d1.position.set(1.6,2.6,2.6); scene.add(d1);
+    const d2=new THREE.DirectionalLight(0xdfe8ff,0.45); d2.position.set(-2,1.2,-2); scene.add(d2);
     resize(); new ResizeObserver(resize).observe(cv);
-    cv.addEventListener('pointerdown',e=>{drag=true;last=e.clientX;cv.setPointerCapture(e.pointerId);});
-    cv.addEventListener('pointermove',e=>{ if(!drag)return; rot.y+=(e.clientX-last)*0.01; last=e.clientX; });
+    cv.addEventListener('pointerdown',e=>{drag=true;last={x:e.clientX,y:e.clientY};cv.setPointerCapture(e.pointerId);});
+    cv.addEventListener('pointermove',e=>{ if(!drag)return; rot.y+=(e.clientX-last.x)*0.01; rot.x=Math.max(-0.5,Math.min(0.5,rot.x+(e.clientY-last.y)*0.006)); last={x:e.clientX,y:e.clientY}; });
     ['pointerup','pointercancel','pointerleave'].forEach(ev=>cv.addEventListener(ev,()=>drag=false));
-    // 로드 타임아웃 안전장치
-    const guard=setTimeout(()=>{ if(!avatar&&!failed) fallback('불러오기 시간 초과'); }, 12000);
-    try{
-      new THREE.GLTFLoader().load(MODEL_URL, gltf=>{
-        clearTimeout(guard);
-        avatar=gltf.scene;
-        // 크기·위치 정규화
-        const box=new THREE.Box3().setFromObject(avatar);
-        const size=box.getSize(new THREE.Vector3()), center=box.getCenter(new THREE.Vector3());
-        const scale=1.7/(size.y||1.7); avatar.scale.setScalar(scale);
-        avatar.userData.normScale=scale;
-        const box2=new THREE.Box3().setFromObject(avatar); baseY=-box2.min.y;
-        avatar.position.set(-center.x*scale, baseY-0.05, -center.z*scale);
-        // 재질에 회복 표현을 걸 수 있게 원색 저장
-        avatar.traverse(o=>{ if(o.isMesh&&o.material){ o.material=Array.isArray(o.material)?o.material[0].clone():o.material.clone(); o.userData.base=o.material.color?o.material.color.clone():null; } });
-        scene.add(avatar); ready=true; loop(); applyRecovery(recProgress);
-      }, undefined, err=>{ clearTimeout(guard); fallback('모델 주소 오류'); });
-    }catch(e){ clearTimeout(guard); fallback(); }
+    const guard=setTimeout(()=>{ if(!ready&&!failed) fallback('불러오기 시간 초과'); }, 30000);
+    const loader=new THREE.GLTFLoader();
+    const tryLoad=i=>{
+      if(i>=MODEL_URLS.length){ clearTimeout(guard); fallback('모델 주소 오류'); return; }
+      loader.load(MODEL_URLS[i], gltf=>{ clearTimeout(guard); onLoaded(gltf); },
+        xhr=>{ if(xhr&&xhr.total) status(`해부학 모델 불러오는 중… ${Math.round(xhr.loaded/xhr.total*100)}%`); },
+        ()=>tryLoad(i+1));
+    };
+    tryLoad(0);
+  }
+  const regionMats=[];
+  function onLoaded(gltf){
+    if(failed) return;
+    avatar=gltf.scene;
+    const meshes=[]; avatar.traverse(o=>{ if(o.isMesh) meshes.push(o); });
+    meshes.forEach(o=>{
+      const nm=(o.name||(o.parent&&o.parent.name)||'');
+      const m=(Array.isArray(o.material)?o.material[0]:o.material).clone();
+      m.roughness=0.62; m.metalness=0.02; o.material=m;
+      if(nm.startsWith('skeleton')){ m.color.setHex(C.bone); o.userData={cls:null}; return; }
+      if(nm.startsWith('connective')){ m.color.setHex(C.tissue); o.userData={cls:null}; return; }
+      const r=regionOf(nm);
+      o.userData={cls:r?(/^(arm|leg|hip)/.test(r)||r==='head'?r:'trunk'):null, region:r};
+      m.color.setHex(C.neutral);
+    });
+    status('관절 뼈대 심는 중…');
+    try{ rig(avatar, meshes); }catch(e){ console.warn('rig 실패',e); }
+    (skinned.length?skinned:meshes).forEach(o=>{
+      const r=o.userData.region; if(r){ (regionMeshes[r]=regionMeshes[r]||[]).push(o); regionMats.push(o.material); }
+    });
+    // 크기·위치 정규화 (리깅 후, 그룹 단위로)
+    const box=new THREE.Box3().setFromObject(avatar);
+    const size=box.getSize(new THREE.Vector3()), center=box.getCenter(new THREE.Vector3());
+    const scale=1.7/(size.y||1.7); avatar.scale.setScalar(scale);
+    baseY=-box.min.y*scale-0.02;
+    avatar.position.set(-center.x*scale, baseY, -center.z*scale);
+    scene.add(avatar); ready=true; status(''); loop(); applyRecovery(recProgress);
   }
   function resize(){
-    if(!renderer) return; const cv=renderer.domElement, w=cv.clientWidth||360, h=cv.clientHeight||380;
+    if(!renderer) return; const cv=renderer.domElement, w=cv.clientWidth||360, h=cv.clientHeight||420;
     renderer.setSize(w,h,false); cam.aspect=w/h; cam.updateProjectionMatrix();
   }
-  let recProgress=0;
   function loop(){
     if(!ready||!renderer) return;
-    if(!drag) rot.y+=0.004;
-    if(avatar) avatar.rotation.y=rot.y;
+    if(!drag&&auto) rot.y+=0.004;
+    avatar.rotation.set(rot.x+0.05*(1-recProgress), rot.y, 0); // 회복 전 살짝 앞으로 수그림
+    animate(performance.now());
     renderer.render(scene,cam); requestAnimationFrame(loop);
   }
-  // 회복 진행도 p: 회복될수록 자세가 곧게 서고 몸이 밝고 생기있게
+  function paint(r,hex){ (regionMeshes[r]||[]).forEach(o=>o.material.color.setHex(hex)); }
+  // 회복 진행도 p: 부위 색칠 탭과 같은 규칙으로 '근육 단위' 색칠
   function applyRecovery(p){
     recProgress=p;
-    if(!ready||!avatar) return;
-    // 자세: 아플 땐 앞으로 굽고 축 처짐 → 회복되면 곧게 서고 살짝 커짐
-    avatar.rotation.z = -0.14*(1-p);              // 옆으로 기운 굽은 자세 → 곧게
-    avatar.rotation.x = 0.10*(1-p);               // 앞으로 수그린 자세 → 폄
-    avatar.position.y = baseY-0.05 - 0.09*(1-p);  // 웅크려 낮아짐 → 바로 섬
-    const sc=avatar.userData.normScale||1;
-    avatar.scale.setScalar(sc*(0.96+0.04*p));     // 위축 → 활력
-    // 명도: 아플 땐 어둡고 칙칙(창백) → 회복되면 밝고 혈색
-    avatar.traverse(o=>{
-      if(o.isMesh&&o.material&&o.material.color&&o.userData.base){
-        const base=o.userData.base;
-        const bright=0.6+0.4*p;                   // p=0 어둡게, p=1 원래 밝기
-        o.material.color.setRGB(
-          Math.min(1,base.r*bright*(1+0.12*p)),   // 회복 시 붉은 혈색 약간 강조
-          base.g*bright,
-          base.b*bright
-        );
-        if(o.material.emissive){                  // 회복될수록 은은한 생기
-          o.material.emissive.setRGB(0.02*p,0.04*p,0.02*p);
-        }
-      }
+    if(!ready) return;
+    if(!S.built||!S.evalRes){ BODY_REGIONS.forEach(r=>paint(r,C.neutral)); return; }
+    const cr=caseRegions(), {hit,bad}=programRegions();
+    BODY_REGIONS.forEach(r=>{
+      if(bad.has(r)) paint(r,C.bad);                                         // 금기 부위
+      else if(hit.has(r)&&cr.has(r)) paint(r, lerp3(C.ailing,C.mending,C.healed,p)); // 다루는 문제부위 → 회복
+      else if(cr.has(r)) paint(r,C.ailing);                                  // 문제인데 미포함 → 그대로 아픔
+      else paint(r,C.neutral);                                               // 무관
     });
   }
-  return {ensure, applyRecovery, resizeNow:()=>{ if(ready) resize(); }, isFailed:()=>failed};
+  // 시점 버튼: 앞/옆/뒤로 고정, 'auto'는 자동 회전 재개
+  function setView(v){
+    if(v==='auto'){ auto=true; return; }
+    auto=false; rot.x=0; rot.y={front:0, side:Math.PI/2, back:Math.PI}[v]||0;
+  }
+  // 특정 순간에 멈춘 자세 (발표 자료 캡처·점검용)
+  function freezePose(exId,t){ setExercise(exId); frozenT=t; }
+  return {ensure, applyRecovery, setView, setExercise, freezePose, motionLabel:id=>MOTIONS[EX_MOTION[id]||'march'].label, resizeNow:()=>{ if(renderer) resize(); }, isFailed:()=>failed};
 })();
 window.RealBody = RealBody;
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-rview]'); if(!b) return;
+  RealBody.setView(b.dataset.rview);
+  document.querySelectorAll('[data-rview]').forEach(x=>x.dataset.on=(x===b)?'1':'0');
+});
 
 /* ============================================================
    INIT
