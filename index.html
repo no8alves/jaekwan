@@ -8,17 +8,26 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
 :root{
-  --paper:#EDF1E9;
-  --band:#E1E9DE;
-  --card:#FAFCF7;
-  --ink:#12302A;
-  --ink2:#4B615A;
-  --ink3:#7C8F87;
-  --rule:#C2D0C3;
-  --signal:#0C8A66;
-  --caution:#B0700B;
-  --alert:#A0281F;
-  --focus:#0C8A66;
+  --paper:#F3F5F2;
+  --band:#EEF2EF;
+  --card:#FFFFFF;
+  --ink:#0F2420;
+  --ink2:#4A5B56;
+  --ink3:#86958F;
+  --rule:#DFE6E1;
+  --signal:#0B8462;
+  --caution:#B26A00;
+  --alert:#B42318;
+  --focus:#0B8462;
+  --brand-1:#0F2420;
+  --brand-2:#14463A;
+  --mint:#E3F3EC;
+  --r-lg:16px;
+  --r-md:12px;
+  --r-sm:8px;
+  --sh-1:0 1px 2px rgba(15,36,32,.04),0 1px 3px rgba(15,36,32,.06);
+  --sh-2:0 2px 4px rgba(15,36,32,.04),0 8px 24px -6px rgba(15,36,32,.10);
+  --sh-3:0 4px 8px rgba(15,36,32,.05),0 18px 40px -12px rgba(15,36,32,.18);
   --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
   --sans:"Pretendard Variable",Pretendard,system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
 }
@@ -684,6 +693,269 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
 .rp-now{margin-top:8px;font-size:12.5px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .rp-now span{background:var(--band);border-radius:14px;padding:3px 10px}
 .rp-now i{font-style:normal;color:var(--ink3);font-size:11px;margin-left:3px}
+
+
+/* ---------- 부위 커버리지 안내 ---------- */
+.covkey{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:8px;margin:0 0 10px}
+.ck{display:grid;grid-template-columns:14px 1fr;gap:10px;align-items:start;padding:11px 13px;border-radius:12px;background:var(--band);border:1px solid transparent}
+.ck i{width:14px;height:14px;border-radius:4px;margin-top:3px}
+.ck b{display:block;font-size:13.5px;font-weight:700;margin-bottom:2px}
+.ck span{display:block;font-size:12.5px;color:var(--ink2);line-height:1.5}
+.ck em{display:block;font-style:normal;font-size:12.5px;font-weight:700;margin-top:4px}
+.ck[data-k="gap"]{background:#FFF7E6;border-color:#F2DDAF}.ck[data-k="gap"] i{background:#E0A93B}.ck[data-k="gap"] em{color:#9A5B00}
+.ck[data-k="good"]{background:#ECF7F1;border-color:#C8E7D7}.ck[data-k="good"] i{background:#2E9E77}.ck[data-k="good"] em{color:#0B7A58}
+.ck[data-k="bad"]{background:#FDF0EE;border-color:#F1CFCA}.ck[data-k="bad"] i{background:#C0392B}.ck[data-k="bad"] em{color:#A2271B}
+.ck[data-k="none"] i{background:#C7D1C3}
+.ck[data-k="extra"]{background:#EEF4FB;border-color:#CFE0F2}.ck[data-k="extra"] i{background:#3B82C4}.ck[data-k="extra"] em{color:#245E96}
+.bl-row[data-k="extra"] .bl-sw{background:#3B82C4}
+.covgoal{font-size:13.5px;margin:0 0 16px;color:var(--ink)}
+.cov-status{font-size:13px;font-weight:700;line-height:1.4;padding:9px 11px;border-radius:10px;background:var(--band);color:var(--ink2)}
+.cov-status[data-k="gap"]{background:#FFF7E6;color:#9A5B00}
+.cov-status[data-k="bad"]{background:#FDF0EE;color:#A2271B}
+.cov-status[data-k="good"]{background:#ECF7F1;color:#0B7A58}
+.bl-row[data-k="gap"] .bl-sw{background:#E0A93B}
+.bl-row[data-k="bad"] .bl-sw{background:#C0392B}
+.bl-row[data-k="good"] .bl-sw{background:#2E9E77}
+.bl-row b small{font-weight:600;color:var(--ink3);font-size:11px;margin-left:2px}
+.bl-list{display:block;color:var(--ink);font-size:12px;margin-top:1px}
+.bl-todo{display:block;font-size:11.5px;font-weight:700;margin-top:2px}
+.bl-row[data-k="gap"] .bl-todo{color:#9A5B00}
+.bl-row[data-k="bad"] .bl-todo{color:#A2271B}
+
+/* ---------- 대상자 확인 (Step 2) — 한 화면에 보이도록 3단 배치 ---------- */
+.caselayout{display:grid;grid-template-columns:260px 1fr 1fr;gap:16px;align-items:stretch}
+.caselayout .chart{margin-bottom:0;display:flex;flex-direction:column}
+.caselayout .chart>.body,.caselayout .caseinfo,.caselayout .precs{flex:1}
+.casecol{display:contents}
+.casefig .body{display:flex;flex-direction:column;padding:14px}
+.casefig-art{flex:1;min-height:clamp(190px,calc(100vh - 560px),420px);border-radius:14px;background:linear-gradient(180deg,#F6F9F7,#EAF0EC);display:flex;align-items:center;justify-content:center;padding:14px 8px 10px}
+.casefig-art .body-fig{gap:10px}
+.casefig-art .bf-svg{max-height:none;height:100%}
+.casefig-art .bf-cap{font-size:14px}
+.casefig-name{margin-top:12px;font-size:19px;font-weight:800;letter-spacing:-.02em;display:flex;align-items:baseline;gap:8px}
+.casefig-name small{font-size:13px;font-weight:500;color:var(--ink3)}
+.casefig-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.caseinfo{margin:0;padding:2px 16px}
+.ci-row{display:grid;grid-template-columns:78px 1fr;gap:12px;padding:7px 0;border-bottom:1px solid var(--rule)}
+.ci-row:last-child{border-bottom:none}
+.ci-row dt{font-size:12px;font-weight:600;color:var(--ink3);padding-top:2px}
+.ci-row dd{margin:0;font-size:14px;line-height:1.5;color:var(--ink);font-weight:500}
+.precs{list-style:none;margin:0;padding:4px 16px}
+.precs li{position:relative;padding:9px 0 9px 26px;font-size:14px;line-height:1.5;border-bottom:1px solid var(--rule)}
+.precs li:last-child{border-bottom:none}
+.precs li::before{content:"!";position:absolute;left:0;top:11px;width:17px;height:17px;border-radius:50%;background:#FDF0EE;color:var(--alert);font-size:11px;font-weight:800;display:grid;place-items:center}
+.caseprec>h3{color:var(--alert) !important}
+.panel[data-step="2"] .act{margin-top:14px}
+.panel[data-step="2"] .lede{margin-bottom:14px}
+.caselayout .chart>h3{padding:10px 16px}
+@media(max-width:1080px){
+  .caselayout{grid-template-columns:240px 1fr}
+  .casecol{display:flex;flex-direction:column;gap:16px}
+}
+@media(max-width:760px){
+  .caselayout{grid-template-columns:1fr}
+  .casefig-art{min-height:280px}
+}
+/* ============================================================
+   PREMIUM THEME — 화면 전용 (인쇄 스타일은 위 규칙 유지)
+   ============================================================ */
+@media screen{
+  body{
+    background:
+      radial-gradient(1200px 520px at 85% -120px,rgba(11,132,98,.10),transparent 60%),
+      radial-gradient(900px 420px at -10% -80px,rgba(20,70,58,.08),transparent 60%),
+      var(--paper);
+    background-attachment:fixed;
+    font-size:15px;letter-spacing:-.005em;
+  }
+  ::selection{background:rgba(11,132,98,.18)}
+  .wrap{max-width:1120px;padding:0 24px 112px}
+
+  /* ---- header ---- */
+  header.top{border-bottom:none;padding:18px 0 14px;margin-bottom:2px}
+  .brandline{align-items:center}
+  h1.brand{
+    font-size:clamp(24px,3vw,32px);font-weight:800;letter-spacing:-.04em;
+    display:flex;flex-direction:column;
+  }
+  h1.brand small{
+    display:inline-flex;align-items:center;gap:8px;align-self:flex-start;
+    font-size:10.5px;letter-spacing:.16em;color:var(--signal);font-weight:600;
+    background:var(--mint);border:1px solid rgba(11,132,98,.18);
+    padding:4px 11px 4px 9px;border-radius:999px;margin-bottom:8px;
+  }
+  h1.brand small::before{
+    content:"";width:7px;height:7px;border-radius:50%;background:var(--signal);
+    box-shadow:0 0 0 3px rgba(11,132,98,.18);
+  }
+  .teamtag{
+    background:var(--card);border:1px solid var(--rule);border-radius:var(--r-md);
+    padding:8px 14px;box-shadow:var(--sh-1);font-size:10.5px;letter-spacing:.12em;color:var(--ink3);
+    line-height:1.7;
+  }
+  .teamtag input{
+    font-family:var(--sans);font-size:14px;font-weight:700;letter-spacing:-.01em;width:150px;
+    border-bottom:1px solid transparent;color:var(--ink);
+  }
+  .teamtag input:hover{border-bottom-color:var(--rule)}
+  #stamp{letter-spacing:.04em}
+  .savebar{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:4px;letter-spacing:0}
+  .savestate{display:inline-flex;align-items:center;gap:6px;font-family:var(--sans);font-size:11.5px;color:var(--ink3)}
+  .savestate::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--ink3)}
+  .savestate[data-st="ok"]::before{background:var(--signal);box-shadow:0 0 0 3px rgba(11,132,98,.16)}
+  .savestate[data-st="err"]{color:var(--alert)}
+  .savestate[data-st="err"]::before{background:var(--alert)}
+  .freshbtn{
+    font-family:var(--sans);font-size:11.5px;font-weight:600;color:var(--ink2);
+    background:var(--band);border:1px solid var(--rule);border-radius:999px;padding:3px 10px;cursor:pointer;
+    transition:all .15s;
+  }
+  .freshbtn:hover{color:var(--alert);border-color:rgba(180,35,24,.35);background:#FDF3F2}
+
+  /* ---- step rail (sticky segmented stepper) ---- */
+  .rail{
+    position:sticky;top:12px;z-index:40;gap:4px;padding:5px;
+    background:rgba(255,255,255,.82);backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);
+    border:1px solid rgba(223,230,225,.9);border-radius:var(--r-lg);box-shadow:var(--sh-2);margin-bottom:24px;
+  }
+  .rail button{
+    border-right:none;border-radius:11px;padding:9px 10px 9px 12px;position:relative;
+    display:flex;align-items:center;gap:9px;
+  }
+  .rail button .n{
+    flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;
+    font-size:10.5px;font-weight:700;letter-spacing:0;background:var(--band);color:var(--ink3);
+    transition:all .2s;
+  }
+  .rail button .t{font-size:12.5px;font-weight:600;letter-spacing:-.01em}
+  .rail button:not(:disabled):hover{background:var(--band);color:var(--ink)}
+  .rail button[data-done="1"] .n{background:var(--mint);color:var(--signal)}
+  .rail button[data-on="1"]{
+    background:linear-gradient(135deg,var(--brand-1),var(--brand-2));color:#fff;
+    box-shadow:0 6px 16px -6px rgba(15,36,32,.55);
+  }
+  .rail button[data-on="1"] .n{background:rgba(255,255,255,.16);color:#9AF0CD}
+  .rail button:disabled{opacity:.38}
+
+  /* ---- section heads ---- */
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;color:var(--signal);font-weight:600;
+    letter-spacing:.18em;font-size:10.5px;margin-bottom:10px;
+  }
+  .eyebrow::before{content:"";width:18px;height:1.5px;background:currentColor;border-radius:2px}
+  h2.sec{font-size:clamp(22px,2.6vw,28px);letter-spacing:-.035em;margin-bottom:8px;line-height:1.25}
+  p.lede{font-size:15px;line-height:1.7;color:var(--ink2);margin-bottom:20px;max-width:70ch}
+  .panel{animation:fadeup .35s cubic-bezier(.2,.7,.2,1)}
+  @keyframes fadeup{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  /* ---- cards / charts ---- */
+  .chart{
+    border:1px solid var(--rule);border-radius:var(--r-lg);box-shadow:var(--sh-1);
+    overflow:hidden;margin-bottom:20px;background:var(--card);
+  }
+  .chart>h3{
+    background:linear-gradient(180deg,#FBFCFB,#F5F8F6);color:var(--ink);
+    border-bottom:1px solid var(--rule);padding:13px 18px;
+    font-size:14px;font-weight:700;letter-spacing:-.015em;
+  }
+  .chart>h3 span.hint{
+    color:var(--ink3);font-size:9.5px;letter-spacing:.14em;font-weight:600;
+    background:var(--card);border:1px solid var(--rule);border-radius:999px;padding:3px 9px;
+  }
+  .chart .body{padding:18px}
+  .pick,.role,.daycard,.weekcard,.wkc,.wk-summary{border-radius:var(--r-md);box-shadow:var(--sh-1)}
+  .pick:hover{box-shadow:var(--sh-2)}
+  .casecard{border-radius:var(--r-md)}
+
+  /* ---- buttons ---- */
+  .btn{
+    border-radius:999px;padding:11px 22px;font-size:14px;font-weight:700;border:1px solid transparent;
+    background:linear-gradient(135deg,var(--brand-1),var(--brand-2));color:#fff;
+    box-shadow:0 1px 0 rgba(255,255,255,.08) inset,0 8px 18px -8px rgba(15,36,32,.55);
+    transition:transform .15s,box-shadow .15s,opacity .15s,background .15s;
+  }
+  .btn:hover:not(:disabled){opacity:1;transform:translateY(-1px);box-shadow:0 1px 0 rgba(255,255,255,.08) inset,0 12px 24px -10px rgba(15,36,32,.6)}
+  .btn:active:not(:disabled){transform:none}
+  .btn.ghost{background:var(--card);color:var(--ink);border-color:var(--rule);box-shadow:var(--sh-1)}
+  .btn.ghost:hover:not(:disabled){border-color:#C5D1CA;box-shadow:var(--sh-2)}
+  .btn.small{padding:7px 14px;font-size:12.5px}
+  .btn:disabled{opacity:.38;box-shadow:none}
+  .act{margin-top:30px;gap:10px}
+
+  /* ---- inputs ---- */
+  input[type=number],input[type=text],select,textarea{
+    border-radius:10px;border:1px solid var(--rule);padding:8px 11px;background:#fff;
+    transition:border-color .15s,box-shadow .15s;
+  }
+  input[type=number]{padding:6px 9px}
+  input:hover,select:hover,textarea:hover{border-color:#C9D4CD}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--signal);box-shadow:0 0 0 4px rgba(11,132,98,.14)}
+  .teamtag input,.teamtag input:focus{border-radius:0;box-shadow:none;padding:2px 4px;border-top:none;border-left:none;border-right:none}
+  .mem-name{font-family:var(--sans) !important}
+  .mem-star{border-radius:10px;height:38px}
+  .mem-row{grid-template-columns:38px 1fr 30px}
+
+  /* ---- chips & pills ---- */
+  .tagpick button{background:var(--card);box-shadow:var(--sh-1);padding:8px 15px}
+  .tagpick button[data-sel="1"]{background:linear-gradient(135deg,var(--brand-1),var(--brand-2));border-color:transparent;color:#fff}
+  .wk-chip,.day-chip,.real-views button,.real-ex-chips button{transition:all .15s}
+  .wtab{border-radius:var(--r-sm);box-shadow:var(--sh-1)}
+
+  /* ---- exercise cards ---- */
+  .ex{border-radius:var(--r-md);padding:15px 16px;box-shadow:var(--sh-1)}
+  .ex:hover{box-shadow:var(--sh-2);transform:translateY(-2px)}
+  .ex[data-on="1"]{background:linear-gradient(180deg,#FFFFFF,#F6FBF8);box-shadow:inset 0 0 0 1.5px var(--signal),var(--sh-2)}
+  .ex-ico{border-radius:10px}
+  .ex[data-on="1"] .ex-ico{background:var(--mint)}
+  .ex-state,.tagpill,.bl-tag,.ex-guide b{border-radius:999px}
+  .ex-state{padding:2px 8px}
+
+  /* ---- draw card ---- */
+  .draw-card{border:1px solid var(--rule);border-radius:20px;box-shadow:var(--sh-3)}
+  .draw-card.drawing{border:1.5px dashed var(--signal)}
+  .db-illust{border-radius:14px}
+  .db-verdict{border-radius:999px}
+
+  /* ---- assessment / verdict ---- */
+  .verdict{border-width:1px;border-radius:var(--r-lg);box-shadow:var(--sh-2);padding:18px 20px}
+  .verdict[data-risk="ok"]{background:linear-gradient(180deg,#FFFFFF,#F4FBF7)}
+  .verdict[data-risk="caution"]{background:linear-gradient(180deg,#FFFFFF,#FFF8EC)}
+  .verdict[data-risk="stop"]{background:linear-gradient(180deg,#FFFFFF,#FDF2F1)}
+  .vbadge{border-radius:999px;padding:4px 11px}
+  .rules li{border-radius:10px;padding:9px 12px}
+  .row{padding:9px 12px}
+  .monitor{border-radius:var(--r-lg);background:linear-gradient(160deg,#0B1C19,#0F2B25);border-color:#183A32;box-shadow:var(--sh-2);padding:16px 18px}
+
+  /* ---- AI review ---- */
+  .aibox{border-radius:var(--r-md);border-style:solid;background:var(--band)}
+  .rv-verdict{border-width:1px;border-radius:var(--r-md);box-shadow:var(--sh-1)}
+  .rv-item{border-radius:10px}
+
+  /* ---- 3D ---- */
+  .realcanvas{border-radius:var(--r-md);box-shadow:var(--sh-2)}
+  .real-ex{border-radius:var(--r-md)}
+
+  /* ---- Rx card ---- */
+  .rx{border:1px solid var(--rule);border-radius:var(--r-lg);box-shadow:var(--sh-3)}
+  .rxhead{background:linear-gradient(135deg,var(--brand-1),var(--brand-2));padding:18px 22px}
+  .rxbody{padding:22px}
+  .stopbox{border-radius:0 10px 10px 0}
+
+  .foot{border-top:1px solid var(--rule);margin-top:48px;padding-top:18px}
+
+  @media(max-width:860px){
+    .rail button{flex-direction:column;gap:4px;padding:8px 4px;align-items:center;text-align:center}
+    .rail button .t{font-size:11px}
+  }
+  @media(max-width:560px){
+    .wrap{padding:0 16px 96px}
+    .rail{top:8px}
+    .rail button .t{display:none}
+    .teamtag{width:100%;text-align:left}
+    .savebar{justify-content:flex-start}
+  }
+}
+@media print{ .savebar{display:none !important} }
 </style>
 </head>
 <body>
@@ -695,6 +967,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
     <div class="teamtag">
       TEAM <input id="teamName" type="text" placeholder="팀 이름 입력" maxlength="18"><br>
       <span id="stamp"></span>
+      <div class="savebar"><span id="saveState" class="savestate">자동 저장 켜짐</span><button type="button" id="btnFresh" class="freshbtn">처음부터</button></div>
     </div>
   </div>
 </header>
@@ -737,7 +1010,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
 <section class="panel" data-step="2">
   <p class="eyebrow">Step 02 — Case</p>
   <h2 class="sec">배정된 대상자를 확인하세요</h2>
-  <p class="lede">우리 조가 맡은 대상자입니다. 진단·병력·주의사항을 팀이 함께 읽고, 이 사람에게 어떤 움직임과 운동이 필요할지 이야기해 보세요.</p>
+  <p class="lede">진단·병력·주의사항을 팀이 함께 읽고, 이 사람에게 어떤 움직임과 운동이 필요할지 이야기해 보세요.</p>
   <div id="caseView"></div>
   <div class="act">
     <button class="btn" id="btnToAssess">사정 결과 보기 →</button>
@@ -820,7 +1093,15 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
   <div class="chart">
     <h3>부위 커버리지 · 3D <span class="hint">BODY COVERAGE</span></h3>
     <div class="body">
-      <p class="ex-guide">담은 운동이 실제로 쓰는 <b>근육</b>을 해부 모델에 색으로 보여줍니다. <b class="bl-tag" style="background:#DCEEE6;color:#0C8A66">초록</b> 대상자 문제 부위를 다룸 · <b class="bl-tag" style="background:#F3E1DF;color:#A0281F">빨강</b> 관련 없거나 금기인 부위 · <b class="bl-tag" style="background:#FAF0DC;color:#B0700B">노랑</b> 문제 부위인데 아직 안 다룸. 운동 카드를 담으면 그 운동을 하는 모습을 미리 보여주고, 쓰는 근육이 빛납니다.</p>
+      <p class="ex-guide">위에서 담은 운동이 <strong>대상자의 아픈 부위를 잘 다루고 있는지</strong> 인체 모델의 색으로 확인하는 곳입니다. 운동 카드를 담으면 그 운동을 하는 모습이 나오고, 그 운동이 쓰는 근육이 빛납니다.</p>
+      <div class="covkey">
+        <div class="ck" data-k="gap"><i></i><div><b>노랑 · 아직 처방이 없어요</b><span>대상자의 아픈 부위인데, 담은 운동 중 이 부위를 쓰는 운동이 없습니다.</span><em>→ 이 부위를 쓰는 운동을 추가하세요</em></div></div>
+        <div class="ck" data-k="good"><i></i><div><b>초록 · 잘 처방했어요</b><span>대상자의 아픈 부위를 담은 운동이 다루고 있습니다.</span><em>→ 그대로 두면 됩니다</em></div></div>
+        <div class="ck" data-k="bad"><i></i><div><b>빨강 · 다시 확인하세요</b><span>지금 대상자 상태에서 운동하면 안 되는 부위(금기)를 쓰는 운동이 들어갔습니다.</span><em>→ 그 운동을 빼거나 다른 운동으로 바꾸세요</em></div></div>
+        <div class="ck" data-k="extra"><i></i><div><b>파랑 · 추가로 운동하는 부위</b><span>대상자의 아픈 부위는 아니지만, 담은 운동이 함께 쓰는 부위입니다. 혈액순환·전신 체력처럼 도움이 될 수 있어요.</span><em>→ 꼭 필요한 운동인지 팀에서 이유를 말할 수 있으면 됩니다</em></div></div>
+        <div class="ck" data-k="none"><i></i><div><b>회색 · 신경 쓰지 않아도 돼요</b><span>대상자의 문제와 관계없고, 담은 운동도 쓰지 않는 부위입니다.</span></div></div>
+      </div>
+      <p class="covgoal">🎯 목표: <b>노랑을 모두 초록으로</b> 바꾸고, <b>빨강은 하나도 없게</b> 만드세요. 파랑은 있어도 괜찮습니다.</p>
       <div class="bodywrap">
         <div>
           <div id="covRealSlot"></div>
@@ -919,7 +1200,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
   <div class="chart" id="recoveryChart">
     <h3>회복 시뮬레이션 <span class="hint">RECOVERY OVER TIME</span></h3>
     <div class="body">
-      <p class="ex-guide">우리 조가 설계한 프로그램을 <b id="recWeeks">4</b>주간 진행했을 때, 대상자의 문제 부위가 어떻게 회복되는지 시간 흐름으로 보여줍니다. 치료 전에는 문제 부위가 <b style="color:#C0392B">빨강(아픔)</b>이고, 프로그램이 <b>다루는</b> 부위는 시간이 지나며 <b style="color:#E0A93B">주황</b>을 거쳐 <b style="color:#2E9E77">초록(회복)</b>으로 바뀝니다. 프로그램이 <b>다루지 못한</b> 부위는 4주가 지나도 빨강 그대로 남습니다.</p>
+      <p class="ex-guide">우리 조가 설계한 프로그램을 <b id="recWeeks">4</b>주간 진행했을 때, 대상자의 문제 부위가 어떻게 회복되는지 시간 흐름으로 보여줍니다. 치료 전에는 문제 부위가 <b style="color:#C0392B">빨강(아픔)</b>이고, 프로그램이 <b>다루는</b> 부위는 시간이 지나며 <b style="color:#E0A93B">주황</b>을 거쳐 <b style="color:#2E9E77">초록(회복)</b>으로 바뀝니다. 프로그램이 <b>다루지 못한</b> 부위는 4주가 지나도 빨강 그대로 남습니다. <b style="color:#3B82C4">파랑</b>은 문제 부위는 아니지만 우리 운동이 함께 쓰는 부위입니다.</p>
 
       <div class="rec-tabs">
         <button class="rec-tab" data-rtab="real" data-on="1">🧍 사실적 모델</button>
@@ -950,6 +1231,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
           <span><i style="background:#D14B3C"></i>아픔·금기</span>
           <span><i style="background:#E0A93B"></i>회복 중</span>
           <span><i style="background:#2FCE86"></i>회복됨</span>
+          <span><i style="background:#3B82C4"></i>추가로 운동하는 근육</span>
           <span><i style="background:#D9C9BF"></i>관련 없는 근육</span>
           <span><i style="background:#EEE7D8"></i>뼈대</span>
         </div>
@@ -1623,36 +1905,41 @@ function confettiBurst(){
 function renderCaseView(){
   const c = caseObj(), g = ageObj(); if(!c || !g) return;
   const sysList = SYS_MAP.filter(s => c.tags.includes(s.t));
+  const info = [
+    ['성명(가명)', c.nm],
+    ['연령 / 성별', `${c.age}세 / ${c.sex}`],
+    ['연령대', `${g.nm} (${g.k})`],
+    ['진단', c.dx],
+    ['주호소', `“${c.cc}”`],
+    ['현병력', c.hx],
+    ['투약', c.meds]
+  ];
   $('#caseView').innerHTML = `
-    <div class="chart">
-      <h3>대상자 정보 <span class="hint">CASE · ${c.id.toUpperCase()}</span></h3>
-      <div class="body">
-        <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
-          <div class="db-illust" id="caseIllust" style="width:130px;height:150px">${bodyFigure(c)}</div>
-          <div style="flex:1;min-width:220px">
-            <div class="kv" style="margin-bottom:10px">
-              <div><b>${c.nm}</b><span>성명(가명)</span></div>
-              <div><b>${c.age}세 / ${c.sex}</b><span>연령 / 성별</span></div>
-              <div><b>${g.nm} (${g.k})</b><span>연령대</span></div>
-              <div><b>${c.meds}</b><span>투약</span></div>
-            </div>
-            <div style="display:flex;flex-wrap:wrap;gap:6px">
-              ${sysList.map(s => `<span class="cc-sys">${s.ic} ${s.nm}</span>`).join('')}
-              ${c.tags.includes('betablocker') ? '<span class="cc-sys">💊 베타차단제</span>' : ''}
-            </div>
+    <div class="caselayout">
+      <div class="chart casefig">
+        <h3>아픈 부위 <span class="hint">CASE · ${c.id.toUpperCase()}</span></h3>
+        <div class="body">
+          <div class="casefig-art" id="caseIllust">${bodyFigure(c)}</div>
+          <div class="casefig-name">${c.nm}<small>${c.age}세 · ${c.sex}</small></div>
+          <div class="casefig-tags">
+            ${sysList.map(s => `<span class="cc-sys">${s.ic} ${s.nm}</span>`).join('')}
+            ${c.tags.includes('betablocker') ? '<span class="cc-sys">💊 베타차단제</span>' : ''}
           </div>
         </div>
-        <p style="margin:12px 0 6px;font-size:14px"><strong>진단</strong> ${c.dx}</p>
-        <p style="margin:0 0 6px;font-size:14px"><strong>주호소</strong> “${c.cc}”</p>
-        <p style="margin:0;font-size:14px"><strong>현병력</strong> ${c.hx}</p>
       </div>
-    </div>
-    <div class="chart">
-      <h3>운동 금기 · 주의 <span class="hint">PRECAUTIONS</span></h3>
-      <div class="body">
-        <ul style="margin:0;padding-left:18px;font-size:13.5px;color:var(--ink2);line-height:1.65">
-          ${c.cautions.map(x => `<li>${x}</li>`).join('')}
-        </ul>
+      <div class="casecol">
+        <div class="chart">
+          <h3>대상자 정보 <span class="hint">PROFILE</span></h3>
+          <dl class="caseinfo">
+            ${info.map(([k,v]) => `<div class="ci-row"><dt>${k}</dt><dd>${v}</dd></div>`).join('')}
+          </dl>
+        </div>
+        <div class="chart caseprec">
+          <h3>운동 금기 · 주의 <span class="hint">PRECAUTIONS</span></h3>
+          <ul class="precs">
+            ${c.cautions.map(x => `<li>${x}</li>`).join('')}
+          </ul>
+        </div>
       </div>
     </div>`;
 }
@@ -2921,7 +3208,7 @@ function programRegions(){
 }
 
 const Body3D = (()=>{
-  const COL={neutral:0xC7D1C3, good:0x2E9E77, bad:0xC0392B, gap:0xE0A93B, skin:0xBFC9BC, healed:0x2FCE86, ailing:0xD14B3C, mending:0xE0A93B};
+  const COL={neutral:0xC7D1C3, good:0x2E9E77, bad:0xC0392B, gap:0xE0A93B, extra:0x3B82C4, skin:0xBFC9BC, healed:0x2FCE86, ailing:0xD14B3C, mending:0xE0A93B};
   let ready=false, renderer, scene, cam, human, mats={}, rot={x:-0.08,y:0.5}, drag=false, last=null, ro;
 
   function mat(c){ return new THREE.MeshStandardMaterial({color:c,roughness:.72,metalness:.05}); }
@@ -3081,6 +3368,7 @@ const Body3D = (()=>{
       if(cr.has(r)&&!hit.has(r)){                                      // 문제인데 미포함 → 끝까지 아픈 빨강으로 남음
         setRegion(r, COL.ailing); return;
       }
+      if(hit.has(r)){ setRegion(r,COL.extra); return; }               // 문제와 무관하지만 운동하는 부위 → 파랑
       setRegion(r,COL.neutral);                                        // 무관한 부위
     });
     if(human){
@@ -3094,12 +3382,12 @@ const Body3D = (()=>{
     if(human){ postureZ=0; human.scale.set(1,1,1); } // 회복 자세 리셋
     if(!S.built||!S.evalRes){ BODY_REGIONS.forEach(r=>setRegion(r,COL.neutral)); renderLegend({}); return; }
     const cr=caseRegions(), {hit,bad}=programRegions();
-    const buckets={good:[],bad:[],gap:[],none:[]};
+    const buckets={good:[],bad:[],gap:[],extra:[],none:[]};
     BODY_REGIONS.forEach(r=>{
       let key;
       if(bad.has(r)) key='bad';
       else if(hit.has(r)&&cr.has(r)) key='good';
-      else if(hit.has(r)&&!cr.has(r)) key='bad';
+      else if(hit.has(r)&&!cr.has(r)) key='extra';
       else if(cr.has(r)&&!hit.has(r)) key='gap';
       else key='none';
       setRegion(r, COL[key==='none'?'neutral':key]);
@@ -3109,13 +3397,19 @@ const Body3D = (()=>{
   }
   function renderLegend(b){
     const el=document.getElementById('bodyLegend'); if(!el) return;
-    const row=(hex,label,arr)=>`<div class="bl-row"><span class="bl-sw" style="background:#${hex}"></span>
-      <span><b>${label}</b><br>${arr&&arr.length?arr.join(', '):'<span class="bl-empty">해당 없음</span>'}</span></div>`;
+    const n=k=>(b[k]||[]).length;
+    if(!b.good && !b.bad && !b.gap){ el.innerHTML='<div class="cov-status">대상자를 뽑고 사정을 마치면 여기에 결과가 나옵니다.</div>'; return; }
+    const st = n('bad') ? ['bad',`빨강 ${n('bad')}곳을 먼저 고치세요`]
+             : n('gap') ? ['gap',`노랑 ${n('gap')}곳에 운동을 추가하세요`]
+             : ['good','아픈 부위를 모두 처방했어요 ✓'];
+    const row=(k,label,todo)=>`<div class="bl-row" data-k="${k}"><span class="bl-sw"></span>
+      <span><b>${label} <small>${n(k)}곳</small></b>${n(k)?`<span class="bl-list">${b[k].join(', ')}</span>${todo?`<span class="bl-todo">${todo}</span>`:''}`:''}</span></div>`;
     el.innerHTML =
-      row('2E9E77','적절히 다룸', b.good) +
-      row('C0392B','관련 없거나 금기', b.bad) +
-      row('E0A93B','문제부위인데 미포함', b.gap) +
-      `<div class="bodyhint" style="font-size:11px;color:var(--ink3);margin-top:2px">회색은 이 대상자와 무관한 부위입니다.</div>`;
+      `<div class="cov-status" data-k="${st[0]}">${st[1]}</div>` +
+      row('gap','노랑 · 처방 필요','→ 이 부위 운동 추가') +
+      row('bad','빨강 · 다시 확인','→ 빼거나 바꾸기') +
+      row('good','초록 · 잘 처방함','') +
+      row('extra','파랑 · 추가 운동','');
   }
   return {ensure, update, setRecovery, resizeNow:()=>{ if(ready&&renderer) resize(); }, hasHuman:()=>!!human};
 })();
@@ -3132,7 +3426,7 @@ const RealBody = (()=>{
     'models/full-body-male-mobile.glb',
     'https://raw.githubusercontent.com/slfresh/fitmitwith-anatomy-atlas/master/models/full-body-male-mobile.glb'
   ];
-  const C={neutral:0xD9C9BF, bone:0xEEE7D8, tissue:0xE4DCCF, bad:0xC0392B,
+  const C={neutral:0xD9C9BF, bone:0xEEE7D8, tissue:0xE4DCCF, bad:0xC0392B, extra:0x3B82C4,
            ailing:0xD14B3C, mending:0xE0A93B, healed:0x2FCE86};
   let ready=false, failed=false, renderer, scene, cam, avatar, rot={x:0,y:0.35}, drag=false, last=null, baseY=0, auto=true;
   const regionMeshes={}; // 부위 → [mesh]
@@ -3553,7 +3847,7 @@ const RealBody = (()=>{
     BODY_REGIONS.forEach(r=>{
       if(bad.has(r)) paint(r,C.bad);
       else if(hit.has(r)&&cr.has(r)) paint(r,0x2E9E77);
-      else if(hit.has(r)&&!cr.has(r)) paint(r,C.bad);
+      else if(hit.has(r)&&!cr.has(r)) paint(r,C.extra);
       else if(cr.has(r)) paint(r,0xE0A93B);
       else paint(r,C.neutral);
     });
@@ -3571,6 +3865,7 @@ const RealBody = (()=>{
       if(bad.has(r)) paint(r,C.bad);                                         // 금기 부위
       else if(hit.has(r)&&cr.has(r)) paint(r, lerp3(C.ailing,C.mending,C.healed,recMap&&recMap[r]!=null?recMap[r]:p)); // 다루는 문제부위 → 주차별 운동량만큼 회복
       else if(cr.has(r)) paint(r,C.ailing);                                  // 문제인데 미포함 → 그대로 아픔
+      else if(hit.has(r)) paint(r,C.extra);                                  // 문제와 무관하지만 운동하는 부위
       else paint(r,C.neutral);                                               // 무관
     });
   }
@@ -3590,6 +3885,70 @@ document.addEventListener('click',e=>{
   RealBody.setView(b.dataset.rview);
   document.querySelectorAll('[data-rview]').forEach(x=>x.dataset.on=(x===b)?'1':'0');
 });
+
+/* ============================================================
+   AUTOSAVE — 이 브라우저에 진행 상황 저장 (새로고침해도 유지)
+   ============================================================ */
+const SAVE_KEY = 'rehablab.v1';
+const Save = (()=>{
+  let timer=null, ready=false;
+  function snapshot(){
+    return {
+      v:1, at:Date.now(), step:S.step, age:S.age,
+      builtId:S.built?S.built.id:null, built:S.built,
+      a:S.a, redraws:S.redraws, picked:[...S.picked], dose:S.dose, doseSet:!!S.doseSet,
+      weekPlan:S.weekPlan, weekPlanKey:S.weekPlanKey, activeWeek:S.activeWeek,
+      goal:S.goal, team:S.team, members:S.members, roles:S.roles, evalRes:S.evalRes,
+      tools:[...S.tools], trial:S.trial, dropped:[...S.dropped], talk:S.talk, reviews:S.reviews
+    };
+  }
+  function write(){
+    timer=null;
+    if(!ready) return;
+    try{ localStorage.setItem(SAVE_KEY, JSON.stringify(snapshot())); mark(Date.now()); }
+    catch(e){ mark(null,'저장 안 됨'); }
+  }
+  function soon(){ if(!ready) return; clearTimeout(timer); timer=setTimeout(write,400); }
+  function mark(t,msg){
+    const el=$('#saveState'); if(!el) return;
+    if(msg){ el.textContent=msg; el.dataset.st='err'; return; }
+    el.textContent='자동 저장됨 · '+new Date(t).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
+    el.dataset.st='ok';
+  }
+  function restore(){
+    let d=null;
+    try{ d=JSON.parse(localStorage.getItem(SAVE_KEY)||'null'); }catch(e){ d=null; }
+    if(!d||d.v!==1||!d.builtId && !d.team && !(d.members||[]).some(m=>m.name)) return false;
+    S.age=d.age; S.built=d.builtId ? (CASES.find(c=>c.id===d.builtId)||d.built) : null;
+    S.a=d.a||{}; S.redraws=d.redraws||0;
+    S.picked.clear(); (d.picked||[]).forEach(x=>S.picked.add(x));
+    S.dropped.clear(); (d.dropped||[]).forEach(x=>S.dropped.add(x));
+    S.tools=new Set(d.tools||['body','chair','band','pad']);
+    Object.assign(S.dose,d.dose||{}); S.doseSet=!!d.doseSet;
+    S.weekPlan=d.weekPlan||null; S.weekPlanKey=d.weekPlanKey||''; S.activeWeek=d.activeWeek||0;
+    S.goal=d.goal||''; S.members=(d.members&&d.members.length)?d.members:S.members;
+    S.roles=d.roles||S.roles; S.evalRes=d.evalRes||null; S.trial=d.trial||{};
+    S.talk=d.talk||{changed:'',fixed:''}; S.reviews=d.reviews||0;
+    syncTeam(d.team||'');
+    $('#talkGoal').value=S.goal; $('#talkChanged').value=S.talk.changed; $('#talkFixed').value=S.talk.fixed;
+    renderMembers();
+    if(S.built){ renderDraw(false); }
+    // 저장된 단계로 이동 (도달할 수 없으면 가능한 가장 먼 단계)
+    let n=d.step||1; while(n>1 && !reachable(n)) n--;
+    go(n);
+    if(d.at) mark(d.at);
+    return true;
+  }
+  function clear(){ ready=false; clearTimeout(timer); try{ localStorage.removeItem(SAVE_KEY); }catch(e){} }
+  function start(){
+    ready=true;
+    // 입력·클릭이 처리된 직후의 상태를 저장
+    ['input','change','click'].forEach(t=>document.addEventListener(t,soon));
+    window.addEventListener('pagehide',write);
+    document.addEventListener('visibilitychange',()=>{ if(document.hidden) write(); });
+  }
+  return {restore, start, clear, now:write};
+})();
 
 /* ============================================================
    INIT
@@ -3627,6 +3986,15 @@ $('#btnReset').addEventListener('click',()=>{
   renderDraw(false);
   $('#btnDraw').hidden=false; $('#btnRedraw').hidden=true; $('#btnDrawNext').hidden=true;
   go(1);
+  Save.now();
+});
+
+// 이전 진행 상황 불러오기 → 이후 변경은 자동 저장
+if(Save.restore()){ const el=$('#saveState'); if(el){ el.textContent='이전 진행 상황을 불러왔습니다'; el.dataset.st='ok'; } }
+Save.start();
+$('#btnFresh').addEventListener('click',()=>{
+  if(!confirm('저장된 진행 상황을 지우고 처음부터 시작할까요?\n(조 이름·조원·선택한 운동·계획이 모두 지워집니다)')) return;
+  Save.clear(); location.reload();
 });
 </script>
 </body>
