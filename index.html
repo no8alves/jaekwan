@@ -756,6 +756,27 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
   .caselayout{grid-template-columns:1fr}
   .casefig-art{min-height:280px}
 }
+
+/* ---------- 시트 제출·불러오기 창 ---------- */
+.cmodal{position:fixed;inset:0;z-index:80;background:rgba(15,36,32,.38);backdrop-filter:blur(3px);display:flex;align-items:flex-start;justify-content:center;padding:8vh 16px 16px}
+.cm-box{width:100%;max-width:560px;max-height:84vh;display:flex;flex-direction:column;background:#fff;border-radius:18px;box-shadow:0 24px 60px -12px rgba(15,36,32,.4);overflow:hidden}
+.cm-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--rule)}
+.cm-head b{font-size:16px}
+.cm-x{border:none;background:var(--band);width:30px;height:30px;border-radius:50%;cursor:pointer;color:var(--ink2)}
+.cm-help{margin:12px 20px 8px;font-size:13px;color:var(--ink2);line-height:1.5}
+#cmFilter{margin:0 20px 10px;font-family:var(--sans)}
+.cm-list{overflow:auto;padding:0 12px 8px;display:grid;gap:6px}
+.cm-item{display:grid;grid-template-columns:1fr auto;gap:2px 10px;text-align:left;width:100%;border:1px solid var(--rule);background:#fff;border-radius:12px;padding:10px 12px;cursor:pointer;font-family:var(--sans);color:var(--ink);transition:all .12s}
+.cm-item:hover{border-color:var(--signal);background:#F6FBF8}
+.cm-team{font-weight:800;font-size:15px}
+.cm-at{font-family:var(--mono);font-size:11.5px;color:var(--ink3);text-align:right}
+.cm-mem{grid-column:1/-1;font-size:12.5px;color:var(--ink2)}
+.cm-case{grid-column:1/-1;font-size:12px;color:var(--signal);font-weight:600}
+.cm-empty{padding:24px 10px;text-align:center;font-size:13px;color:var(--ink3);line-height:1.6}
+.cm-foot{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:12px 20px;border-top:1px solid var(--rule);background:var(--band);font-size:12px;color:var(--ink3)}
+.cm-link{border:none;background:none;color:var(--ink2);font-family:var(--sans);font-size:12.5px;font-weight:600;cursor:pointer;padding:2px 4px;text-decoration:underline;text-underline-offset:3px}
+.cm-link:hover{color:var(--signal)}
+@media print{.cmodal{display:none !important}}
 /* ============================================================
    PREMIUM THEME — 화면 전용 (인쇄 스타일은 위 규칙 유지)
    ============================================================ */
@@ -811,6 +832,9 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
     transition:all .15s;
   }
   .freshbtn:hover{color:var(--alert);border-color:rgba(180,35,24,.35);background:#FDF3F2}
+  .freshbtn.filebtn{background:var(--card);color:var(--ink)}
+  .freshbtn.filebtn:hover{color:var(--signal);border-color:rgba(11,132,98,.4);background:var(--mint)}
+  .savebtns{gap:6px;margin-top:6px}
 
   /* ---- step rail (sticky segmented stepper) ---- */
   .rail{
@@ -967,12 +991,32 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
     <div class="teamtag">
       TEAM <input id="teamName" type="text" placeholder="팀 이름 입력" maxlength="18"><br>
       <span id="stamp"></span>
-      <div class="savebar"><span id="saveState" class="savestate">자동 저장 켜짐</span><button type="button" id="btnFresh" class="freshbtn">처음부터</button></div>
+      <div class="savebar"><span id="saveState" class="savestate">자동 저장 켜짐</span></div>
+      <div class="savebar savebtns">
+        <button type="button" id="btnCloudSave" class="freshbtn filebtn" title="선생님 시트에 지금까지의 진행 상황을 제출합니다">☁ 시트에 제출</button>
+        <button type="button" id="btnCloudLoad" class="freshbtn filebtn" title="선생님 시트에 제출한 진행 상황을 불러옵니다">↻ 불러오기</button>
+        <button type="button" id="btnFresh" class="freshbtn">처음부터</button>
+        <input type="file" id="fileImport" accept=".json,application/json" hidden>
+      </div>
     </div>
   </div>
 </header>
 
 <nav class="rail" id="rail" aria-label="진행 단계"></nav>
+
+<div class="cmodal" id="cloudModal" hidden>
+  <div class="cm-box" role="dialog" aria-modal="true" aria-labelledby="cmTitle">
+    <div class="cm-head"><b id="cmTitle">우리 조 진행 상황 불러오기</b><button type="button" class="cm-x" id="cmClose" aria-label="닫기">✕</button></div>
+    <p class="cm-help">선생님 시트에 제출된 기록입니다. <b>우리 조 이름과 조원</b>을 확인하고 가장 최근 것을 고르세요.</p>
+    <input type="text" id="cmFilter" placeholder="조 이름으로 찾기 (예: 3조)">
+    <div class="cm-list" id="cmList"></div>
+    <div class="cm-foot">
+      <span>인터넷 연결이 불안할 때:</span>
+      <button type="button" class="cm-link" id="btnExport">⬇ 파일로 저장</button>
+      <button type="button" class="cm-link" id="btnImport">⬆ 파일에서 불러오기</button>
+    </div>
+  </div>
+</div>
 
 <!-- ===== STEP 1 ===== -->
 <section class="panel" data-step="1">
@@ -3919,6 +3963,9 @@ const Save = (()=>{
     let d=null;
     try{ d=JSON.parse(localStorage.getItem(SAVE_KEY)||'null'); }catch(e){ d=null; }
     if(!d||d.v!==1||!d.builtId && !d.team && !(d.members||[]).some(m=>m.name)) return false;
+    return apply(d);
+  }
+  function apply(d){
     S.age=d.age; S.built=d.builtId ? (CASES.find(c=>c.id===d.builtId)||d.built) : null;
     S.a=d.a||{}; S.redraws=d.redraws||0;
     S.picked.clear(); (d.picked||[]).forEach(x=>S.picked.add(x));
@@ -3947,7 +3994,33 @@ const Save = (()=>{
     window.addEventListener('pagehide',write);
     document.addEventListener('visibilitychange',()=>{ if(document.hidden) write(); });
   }
-  return {restore, start, clear, now:write};
+  // ---- 파일로 저장 / 불러오기 (다른 컴퓨터에서 이어하기) ----
+  function exportFile(){
+    const d=snapshot(); d.app='REHAB LAB';
+    const team=(S.team||'').trim().replace(/[\\/:*?"<>|\s]+/g,'_')||'조이름없음';
+    const dt=new Date(), pad=n=>String(n).padStart(2,'0');
+    const name=`재활처방_${team}_${dt.getMonth()+1}월${dt.getDate()}일_${pad(dt.getHours())}${pad(dt.getMinutes())}.json`;
+    const blob=new Blob([JSON.stringify(d,null,1)],{type:'application/json'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+    const el=$('#saveState'); if(el){ el.textContent='파일로 저장했습니다'; el.dataset.st='ok'; }
+  }
+  function importFile(file){
+    if(!file) return;
+    const rd=new FileReader();
+    rd.onload=()=>{
+      let d=null; try{ d=JSON.parse(rd.result); }catch(e){}
+      if(!d||d.v!==1||!('step' in d)){ alert('이 파일은 재활운동 처방 실습 진행 파일이 아닙니다.\n「파일로 저장」으로 받은 .json 파일을 골라 주세요.'); return; }
+      const who=(d.team?`「${d.team}」 `:'')+(d.built&&d.built.nm?`대상자 ${d.built.nm}`:'');
+      if(!confirm(`${who||'이 파일'}의 진행 상황을 불러올까요?\n지금 화면의 내용은 파일 내용으로 바뀝니다.`)) return;
+      if(d.builtId && !CASES.some(c=>c.id===d.builtId) && !d.built){ alert('파일에 있는 대상자를 찾을 수 없습니다.'); return; }
+      apply(d); write();
+      const el=$('#saveState'); if(el){ el.textContent='파일에서 불러왔습니다'; el.dataset.st='ok'; }
+    };
+    rd.readAsText(file,'utf-8');
+  }
+  return {restore, start, clear, now:write, exportFile, importFile, snap:snapshot, apply:d=>{ apply(d); write(); }};
 })();
 
 /* ============================================================
@@ -3992,6 +4065,58 @@ $('#btnReset').addEventListener('click',()=>{
 // 이전 진행 상황 불러오기 → 이후 변경은 자동 저장
 if(Save.restore()){ const el=$('#saveState'); if(el){ el.textContent='이전 진행 상황을 불러왔습니다'; el.dataset.st='ok'; } }
 Save.start();
+$('#btnExport').addEventListener('click',()=>Save.exportFile());
+
+/* ---- 선생님 시트에 제출 / 불러오기 (apps-script-proxy.gs 의 save·list·load) ---- */
+const Cloud = (()=>{
+  const call = async body => {
+    const r = await fetch(AI_PROXY,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)});
+    const j = await r.json(); if(j.error) throw new Error(j.error); return j;
+  };
+  const status = (t,st)=>{ const el=$('#saveState'); if(el){ el.textContent=t; el.dataset.st=st||'ok'; } };
+  let items=[];
+  async function submit(){
+    if(!S.team.trim()){ alert('조 이름을 먼저 적어 주세요. (오른쪽 위 TEAM 칸)'); $('#teamName').focus(); return; }
+    if(!S.built){ alert('대상자를 뽑은 뒤에 제출할 수 있습니다.'); return; }
+    const b=$('#btnCloudSave'); b.disabled=true; status('시트에 제출하는 중…','ok');
+    try{ await call({action:'save',data:Save.snap()}); status('시트에 제출 완료 · '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})); alert(`「${S.team}」 진행 상황을 선생님 시트에 제출했습니다.\n다음 시간에 [↻ 불러오기]에서 이어서 할 수 있어요.`); }
+    catch(e){ status('제출 실패','err'); alert('시트에 제출하지 못했습니다.\n('+e.message+')\n\n인터넷 연결을 확인하거나, [↻ 불러오기] 창 아래의 「파일로 저장」을 사용하세요.'); }
+    finally{ b.disabled=false; }
+  }
+  function render(){
+    const q=($('#cmFilter').value||'').trim();
+    const list=items.filter(it=>!q||String(it.team).includes(q));
+    $('#cmList').innerHTML = list.length ? list.map(it=>`
+      <button type="button" class="cm-item" data-id="${escAttr(it.id)}">
+        <span class="cm-team">${_esc(it.team||'(조 이름 없음)')}</span>
+        <span class="cm-mem">${_esc(it.members||'')}</span>
+        <span class="cm-case">${_esc(it.case||'')} · ${_esc(it.step||'')}</span>
+        <span class="cm-at">${_esc(it.at||'')}</span>
+      </button>`).join('') : `<div class="cm-empty">${items.length?'찾는 조가 없습니다.':'아직 제출된 기록이 없습니다.'}</div>`;
+  }
+  async function open(){
+    $('#cloudModal').hidden=false; $('#cmFilter').value=S.team||''; $('#cmList').innerHTML='<div class="cm-empty">불러오는 중…</div>';
+    try{ items=(await call({action:'list'})).items||[]; render(); }
+    catch(e){ $('#cmList').innerHTML=`<div class="cm-empty">목록을 가져오지 못했습니다. (${_esc(e.message)})<br>아래 「파일에서 불러오기」를 사용하세요.</div>`; }
+  }
+  function close(){ $('#cloudModal').hidden=true; }
+  async function pick(id){
+    const it=items.find(x=>x.id===id); if(!it) return;
+    if(!confirm(`「${it.team}」 (${it.members})\n대상자 ${it.case} · ${it.step} · ${it.at} 제출\n\n이 기록을 불러올까요? 지금 화면의 내용은 바뀝니다.`)) return;
+    $('#cmList').innerHTML='<div class="cm-empty">불러오는 중…</div>';
+    try{ const j=await call({action:'load',id}); Save.apply(j.data); close(); status('시트에서 불러왔습니다'); }
+    catch(e){ alert('불러오지 못했습니다. ('+e.message+')'); render(); }
+  }
+  $('#btnCloudSave').addEventListener('click',submit);
+  $('#btnCloudLoad').addEventListener('click',open);
+  $('#cmClose').addEventListener('click',close);
+  $('#cloudModal').addEventListener('click',e=>{ if(e.target.id==='cloudModal') close(); const b=e.target.closest('.cm-item'); if(b) pick(b.dataset.id); });
+  $('#cmFilter').addEventListener('input',render);
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape' && !$('#cloudModal').hidden) close(); });
+  return {submit, open};
+})();
+$('#btnImport').addEventListener('click',()=>$('#fileImport').click());
+$('#fileImport').addEventListener('change',e=>{ $('#cloudModal').hidden=true; Save.importFile(e.target.files[0]); e.target.value=''; });
 $('#btnFresh').addEventListener('click',()=>{
   if(!confirm('저장된 진행 상황을 지우고 처음부터 시작할까요?\n(조 이름·조원·선택한 운동·계획이 모두 지워집니다)')) return;
   Save.clear(); location.reload();
