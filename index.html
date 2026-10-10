@@ -789,6 +789,53 @@ html.watch .panel{animation:none}
 html.watch header.top{display:none}
 html.watch .wrap{padding-top:12px;padding-bottom:40px}
 html.watch .rail{margin-bottom:18px;top:8px}
+
+/* ---------- 운동 후보 목록: 묶음 + 간결한 카드 ---------- */
+.picktray{position:sticky;top:76px;z-index:30;background:rgba(255,255,255,.94);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--rule);border-radius:14px;padding:10px 14px;margin-bottom:16px;box-shadow:0 2px 4px rgba(15,36,32,.04),0 8px 24px -6px rgba(15,36,32,.10)}
+.pt-h{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.pt-h b{font-size:14.5px}
+.pt-h span{font-size:12.5px;color:var(--ink3)}
+.pt-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;max-height:76px;overflow:auto}
+.pt-chip{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;background:#E3F3EC;color:#0B6B50;border-radius:999px;padding:4px 6px 4px 11px;white-space:nowrap}
+.pt-chip button{border:none;background:rgba(11,132,98,.14);color:#0B6B50;width:20px;height:20px;border-radius:50%;font-size:11px;cursor:pointer;line-height:1;padding:0}
+.pt-chip button:hover{background:var(--alert);color:#fff}
+.exgrp{margin-bottom:18px}
+.exgrp:last-child{margin-bottom:0}
+.exgrp-h{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin:0 0 10px;padding-bottom:8px;border-bottom:1px solid var(--rule)}
+.exgrp-h b{font-size:15.5px;font-weight:800;letter-spacing:-.02em}
+.exgrp-h span{font-family:var(--mono);font-size:11.5px;font-weight:700;color:var(--signal);background:#E3F3EC;border-radius:999px;padding:1px 9px}
+.exgrp-h em{font-style:normal;font-size:12.5px;color:var(--ink3)}
+.exgrp[data-g="opt"] .exgrp-h span{background:var(--band);color:var(--ink2)}
+.exgrp[data-g="blk"] .exgrp-h span{background:#FDE7E4;color:var(--alert)}
+details.exgrp>summary{cursor:pointer;list-style:none;border-bottom:none;margin-bottom:0;padding:10px 12px;background:var(--band);border-radius:10px}
+details.exgrp>summary::-webkit-details-marker{display:none}
+details.exgrp>summary::after{content:"▾";margin-left:auto;color:var(--ink3)}
+details.exgrp[open]>summary{margin-bottom:10px}
+details.exgrp[open]>summary::after{content:"▴"}
+.exgrp .exlist{align-items:start;grid-template-columns:repeat(auto-fill,minmax(290px,1fr))}
+.ex h4{font-size:15.5px;line-height:1.35}
+.ex p.ex-sum{font-size:13.5px;line-height:1.5;margin-top:4px;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.ex.open p.ex-sum{display:block;overflow:visible}
+.ex-foot{align-items:center;gap:6px 10px;margin-top:8px}
+.ex-foot .ex-tool{margin:0;font-size:12px}
+.ex .dose{font-size:12px}
+.ex-more{display:none;margin-top:8px}
+.ex.open .ex-more{display:block}
+.ex-prog{font-size:13px}
+.ex-note{display:block;font-family:var(--sans);font-size:12.5px;margin-top:6px}
+.ex-info{display:inline-block;margin-top:8px;border:none;background:none;padding:2px 0;font-family:var(--sans);font-size:12.5px;font-weight:700;color:var(--ink3);cursor:pointer}
+.ex-info:hover{color:var(--signal)}
+.ex .why{font-family:var(--sans);font-size:12.5px}
+.exfilter{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--rule)}
+.exf-l{font-size:12.5px;font-weight:700;color:var(--ink2);margin-right:4px}
+.exfilter button{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--rule);background:#fff;border-radius:999px;padding:5px 12px;font-family:var(--sans);font-size:13px;font-weight:600;color:var(--ink2);cursor:pointer;transition:all .12s}
+.exfilter button:hover{border-color:var(--signal)}
+.exfilter button[data-on="1"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.exfilter button i{font-style:normal;font-size:10.5px;font-weight:700;background:#FDE7E4;color:var(--alert);border-radius:999px;padding:1px 7px}
+.exfilter button[data-on="1"] i{background:rgba(255,255,255,.2);color:#fff}
+html.watch .picktray{position:static}
+@media(max-width:560px){.picktray{top:64px}}
+@media print{.picktray{display:none}}
 /* ============================================================
    PREMIUM THEME — 화면 전용 (인쇄 스타일은 위 규칙 유지)
    ============================================================ */
@@ -1125,11 +1172,22 @@ html.watch .rail{margin-bottom:18px;top:8px}
     </div>
   </div>
 
+  <div class="picktray"><div id="pickTray"></div><div class="exfilter" id="exFilter"></div></div>
+
   <div class="chart">
     <h3>② 소도구 실습 운동 <span class="hint" id="toolExCount"></span></h3>
     <div class="body">
-      <p class="ex-guide">직접 해볼 수 있는 구체적인 운동입니다. 카드의 <b>쉽게 → 어렵게</b> 단계를 보고 대상자 수준을 생각해 보세요. <b class="lg-rec">권장</b>은 이 대상자와 관련 있는 운동입니다.</p>
-      <div class="exlist" id="toolExList"></div>
+      <p class="ex-guide">고른 소도구로 직접 해볼 수 있는 운동입니다. <strong>카드를 누르면 담기고, 다시 누르면 빠집니다.</strong> 「자세히」를 누르면 쉽게 → 어렵게 단계와 주의할 점이 나옵니다.</p>
+      <div id="toolExList"></div>
+    </div>
+  </div>
+
+  <div class="chart">
+    <h3>③ 기본 중재 유형 <span class="hint" id="exCount">0개 선택됨</span></h3>
+    <div class="body">
+      <p class="ex-guide">병원 재활에서 쓰는 일반적인 운동 종류입니다. <strong>소도구 운동만으로 부족한 부분</strong>이 있을 때 여기서 채우세요.</p>
+      <button type="button" class="btn ghost small" id="btnSuggest" style="margin:0 0 10px">＋ 권장 기본 중재 모두 담기</button>
+      <div id="exList"></div>
     </div>
   </div>
 
@@ -1138,15 +1196,6 @@ html.watch .rail{margin-bottom:18px;top:8px}
     <div class="body">
       <div class="kv" id="intensityKv" style="margin-bottom:14px"></div>
       <div class="rows" id="doseRows"></div>
-    </div>
-  </div>
-
-  <div class="chart">
-    <h3>③ 기본 중재 유형 <span class="hint" id="exCount">0개 선택됨</span></h3>
-    <div class="body">
-      <p class="ex-guide">병원 재활에서 쓰는 일반적인 중재 유형입니다. 소도구 운동으로 부족한 부분을 채울 때 참고하세요. <b class="lg-rec">권장</b>은 이 대상자에게 맞는 항목, <b class="lg-blk">제외</b>는 현재 상태에서 금기인 항목입니다.</p>
-      <button type="button" class="btn ghost small" id="btnSuggest" style="margin:0 0 10px">＋ 권장 기본 중재 모두 담기</button>
-      <div class="exlist" id="exList"></div>
     </div>
   </div>
 
@@ -2284,30 +2333,57 @@ function renderProgram(){
       <div class="ex-ico">${x.icon||'🔹'}</div>
       <div class="ex-main">
         <div class="ex-top"><h4>${x.nm}</h4><span class="ex-state">${state}</span></div>
-        ${x.tool?`<div class="ex-tool">${toolNm(x.tool)}</div>`:''}
-        <p>${x.d}</p>
-        ${x.prog?`<div class="ex-prog"><b>쉽게 → 어렵게</b> ${x.prog}</div>`:''}
-        <div class="ex-foot"><span class="dose">${x.dose}</span>${x.note?`<span class="ex-note">⚠ ${x.note}</span>`:''}</div>
+        <p class="ex-sum">${x.d}</p>
+        <div class="ex-foot">${x.tool?`<span class="ex-tool">${toolNm(x.tool)}</span>`:''}<span class="dose">${x.dose}</span></div>
+        <div class="ex-more">
+          ${x.prog?`<div class="ex-prog"><b>쉽게 → 어렵게</b> ${x.prog}</div>`:''}
+          ${x.note?`<div class="ex-note">⚠ ${x.note}</div>`:''}
+        </div>
         ${reason?`<div class="why">🚫 ${reason}</div>`:''}
+        ${blocked?'':'<button type="button" class="ex-info" aria-expanded="false">자세히 ▾</button>'}
       </div>
       <div class="ex-check">✓</div>
     </div>`;
-    return {rank, html};
+    return {rank, html, grp: blocked?'blk' : rel?'rec' : 'opt'};
   };
-  const listHTML = arr => arr.map(cardOf).sort((p,q)=>p.rank-q.rank).map(o=>o.html).join('');
+  // 권장 → 선택 가능 → 제외(접어 둠) 순으로 묶어서 보여줌
+  const listHTML = arr => {
+    const cards=arr.map(cardOf), g=k=>cards.filter(o=>o.grp===k);
+    const sec=(k,title,sub)=>{ const c=g(k); return c.length?`<div class="exgrp" data-g="${k}"><div class="exgrp-h"><b>${title}</b><span>${c.length}개</span><em>${sub}</em></div><div class="exlist">${c.map(o=>o.html).join('')}</div></div>`:''; };
+    const blk=g('blk');
+    return sec('rec','⭐ 이 대상자에게 권장','대상자의 문제와 관련 있는 운동입니다. 여기부터 살펴보세요.')
+      + (g('opt').length?`<details class="exgrp" data-g="opt"${g('rec').length?'':' open'}><summary class="exgrp-h"><b>그 밖에 고를 수 있는 운동</b><span>${g('opt').length}개</span><em>꼭 필요할 때 눌러서 펼쳐 보세요</em></summary><div class="exlist">${g('opt').map(o=>o.html).join('')}</div></details>`:'')
+      + (blk.length?`<details class="exgrp" data-g="blk"><summary class="exgrp-h"><b>🚫 지금은 할 수 없는 운동</b><span>${blk.length}개</span><em>눌러서 이유 보기</em></summary><div class="exlist">${blk.map(o=>o.html).join('')}</div></details>`:'');
+  };
   // ① 소도구 칩
   $('#toolChips').innerHTML = TOOLS.map(t=>{
     const n=EX_LIB.filter(x=>x.tool===t.id).length;
     return `<button type="button" data-tool="${t.id}" data-on="${S.tools.has(t.id)?'1':'0'}"><span>${t.ic}</span>${t.nm}<i>${n}</i></button>`;
   }).join('');
   // ② 소도구 실습 운동 / ③ 기본 중재
-  const renderLists=()=>{
-    const tl=EX_LIB.filter(x=>x.tool && S.tools.has(x.tool));
-    $('#toolExList').innerHTML = tl.length ? listHTML(tl) : '<p class="ex-guide" style="margin:0">위에서 소도구를 하나 이상 고르세요.</p>';
-    $('#toolExCount').textContent = `${tl.length}개 운동 · ${tl.filter(x=>S.picked.has(x.id)).length}개 담음`;
-    $('#exList').innerHTML = listHTML(EX_LIB.filter(x=>!x.tool));
-    updateExCount();
+  // 부위로 골라 보기: 한 번에 보이는 카드 수를 줄임
+  const PART_GROUPS=[['all','전체',null],['leg','다리',['legL','legR']],['hip','엉덩이·골반',['hipL','hipR']],['core','몸통·코어',['core']],
+    ['back','등·척추',['back']],['arm','팔·어깨',['armL','armR']],['chest','가슴·심폐',['chest']],['head','머리·인지',['head']]];
+  const crNow=caseRegions();
+  const hitsPart=(x,regs)=>{ if(!regs) return true; const r=EX_REGIONS[x.id], list=r==='CASE'?[...crNow]:(r||[]); return list.some(k=>regs.includes(k)); };
+  const partOf=()=>PART_GROUPS.find(g=>g[0]===S.exPart)||PART_GROUPS[0];
+  const renderFilter=()=>{
+    $('#exFilter').innerHTML = '<span class="exf-l">부위로 골라 보기</span>' + PART_GROUPS.map(([id,nm,regs])=>{
+      const sick=regs&&regs.some(k=>crNow.has(k)) && crNow.size<BODY_REGIONS.length;
+      return `<button type="button" data-part="${id}" data-on="${partOf()[0]===id?'1':'0'}">${nm}${sick?'<i title="이 대상자의 아픈 부위">아픈 부위</i>':''}</button>`;
+    }).join('');
   };
+  const emptyMsg='<p class="ex-guide" style="margin:0">이 부위를 쓰는 운동이 여기에는 없습니다. 「전체」를 누르거나 다른 목록을 보세요.</p>';
+  const renderLists=()=>{
+    const regs=partOf()[2];
+    const tlAll=EX_LIB.filter(x=>x.tool && S.tools.has(x.tool)), tl=tlAll.filter(x=>hitsPart(x,regs));
+    $('#toolExList').innerHTML = !tlAll.length ? '<p class="ex-guide" style="margin:0">위에서 소도구를 하나 이상 고르세요.</p>' : tl.length ? listHTML(tl) : emptyMsg;
+    $('#toolExCount').textContent = `${tlAll.length}개 운동 · ${tlAll.filter(x=>S.picked.has(x.id)).length}개 담음`;
+    const base=EX_LIB.filter(x=>!x.tool && hitsPart(x,regs));
+    $('#exList').innerHTML = base.length ? listHTML(base) : emptyMsg;
+    renderFilter(); updateExCount();
+  };
+  $('#exFilter').onclick = e=>{ const b=e.target.closest('[data-part]'); if(!b) return; S.exPart=b.dataset.part; renderLists(); };
   renderLists();
   $('#toolChips').onclick = e=>{
     const b=e.target.closest('[data-tool]'); if(!b) return;
@@ -2317,6 +2393,8 @@ function renderProgram(){
     renderLists();
   };
   const onPick = e=>{
+    const info=e.target.closest('.ex-info');
+    if(info){ const card=info.closest('.ex'), open=card.classList.toggle('open'); info.textContent=open?'접기 ▴':'자세히 ▾'; info.setAttribute('aria-expanded',open); return; }
     const el=e.target.closest('.ex'); if(!el||el.dataset.block==='1') return;
     const id=el.dataset.ex;
     if(S.picked.has(id)){ S.picked.delete(id); } else { S.picked.add(id); S.dropped.delete(id); }
@@ -2337,6 +2415,12 @@ function renderProgram(){
   $('#exList').onclick = onPick;
   $('#btnSuggest').onclick = ()=>{ suggest().forEach(id=>{ S.picked.add(id); S.dropped.delete(id); }); renderLists(); Body3D.update(); if(window.RealBody) RealBody.applyCoverage(); $$('#rail button').forEach(b=>b.disabled=!reachable(+b.dataset.go)); };
   $('#toolExList').onclick = onPick;
+  $('#pickTray').onclick = e=>{
+    const b=e.target.closest('[data-unpick]'); if(!b) return;
+    S.picked.delete(b.dataset.unpick); renderLists(); Body3D.update();
+    if(window.RealBody){ RealBody.applyCoverage(); RealBody.setExercise(null); covCaption(''); }
+    $$('#rail button').forEach(x=>x.disabled=!reachable(+x.dataset.go));
+  };
   $('#goalText').value = S.goal;
   $('#goalText').oninput = e=>{S.goal=e.target.value;};
   Body3D.ensure(); Body3D.update();
@@ -2436,6 +2520,10 @@ function renderTalk(){
 }
 function updateExCount(){
   const el=$('#exCount'); if(el) el.textContent = `후보 총 ${S.picked.size}개 담음`;
+  const tray=$('#pickTray'); if(!tray) return;
+  const items=EX_LIB.filter(x=>S.picked.has(x.id));
+  tray.innerHTML = `<div class="pt-h"><b>담은 운동 ${items.length}개</b><span>${items.length?'✕ 를 누르면 뺄 수 있어요':'아래에서 운동 카드를 눌러 담아 보세요'}</span></div>`
+    + (items.length?`<div class="pt-list">${items.map(x=>`<span class="pt-chip">${x.icon||'🔹'} ${x.nm.split(' (')[0]}<button type="button" data-unpick="${x.id}" aria-label="${escAttr(x.nm)} 빼기">✕</button></span>`).join('')}</div>`:'');
 }
 
 /* ============================================================
@@ -4003,7 +4091,7 @@ const Save = (()=>{
     if(d.at) mark(d.at);
     return true;
   }
-  function clear(){ ready=false; clearTimeout(timer); try{ localStorage.removeItem(SAVE_KEY); }catch(e){} }
+  function clear(){ ready=false; clearTimeout(timer); try{ localStorage.removeItem(SAVE_KEY); localStorage.removeItem('rehablab.sub'); }catch(e){} }
   function start(){
     ready=true;
     // 입력·클릭이 처리된 직후의 상태를 저장
@@ -4091,8 +4179,16 @@ const Live = (()=>{
     if(S.built&&S.evalRes){ const cr=caseRegions(), pr=programRegions();
       BODY_REGIONS.forEach(r=>{ if(pr.bad.has(r)) bad++; else if(cr.has(r)&&!pr.hit.has(r)) gap++; }); }
     const ids=[...S.picked], done=ids.filter(id=>{ const t=S.trial[id]||{}; return t.can&&t.dec; }).length;
-    return {gap, bad, risk:S.evalRes?S.evalRes.risk:'', trial:done, trialN:ids.length};
+    let sub=null; try{ sub=JSON.parse(localStorage.getItem('rehablab.sub')||'null'); }catch(e){}
+    return {gap, bad, risk:S.evalRes?S.evalRes.risk:'', trial:done, trialN:ids.length,
+            sub: sub&&sub.at ? {at:sub.at, same:sub.h===stateHash()} : null};
   }
+  // 시트에 제출한 시점의 내용과 지금 내용이 같은지 비교하기 위한 요약값 (단계 이동만 한 것은 변경으로 치지 않음)
+  function stateHash(){
+    const d=Save.snap(); delete d.at; delete d.step; delete d.activeWeek;
+    const t=JSON.stringify(d); let h=5381; for(let i=0;i<t.length;i++) h=((h<<5)+h+t.charCodeAt(i))|0; return h;
+  }
+  function markSubmitted(){ try{ localStorage.setItem('rehablab.sub',JSON.stringify({at:Date.now(),h:stateHash()})); }catch(e){} soon(); }
   function send(){
     timer=null;
     if(!S.built && !S.team.trim()) return;                 // 아직 아무것도 안 한 화면은 보내지 않음
@@ -4104,7 +4200,7 @@ const Live = (()=>{
   }
   function soon(){ if(timer) return; timer=setTimeout(send, Math.max(2500, 10000-(Date.now()-lastSent))); }   // 최소 10초 간격
   function start(){ sid=getSid(); ['input','change','click'].forEach(t=>document.addEventListener(t,soon)); soon(); }
-  return {start};
+  return {start, markSubmitted};
 })();
 
 /* ---- 보기 전용 모드: 교사용 현황판(teacher.html)이 보내 주는 조의 진행 상황을 그대로 그림 ---- */
@@ -4162,7 +4258,7 @@ const Cloud = (()=>{
     if(!S.built){ alert('대상자를 뽑은 뒤에 제출할 수 있습니다.'); return; }
     const c=askCode(); if(!c) return; code=c;
     const b=$('#btnCloudSave'); b.disabled=true; status('시트에 제출하는 중…','ok');
-    try{ await call({action:'save',data:Save.snap(),code}); status('시트에 제출 완료 · '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})); alert(`「${S.team}」 진행 상황을 선생님 시트에 제출했습니다.\n\n다음 시간에 [↻ 불러오기]에서\n조 이름 「${S.team}」 과 암호 ${code} 를 입력하면 이어서 할 수 있어요.`); }
+    try{ await call({action:'save',data:Save.snap(),code}); Live.markSubmitted(); status('시트에 제출 완료 · '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})); alert(`「${S.team}」 진행 상황을 선생님 시트에 제출했습니다.\n\n다음 시간에 [↻ 불러오기]에서\n조 이름 「${S.team}」 과 암호 ${code} 를 입력하면 이어서 할 수 있어요.`); }
     catch(e){ status('제출 실패','err'); alert('시트에 제출하지 못했습니다.\n('+e.message+')\n\n인터넷 연결을 확인하거나, [↻ 불러오기] 창 아래의 「파일로 저장」을 사용하세요.'); }
     finally{ b.disabled=false; }
   }
@@ -4196,7 +4292,7 @@ const Cloud = (()=>{
     const it=items.find(x=>x.id===id); if(!it) return;
     if(!confirm(`「${it.team}」 (${it.members})\n대상자 ${it.case} · ${it.step} · ${it.at} 제출\n\n이 기록을 불러올까요? 지금 화면의 내용은 바뀝니다.`)) return;
     msg('불러오는 중…');
-    try{ const j=await call({action:'load',id,code}); Save.apply(j.data); close(); status('시트에서 불러왔습니다'); }
+    try{ const j=await call({action:'load',id,code}); Save.apply(j.data); Live.markSubmitted(); close(); status('시트에서 불러왔습니다'); }
     catch(e){ alert('불러오지 못했습니다. ('+e.message+')'); render(); }
   }
   $('#btnCloudSave').addEventListener('click',submit);

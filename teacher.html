@@ -65,6 +65,7 @@ button{font-family:inherit}
 .chip.ok{background:var(--mint);color:var(--signal)}
 .chip.warn{background:#FFF1D6;color:#8A5200}
 .chip.bad{background:#FDE7E4;color:var(--alert)}
+.chip.none{background:#fff;color:var(--ink3);border:1px dashed #C5D1CA}
 
 .view{flex:1;min-height:0;position:relative;overflow:hidden;background:var(--paper)}
 .view iframe{position:absolute;left:0;top:0;border:0;transform-origin:0 0;background:var(--paper)}
@@ -243,11 +244,21 @@ function paintStrip(t){
     step>=4&&sum.gap ? `<span class="chip warn">노랑(미처방) ${sum.gap}곳</span>` : '',
     sum.bad ? `<span class="chip bad">빨강(금기) ${sum.bad}곳</span>` : '',
     step>=5 ? `<span class="chip ${sum.trialN&&sum.trial>=sum.trialN?'ok':''}">체험 ${sum.trial||0}/${sum.trialN||0}</span>` : '',
-    step>=7 ? `<span class="chip ${d.reviews>=2?'ok':d.reviews?'':'warn'}">AI 검토 ${d.reviews||0}회</span>` : ''
+    step>=7 ? `<span class="chip ${d.reviews>=2?'ok':d.reviews?'':'warn'}">AI 검토 ${d.reviews||0}회</span>` : '',
+    subChip(sum.sub, !!b)
   ];
   el.querySelector('.chips').innerHTML=chips.join('');
   el.dataset.bad = sum.bad?'1':'0';
   paintAge(t);
+}
+// 시트 제출 여부: 제출함 / 제출 뒤에 내용이 바뀜 / 아직 안 함
+const hhmm = ms => new Date(ms).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',hour12:false});
+function subState(sub){ return !sub ? 'none' : sub.same ? 'done' : 'changed'; }
+function subChip(sub, hasCase){
+  const st=subState(sub);
+  if(st==='done') return `<span class="chip ok">시트 제출함 ✓ ${hhmm(sub.at)}</span>`;
+  if(st==='changed') return `<span class="chip warn">제출 후 내용 바뀜 · ${hhmm(sub.at)} 제출</span>`;
+  return hasCase ? `<span class="chip none">아직 제출 안 함</span>` : '';
 }
 function paintAge(t){
   const age=Math.max(0, Date.now()-skew-t.item.at);
@@ -267,7 +278,9 @@ function paintStats(){
     `<span class="stat">평균 <b>${avg}</b>단계</span>`,
     Math.max(...steps)>min ? `<span class="stat">가장 느린 조 <b>${esc(slow.join(', '))}</b> (${min}단계)</span>` : '',
     idle ? `<span class="stat warn">멈춘 조 <b>${idle}</b></span>` : '',
-    bad ? `<span class="stat bad">금기 운동 담은 조 <b>${bad}</b></span>` : ''
+    bad ? `<span class="stat bad">금기 운동 담은 조 <b>${bad}</b></span>` : '',
+    (()=>{ const done=all.filter(t=>subState((t.item.sum||{}).sub)==='done').length, ch=all.filter(t=>subState((t.item.sum||{}).sub)==='changed').length;
+      return `<span class="stat">시트 제출 <b>${done}/${n}</b>${ch?` · 바뀐 조 ${ch}`:''}</span>`; })()
   ].join('');
 }
 
