@@ -116,7 +116,7 @@ function doPost(e) {
     var list = body.model ? [body.model] : (wantImage ? IMAGE_MODELS : MODELS);
     var genCfg = wantImage
       ? { responseModalities: ['TEXT', 'IMAGE'] }
-      : { temperature: 0.4, maxOutputTokens: 1400 };
+      : { temperature: 0.4, maxOutputTokens: 4096 };   // 검토 JSON 이 중간에 잘리지 않도록 넉넉하게 (생각 토큰 포함)
     var payload = JSON.stringify({
       contents: [{ parts: [{ text: prompt }] }],
       generationConfig: genCfg
