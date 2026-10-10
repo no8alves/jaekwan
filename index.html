@@ -764,7 +764,10 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
 .cm-head b{font-size:16px}
 .cm-x{border:none;background:var(--band);width:30px;height:30px;border-radius:50%;cursor:pointer;color:var(--ink2)}
 .cm-help{margin:12px 20px 8px;font-size:13px;color:var(--ink2);line-height:1.5}
-#cmFilter{margin:0 20px 10px;font-family:var(--sans)}
+.cm-form{display:grid;grid-template-columns:1fr 120px auto;gap:8px;margin:0 20px 10px}
+.cm-form input{font-family:var(--sans);min-width:0}
+#cmCode{letter-spacing:.2em;text-align:center;font-family:var(--mono)}
+@media(max-width:480px){.cm-form{grid-template-columns:1fr 1fr}.cm-form .btn{grid-column:1/-1}}
 .cm-list{overflow:auto;padding:0 12px 8px;display:grid;gap:6px}
 .cm-item{display:grid;grid-template-columns:1fr auto;gap:2px 10px;text-align:left;width:100%;border:1px solid var(--rule);background:#fff;border-radius:12px;padding:10px 12px;cursor:pointer;font-family:var(--sans);color:var(--ink);transition:all .12s}
 .cm-item:hover{border-color:var(--signal);background:#F6FBF8}
@@ -777,6 +780,15 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
 .cm-link{border:none;background:none;color:var(--ink2);font-family:var(--sans);font-size:12.5px;font-weight:600;cursor:pointer;padding:2px 4px;text-decoration:underline;text-underline-offset:3px}
 .cm-link:hover{color:var(--signal)}
 @media print{.cmodal{display:none !important}}
+
+/* ---------- 보기 전용 (교사용 현황판 안) ---------- */
+html.watch .savebar,html.watch .foot{display:none !important}
+html.watch .btn,html.watch .ex,html.watch .tagpick button,html.watch .freshbtn,html.watch .mem-star,html.watch .mem-del,
+html.watch input,html.watch textarea,html.watch select,html.watch .wk-chip,html.watch .day-chip,html.watch .seg button{pointer-events:none}
+html.watch .panel{animation:none}
+html.watch header.top{display:none}
+html.watch .wrap{padding-top:12px;padding-bottom:40px}
+html.watch .rail{margin-bottom:18px;top:8px}
 /* ============================================================
    PREMIUM THEME — 화면 전용 (인쇄 스타일은 위 규칙 유지)
    ============================================================ */
@@ -1007,8 +1019,12 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
 <div class="cmodal" id="cloudModal" hidden>
   <div class="cm-box" role="dialog" aria-modal="true" aria-labelledby="cmTitle">
     <div class="cm-head"><b id="cmTitle">우리 조 진행 상황 불러오기</b><button type="button" class="cm-x" id="cmClose" aria-label="닫기">✕</button></div>
-    <p class="cm-help">선생님 시트에 제출된 기록입니다. <b>우리 조 이름과 조원</b>을 확인하고 가장 최근 것을 고르세요.</p>
-    <input type="text" id="cmFilter" placeholder="조 이름으로 찾기 (예: 3조)">
+    <p class="cm-help">제출할 때 쓴 <b>조 이름</b>과 <b>조 암호(숫자 4자리)</b>를 입력하면 우리 조 기록만 나옵니다.</p>
+    <form class="cm-form" id="cmForm" autocomplete="off">
+      <input type="text" id="cmTeam" placeholder="조 이름 (예: 3조)" maxlength="30">
+      <input type="text" id="cmCode" placeholder="암호 4자리" inputmode="numeric" maxlength="4" pattern="[0-9]{4}">
+      <button type="submit" class="btn small" id="cmFind">찾기</button>
+    </form>
     <div class="cm-list" id="cmList"></div>
     <div class="cm-foot">
       <span>인터넷 연결이 불안할 때:</span>
@@ -1682,6 +1698,7 @@ const ROLES = [
    ============================================================ */
 const S = {step:1, age:null, built:null, a:{}, redraws:0, picked:new Set(), dose:{freq:3,time:15,weeks:4,rpe:11}, weekPlan:null, weekPlanKey:'', activeWeek:0, goal:'', team:'', members:[{name:'',lead:false},{name:'',lead:false},{name:'',lead:false}], roles:['','','',''], evalRes:null, tools:new Set(['body','chair','band','pad']), trial:{}, dropped:new Set(), talk:{changed:'',fixed:''}, reviews:0};
 const DRAW_MAX = 3;
+const WATCH = new URLSearchParams(location.search).has('watch');   // 교사용 현황판 안에서 보기 전용으로 열림
 const $ = s=>document.querySelector(s);
 const $$ = s=>Array.from(document.querySelectorAll(s));
 const ageObj = ()=>AGES.find(a=>a.id===S.age);
@@ -4062,9 +4079,67 @@ $('#btnReset').addEventListener('click',()=>{
   Save.now();
 });
 
+/* ---- 교사용 현황판으로 진행 상황 자동 전송 (teacher.html 이 모아서 봄) ---- */
+const Live = (()=>{
+  let sid='', timer=null, lastSent=0, lastBody='';
+  function getSid(){
+    try{ let v=localStorage.getItem('rehablab.sid'); if(!/^[a-z0-9]{8,24}$/.test(v||'')){ v=Math.random().toString(36).slice(2,10)+Date.now().toString(36); localStorage.setItem('rehablab.sid',v); } return v; }
+    catch(e){ return Math.random().toString(36).slice(2,10)+Date.now().toString(36); }
+  }
+  function summary(){
+    let gap=0, bad=0;
+    if(S.built&&S.evalRes){ const cr=caseRegions(), pr=programRegions();
+      BODY_REGIONS.forEach(r=>{ if(pr.bad.has(r)) bad++; else if(cr.has(r)&&!pr.hit.has(r)) gap++; }); }
+    const ids=[...S.picked], done=ids.filter(id=>{ const t=S.trial[id]||{}; return t.can&&t.dec; }).length;
+    return {gap, bad, risk:S.evalRes?S.evalRes.risk:'', trial:done, trialN:ids.length};
+  }
+  function send(){
+    timer=null;
+    if(!S.built && !S.team.trim()) return;                 // 아직 아무것도 안 한 화면은 보내지 않음
+    const d=Save.snap(); delete d.at;
+    const body=JSON.stringify({action:'live',sid,data:d,sum:summary()});
+    if(body===lastBody) return;                            // 바뀐 게 없으면 다시 보내지 않음
+    lastBody=body; lastSent=Date.now();
+    fetch(AI_PROXY,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body,keepalive:body.length<60000}).catch(()=>{ lastBody=''; });
+  }
+  function soon(){ if(timer) return; timer=setTimeout(send, Math.max(2500, 10000-(Date.now()-lastSent))); }   // 최소 10초 간격
+  function start(){ sid=getSid(); ['input','change','click'].forEach(t=>document.addEventListener(t,soon)); soon(); }
+  return {start};
+})();
+
+/* ---- 보기 전용 모드: 교사용 현황판(teacher.html)이 보내 주는 조의 진행 상황을 그대로 그림 ---- */
+const Watch = (()=>{
+  let lite=true, last='';
+  function start(){
+    document.documentElement.classList.add('watch');
+    // 2×2 로 볼 때는 3D 를 돌리지 않음 (크게 볼 때만 켬)
+    const re=RealBody.ensure, be=Body3D.ensure;
+    RealBody.ensure=()=>{ if(!lite) re(); }; Body3D.ensure=()=>{ if(!lite) be(); };
+    window.addEventListener('message',e=>{
+      if(e.origin!==location.origin || e.source!==window.parent) return;
+      const m=e.data||{};
+      if(m.type==='rehab-state' && m.state && m.state.v===1){
+        const raw=JSON.stringify(m.state); if(raw===last) return; last=raw;
+        const y=window.scrollY, st=S.step;
+        Save.apply(m.state);
+        if(!S.built) renderDraw(false);
+        window.scrollTo({top:S.step===st?y:0, behavior:'instant'});
+      } else if(m.type==='rehab-lite'){
+        const was=lite; lite=!!m.on;
+        if(was && !lite && S.built) { const y=window.scrollY; go(S.step); window.scrollTo({top:y,behavior:'instant'}); }
+      }
+    });
+    if(window.parent!==window) window.parent.postMessage({type:'rehab-ready'},location.origin);
+  }
+  return {start};
+})();
+
 // 이전 진행 상황 불러오기 → 이후 변경은 자동 저장
-if(Save.restore()){ const el=$('#saveState'); if(el){ el.textContent='이전 진행 상황을 불러왔습니다'; el.dataset.st='ok'; } }
-Save.start();
+if(WATCH){ Watch.start(); }
+else{
+  if(Save.restore()){ const el=$('#saveState'); if(el){ el.textContent='이전 진행 상황을 불러왔습니다'; el.dataset.st='ok'; } }
+  Save.start(); Live.start();
+}
 $('#btnExport').addEventListener('click',()=>Save.exportFile());
 
 /* ---- 선생님 시트에 제출 / 불러오기 (apps-script-proxy.gs 의 save·list·load) ---- */
@@ -4074,44 +4149,62 @@ const Cloud = (()=>{
     const j = await r.json(); if(j.error) throw new Error(j.error); return j;
   };
   const status = (t,st)=>{ const el=$('#saveState'); if(el){ el.textContent=t; el.dataset.st=st||'ok'; } };
-  let items=[];
+  let items=[], code='';   // 조 암호는 이 화면이 열려 있는 동안만 기억 (저장 파일·시트 데이터에는 넣지 않음)
+  const okCode = c => /^\d{4}$/.test(c);
+  function askCode(){
+    const c=(prompt(`「${S.team}」 조 암호를 숫자 4자리로 입력하세요.\n\n· 처음 제출이면 조원끼리 정해서 입력하고 꼭 기억해 두세요.\n· 다음 시간에 불러올 때 이 암호가 필요합니다.\n· 전에 제출한 적이 있으면 같은 암호를 쓰세요.`, code)||'').trim();
+    if(!c) return '';
+    if(!okCode(c)){ alert('암호는 숫자 4자리여야 합니다. (예: 0412)'); return ''; }
+    return c;
+  }
   async function submit(){
     if(!S.team.trim()){ alert('조 이름을 먼저 적어 주세요. (오른쪽 위 TEAM 칸)'); $('#teamName').focus(); return; }
     if(!S.built){ alert('대상자를 뽑은 뒤에 제출할 수 있습니다.'); return; }
+    const c=askCode(); if(!c) return; code=c;
     const b=$('#btnCloudSave'); b.disabled=true; status('시트에 제출하는 중…','ok');
-    try{ await call({action:'save',data:Save.snap()}); status('시트에 제출 완료 · '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})); alert(`「${S.team}」 진행 상황을 선생님 시트에 제출했습니다.\n다음 시간에 [↻ 불러오기]에서 이어서 할 수 있어요.`); }
+    try{ await call({action:'save',data:Save.snap(),code}); status('시트에 제출 완료 · '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})); alert(`「${S.team}」 진행 상황을 선생님 시트에 제출했습니다.\n\n다음 시간에 [↻ 불러오기]에서\n조 이름 「${S.team}」 과 암호 ${code} 를 입력하면 이어서 할 수 있어요.`); }
     catch(e){ status('제출 실패','err'); alert('시트에 제출하지 못했습니다.\n('+e.message+')\n\n인터넷 연결을 확인하거나, [↻ 불러오기] 창 아래의 「파일로 저장」을 사용하세요.'); }
     finally{ b.disabled=false; }
   }
+  const msg = t => { $('#cmList').innerHTML=`<div class="cm-empty">${t}</div>`; };
   function render(){
-    const q=($('#cmFilter').value||'').trim();
-    const list=items.filter(it=>!q||String(it.team).includes(q));
-    $('#cmList').innerHTML = list.length ? list.map(it=>`
+    $('#cmList').innerHTML = items.length ? items.map(it=>`
       <button type="button" class="cm-item" data-id="${escAttr(it.id)}">
-        <span class="cm-team">${_esc(it.team||'(조 이름 없음)')}</span>
+        <span class="cm-team">${_esc(it.team||'')}</span>
+        <span class="cm-at">${_esc(it.at||'')}</span>
         <span class="cm-mem">${_esc(it.members||'')}</span>
         <span class="cm-case">${_esc(it.case||'')} · ${_esc(it.step||'')}</span>
-        <span class="cm-at">${_esc(it.at||'')}</span>
-      </button>`).join('') : `<div class="cm-empty">${items.length?'찾는 조가 없습니다.':'아직 제출된 기록이 없습니다.'}</div>`;
+      </button>`).join('') : `<div class="cm-empty">조 이름과 암호가 맞는 기록이 없습니다.<br>띄어쓰기 말고 글자가 같은지, 암호가 맞는지 확인해 보세요.<br>암호를 잊었으면 선생님께 물어보세요.</div>`;
   }
-  async function open(){
-    $('#cloudModal').hidden=false; $('#cmFilter').value=S.team||''; $('#cmList').innerHTML='<div class="cm-empty">불러오는 중…</div>';
-    try{ items=(await call({action:'list'})).items||[]; render(); }
-    catch(e){ $('#cmList').innerHTML=`<div class="cm-empty">목록을 가져오지 못했습니다. (${_esc(e.message)})<br>아래 「파일에서 불러오기」를 사용하세요.</div>`; }
+  function open(){
+    $('#cloudModal').hidden=false; items=[];
+    $('#cmTeam').value=S.team||''; $('#cmCode').value=code;
+    msg('조 이름과 암호를 입력하고 「찾기」를 누르세요.');
+    ($('#cmTeam').value ? $('#cmCode') : $('#cmTeam')).focus();
+  }
+  async function find(){
+    const team=$('#cmTeam').value.trim(), c=$('#cmCode').value.trim();
+    if(!team){ msg('조 이름을 입력해 주세요.'); $('#cmTeam').focus(); return; }
+    if(!okCode(c)){ msg('암호는 숫자 4자리입니다.'); $('#cmCode').focus(); return; }
+    msg('찾는 중…'); $('#cmFind').disabled=true;
+    try{ items=(await call({action:'list',team,code:c})).items||[]; code=c; render(); }
+    catch(e){ msg(`목록을 가져오지 못했습니다. (${_esc(e.message)})<br>아래 「파일에서 불러오기」를 사용할 수 있습니다.`); }
+    finally{ $('#cmFind').disabled=false; }
   }
   function close(){ $('#cloudModal').hidden=true; }
   async function pick(id){
     const it=items.find(x=>x.id===id); if(!it) return;
     if(!confirm(`「${it.team}」 (${it.members})\n대상자 ${it.case} · ${it.step} · ${it.at} 제출\n\n이 기록을 불러올까요? 지금 화면의 내용은 바뀝니다.`)) return;
-    $('#cmList').innerHTML='<div class="cm-empty">불러오는 중…</div>';
-    try{ const j=await call({action:'load',id}); Save.apply(j.data); close(); status('시트에서 불러왔습니다'); }
+    msg('불러오는 중…');
+    try{ const j=await call({action:'load',id,code}); Save.apply(j.data); close(); status('시트에서 불러왔습니다'); }
     catch(e){ alert('불러오지 못했습니다. ('+e.message+')'); render(); }
   }
   $('#btnCloudSave').addEventListener('click',submit);
   $('#btnCloudLoad').addEventListener('click',open);
   $('#cmClose').addEventListener('click',close);
   $('#cloudModal').addEventListener('click',e=>{ if(e.target.id==='cloudModal') close(); const b=e.target.closest('.cm-item'); if(b) pick(b.dataset.id); });
-  $('#cmFilter').addEventListener('input',render);
+  $('#cmForm').addEventListener('submit',e=>{ e.preventDefault(); find(); });
+  $('#cmCode').addEventListener('input',e=>{ e.target.value=e.target.value.replace(/\D/g,'').slice(0,4); });
   document.addEventListener('keydown',e=>{ if(e.key==='Escape' && !$('#cloudModal').hidden) close(); });
   return {submit, open};
 })();

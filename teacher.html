@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>REHAB LAB · 교사용 현황판</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{
+  --paper:#F3F5F2; --band:#EEF2EF; --card:#FFFFFF; --ink:#0F2420; --ink2:#4A5B56; --ink3:#86958F; --rule:#DFE6E1;
+  --signal:#0B8462; --caution:#B26A00; --alert:#B42318; --mint:#E3F3EC; --brand-1:#0F2420; --brand-2:#14463A;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:"Pretendard Variable",Pretendard,system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html,body{margin:0;height:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;overflow:hidden}
+button{font-family:inherit}
+
+/* ---- 상단 바 ---- */
+.bar{flex:none;display:flex;align-items:center;gap:16px;padding:10px 18px;background:linear-gradient(135deg,var(--brand-1),var(--brand-2));color:#fff}
+.bar h1{margin:0;font-size:18px;font-weight:800;letter-spacing:-.02em;white-space:nowrap}
+.bar h1 small{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.16em;color:#9AF0CD;margin-right:10px}
+.stats{display:flex;gap:8px;flex-wrap:wrap;flex:1;min-width:0}
+.stat{font-size:13px;background:rgba(255,255,255,.1);border-radius:999px;padding:4px 12px;white-space:nowrap}
+.stat b{font-weight:800}
+.stat.warn{background:#FFE7B8;color:#6B4200}
+.stat.bad{background:#FFD9D4;color:#8A1C12}
+.sync{font-size:12px;color:#B9D6CB;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.sync i{width:7px;height:7px;border-radius:50%;background:#5BE3AE}
+.sync.err i{background:#FF8A7A}
+.bar button{border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.08);color:#fff;border-radius:999px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
+.bar button:hover{background:rgba(255,255,255,.18)}
+
+/* ---- 조 화면 격자 ---- */
+.grid{flex:1;min-height:0;display:grid;gap:10px;padding:10px}
+.tile{position:relative;min-width:0;min-height:0;display:flex;flex-direction:column;background:var(--card);border:1px solid var(--rule);border-radius:14px;overflow:hidden;box-shadow:0 2px 4px rgba(15,36,32,.04),0 8px 24px -6px rgba(15,36,32,.10)}
+.tile[data-st="idle"]{border-color:#E9C46A;box-shadow:0 0 0 2px #F6DFA4}
+.tile[data-st="stale"]{border-color:#E39B92;box-shadow:0 0 0 2px #F5C6C0}
+.tile[data-bad="1"]{border-color:#D9685C;box-shadow:0 0 0 2px #F1B5AE}
+.tile.big{position:fixed;inset:8px;z-index:50;box-shadow:0 30px 80px -10px rgba(15,36,32,.55)}
+.shade{position:fixed;inset:0;background:rgba(15,36,32,.45);z-index:40}
+
+.strip{flex:none;display:grid;grid-template-columns:auto 1fr auto;gap:4px 14px;align-items:center;padding:9px 12px 8px 14px;border-bottom:1px solid var(--rule);background:linear-gradient(180deg,#FBFCFB,#F5F8F6)}
+.team{font-size:20px;font-weight:800;letter-spacing:-.03em;white-space:nowrap;max-width:240px;overflow:hidden;text-overflow:ellipsis}
+.mem{font-size:12.5px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.right{grid-row:1/3;grid-column:3;display:flex;align-items:center;gap:8px}
+.act{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--ink2);white-space:nowrap}
+.act i{width:9px;height:9px;border-radius:50%;background:var(--signal);box-shadow:0 0 0 3px rgba(11,132,98,.16)}
+.tile[data-st="idle"] .act{color:var(--caution)} .tile[data-st="idle"] .act i{background:#E0A93B;box-shadow:0 0 0 3px rgba(224,169,59,.2)}
+.tile[data-st="stale"] .act{color:var(--alert)} .tile[data-st="stale"] .act i{background:#D14B3C;box-shadow:0 0 0 3px rgba(209,75,60,.18)}
+.tbtn{border:1px solid var(--rule);background:#fff;border-radius:999px;padding:5px 12px;font-size:12.5px;font-weight:700;color:var(--ink);cursor:pointer}
+.tbtn:hover{border-color:var(--signal);color:var(--signal)}
+.tbtn.x{padding:5px 9px;color:var(--ink3);font-weight:500}
+.tbtn.x:hover{border-color:var(--alert);color:var(--alert)}
+.chips{grid-column:1/3;display:flex;flex-wrap:wrap;gap:5px;align-items:center;min-width:0}
+.steps{display:flex;gap:3px;margin-right:4px}
+.steps i{width:16px;height:6px;border-radius:3px;background:var(--rule)}
+.steps i.on{background:var(--signal)} .steps i.cur{background:var(--ink)}
+.chip{font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;background:var(--band);color:var(--ink2);white-space:nowrap}
+.chip.step{background:var(--ink);color:#fff}
+.chip.ok{background:var(--mint);color:var(--signal)}
+.chip.warn{background:#FFF1D6;color:#8A5200}
+.chip.bad{background:#FDE7E4;color:var(--alert)}
+
+.view{flex:1;min-height:0;position:relative;overflow:hidden;background:var(--paper)}
+.view iframe{position:absolute;left:0;top:0;border:0;transform-origin:0 0;background:var(--paper)}
+
+/* ---- 안내 / 암호 ---- */
+.center{flex:1;display:flex;align-items:center;justify-content:center;padding:24px}
+.box{width:100%;max-width:480px;background:#fff;border:1px solid var(--rule);border-radius:18px;padding:28px;box-shadow:0 18px 40px -12px rgba(15,36,32,.18)}
+.box h2{margin:0 0 6px;font-size:20px;letter-spacing:-.02em}
+.box p{margin:0 0 16px;color:var(--ink2);font-size:14px;line-height:1.6}
+.box ol{margin:0 0 16px;padding-left:20px;color:var(--ink2);font-size:14px;line-height:1.8}
+.box code{font-family:var(--mono);font-size:12.5px;background:var(--band);padding:1px 6px;border-radius:5px;color:var(--ink)}
+.box form{display:flex;gap:8px}
+.box input{flex:1;min-width:0;font-family:var(--sans);font-size:15px;border:1px solid var(--rule);border-radius:10px;padding:10px 12px}
+.box input:focus{outline:none;border-color:var(--signal);box-shadow:0 0 0 4px rgba(11,132,98,.14)}
+.go{border:none;border-radius:999px;padding:10px 22px;font-size:14px;font-weight:700;color:#fff;cursor:pointer;background:linear-gradient(135deg,var(--brand-1),var(--brand-2))}
+.err{color:var(--alert);font-size:13px;font-weight:600;margin:10px 0 0 !important}
+.empty{text-align:center;color:var(--ink2)}
+.empty b{display:block;font-size:19px;color:var(--ink);margin-bottom:6px}
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <h1><small>REHAB LAB</small>교사용 현황판</h1>
+  <div class="stats" id="stats"></div>
+  <span class="sync" id="sync"><i></i><span id="syncTxt">연결 대기</span></span>
+  <button type="button" id="btnClear" hidden>새 수업 시작</button>
+  <button type="button" id="btnLock" hidden>잠그기</button>
+</header>
+
+<!-- 교사 암호 -->
+<div class="center" id="gate">
+  <div class="box">
+    <h2>교사 암호를 입력하세요</h2>
+    <p>조별 진행 상황은 교사 암호를 넣어야 볼 수 있습니다.</p>
+    <form id="gateForm" autocomplete="off">
+      <input type="password" id="gateKey" placeholder="교사 암호" autocomplete="off">
+      <button type="submit" class="go">열기</button>
+    </form>
+    <p class="err" id="gateErr" hidden></p>
+    <div id="gateSetup" hidden>
+      <p style="margin-top:18px"><b>교사 암호가 아직 설정되지 않았습니다.</b> 처음 한 번만 설정하면 됩니다.</p>
+      <ol>
+        <li>Apps Script 편집기를 엽니다.</li>
+        <li>왼쪽 ⚙️ <b>프로젝트 설정</b> → 맨 아래 <b>스크립트 속성</b> → <b>스크립트 속성 추가</b></li>
+        <li>속성 <code>TEACHER_KEY</code> · 값에 원하는 암호를 적고 <b>저장</b></li>
+        <li>이 화면으로 돌아와 그 암호를 입력합니다.</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<!-- 아직 접속한 조 없음 -->
+<div class="center" id="empty" hidden>
+  <div class="empty">
+    <b>아직 진행 중인 조가 없습니다</b>
+    학생들이 조 이름을 적거나 대상자를 뽑으면 10~20초 안에 여기에 나타납니다.
+  </div>
+</div>
+
+<main class="grid" id="grid" hidden></main>
+<div class="shade" id="shade" hidden></div>
+
+<script>
+const API = 'https://script.google.com/macros/s/AKfycbxEZ6Obkq4oEG3LMSI9Plh4G1wcdFxd8v2i0DTiFB1zglQb1nuFAFBcZodn1uV2YFzo/exec';
+const POLL_MS = 8000;          // 현황 새로 가져오는 간격
+const IDLE_MS = 3*60*1000;     // 이만큼 변화가 없으면 "멈춤"
+const STALE_MS = 10*60*1000;   // 이만큼 변화가 없으면 "오래 멈춤"
+const VIEW_W = 1280;           // 조 화면을 그리는 가로 폭(데스크톱 배치)
+const STEP_NAMES = ['','대상자 뽑기','대상자 확인','사정 결과','운동 후보','체험 기록','주차별 계획','검토·3D','처방카드'];
+const RISK = {ok:['운동 가능','ok'], caution:['조건부 진행','warn'], stop:['운동 보류','bad']};
+
+const $ = s=>document.querySelector(s);
+const esc = s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let key = '', timer = null, skew = 0, big = null;
+const tiles = new Map();   // sid → {el, frame, ready, item}
+
+try{ key = sessionStorage.getItem('rehablab.tkey') || ''; }catch(e){}
+
+async function call(body){
+  const r = await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)});
+  return r.json();
+}
+
+/* ---------- 암호 ---------- */
+function showGate(msg, setup){
+  clearTimeout(timer); key=''; try{ sessionStorage.removeItem('rehablab.tkey'); }catch(e){}
+  $('#gate').hidden=false; $('#grid').hidden=true; $('#empty').hidden=true; $('#btnClear').hidden=true; $('#btnLock').hidden=true;
+  $('#gateErr').hidden=!msg; $('#gateErr').textContent=msg||''; $('#gateSetup').hidden=!setup;
+  $('#stats').innerHTML=''; $('#syncTxt').textContent='연결 대기'; $('#gateKey').value=''; $('#gateKey').focus();
+}
+$('#gateForm').addEventListener('submit',e=>{
+  e.preventDefault(); const v=$('#gateKey').value; if(!v) return;
+  key=v; $('#gateErr').hidden=true; poll(true);
+});
+$('#btnLock').addEventListener('click',()=>{ closeBig(); tiles.forEach(t=>t.el.remove()); tiles.clear(); showGate(); });
+
+/* ---------- 현황 가져오기 ---------- */
+async function poll(first){
+  clearTimeout(timer);
+  let j;
+  try{ j = await call({action:'board',key}); }
+  catch(e){ $('#sync').classList.add('err'); $('#syncTxt').textContent='연결 끊김 · 다시 시도 중'; timer=setTimeout(poll,POLL_MS); return; }
+  if(j.error){
+    if(j.code==='nokey') return showGate('', true);
+    if(j.code==='badkey') return showGate(j.error);
+    $('#sync').classList.add('err'); $('#syncTxt').textContent=j.error; timer=setTimeout(poll,POLL_MS); return;
+  }
+  if(first){ try{ sessionStorage.setItem('rehablab.tkey',key); }catch(e){} }
+  skew = Date.now() - j.now;
+  $('#gate').hidden=true; $('#btnClear').hidden=false; $('#btnLock').hidden=false;
+  $('#sync').classList.remove('err');
+  $('#syncTxt').textContent='실시간 연결됨 · '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  render(j.items||[]);
+  timer=setTimeout(poll,POLL_MS);
+}
+
+/* ---------- 그리기 ---------- */
+function render(items){
+  items.sort((a,b)=>String(a.data.team||'~').localeCompare(String(b.data.team||'~'),'ko',{numeric:true}));
+  const seen=new Set();
+  items.forEach(it=>{
+    seen.add(it.sid);
+    let t=tiles.get(it.sid);
+    if(!t){ t=makeTile(it.sid); tiles.set(it.sid,t); }
+    const changed = !t.item || t.item.at!==it.at;
+    t.item=it;
+    $('#grid').appendChild(t.el);            // 조 이름 순서로 다시 놓기 (iframe 은 그대로 유지)
+    paintStrip(t);
+    if(changed) push(t);
+  });
+  tiles.forEach((t,sid)=>{ if(!seen.has(sid)){ if(big===sid) closeBig(); t.el.remove(); tiles.delete(sid); } });
+  const n=tiles.size;
+  $('#grid').hidden = n===0; $('#empty').hidden = n!==0;
+  const cols = n<=1?1 : n<=4?2 : n<=9?3 : 4, rows=Math.ceil(n/cols)||1;
+  $('#grid').style.gridTemplateColumns=`repeat(${cols},minmax(0,1fr))`;
+  $('#grid').style.gridTemplateRows=`repeat(${rows},minmax(0,1fr))`;
+  paintStats(); fitAll();
+}
+
+function makeTile(sid){
+  const el=document.createElement('section'); el.className='tile'; el.dataset.sid=sid;
+  el.innerHTML=`
+    <div class="strip">
+      <div class="team"></div><div class="mem"></div>
+      <div class="right"><span class="act"><i></i><span class="act-t"></span></span>
+        <button type="button" class="tbtn" data-big>크게 보기</button>
+        <button type="button" class="tbtn x" data-x title="현황판에서 이 화면 지우기">✕</button></div>
+      <div class="chips"></div>
+    </div>
+    <div class="view"><iframe title="조 화면" src="index.html?watch=1"></iframe></div>`;
+  const t={el, frame:el.querySelector('iframe'), ready:false, item:null};
+  el.querySelector('[data-big]').addEventListener('click',()=> big===sid ? closeBig() : openBig(sid));
+  el.querySelector('[data-x]').addEventListener('click',async()=>{
+    const name=(t.item&&t.item.data.team)||'이 화면';
+    if(!confirm(`「${name}」을(를) 현황판에서 지울까요?\n(학생 화면에는 영향이 없고, 그 조가 계속 진행하면 다시 나타납니다)`)) return;
+    try{ await call({action:'boardRemove',key,sid}); }catch(e){}
+    poll();
+  });
+  new ResizeObserver(()=>fit(t)).observe(el.querySelector('.view'));
+  return t;
+}
+
+function paintStrip(t){
+  const d=t.item.data, sum=t.item.sum||{}, el=t.el, step=d.step||1;
+  const mem=(d.members||[]).filter(m=>m&&m.name).map(m=>m.name+(m.lead?'(조장)':'')).join(', ');
+  el.querySelector('.team').textContent = d.team||'(조 이름 없음)';
+  el.querySelector('.mem').textContent = mem||'조원 미입력';
+  const b=d.built, risk=RISK[sum.risk];
+  const chips=[
+    `<span class="steps">${Array.from({length:8},(_,i)=>`<i class="${i+1<step?'on':i+1===step?'cur':''}"></i>`).join('')}</span>`,
+    `<span class="chip step">${step}단계 · ${STEP_NAMES[step]||''}</span>`,
+    b ? `<span class="chip">${esc(b.nm)} · ${esc(String(b.dx||'').split(' · ')[0].slice(0,22))}</span>` : `<span class="chip">대상자 아직 안 뽑음</span>`,
+    b&&risk ? `<span class="chip ${risk[1]}">${risk[0]}</span>` : '',
+    step>=4 ? `<span class="chip">운동 ${(d.picked||[]).length}개</span>` : '',
+    step>=4&&sum.gap ? `<span class="chip warn">노랑(미처방) ${sum.gap}곳</span>` : '',
+    sum.bad ? `<span class="chip bad">빨강(금기) ${sum.bad}곳</span>` : '',
+    step>=5 ? `<span class="chip ${sum.trialN&&sum.trial>=sum.trialN?'ok':''}">체험 ${sum.trial||0}/${sum.trialN||0}</span>` : '',
+    step>=7 ? `<span class="chip ${d.reviews>=2?'ok':d.reviews?'':'warn'}">AI 검토 ${d.reviews||0}회</span>` : ''
+  ];
+  el.querySelector('.chips').innerHTML=chips.join('');
+  el.dataset.bad = sum.bad?'1':'0';
+  paintAge(t);
+}
+function paintAge(t){
+  const age=Math.max(0, Date.now()-skew-t.item.at);
+  const st = age>=STALE_MS?'stale' : age>=IDLE_MS?'idle' : 'live';
+  t.el.dataset.st=st;
+  const m=Math.floor(age/60000), s=Math.floor(age/1000);
+  t.el.querySelector('.act-t').textContent = st==='live' ? (s<20?'방금 전':s<60?`${s}초 전`:`${m}분 전`) : `${m}분째 변화 없음`;
+}
+function paintStats(){
+  const all=[...tiles.values()].filter(t=>t.item), n=all.length;
+  if(!n){ $('#stats').innerHTML=''; return; }
+  const steps=all.map(t=>t.item.data.step||1), avg=(steps.reduce((a,b)=>a+b,0)/n).toFixed(1);
+  const min=Math.min(...steps), slow=all.filter(t=>(t.item.data.step||1)===min).map(t=>t.item.data.team||'이름 없음');
+  const idle=all.filter(t=>t.el.dataset.st!=='live').length, bad=all.filter(t=>(t.item.sum||{}).bad).length;
+  $('#stats').innerHTML=[
+    `<span class="stat"><b>${n}</b>개 조</span>`,
+    `<span class="stat">평균 <b>${avg}</b>단계</span>`,
+    Math.max(...steps)>min ? `<span class="stat">가장 느린 조 <b>${esc(slow.join(', '))}</b> (${min}단계)</span>` : '',
+    idle ? `<span class="stat warn">멈춘 조 <b>${idle}</b></span>` : '',
+    bad ? `<span class="stat bad">금기 운동 담은 조 <b>${bad}</b></span>` : ''
+  ].join('');
+}
+
+/* ---------- 조 화면(iframe) ---------- */
+function push(t){ if(t.ready && t.item) t.frame.contentWindow.postMessage({type:'rehab-state',state:t.item.data},location.origin); }
+window.addEventListener('message',e=>{
+  if(e.origin!==location.origin || !e.data || e.data.type!=='rehab-ready') return;
+  tiles.forEach(t=>{ if(t.frame.contentWindow===e.source){ t.ready=true; push(t);
+    t.frame.contentWindow.postMessage({type:'rehab-lite',on:big!==t.el.dataset.sid},location.origin); } });
+});
+function fit(t){
+  const v=t.el.querySelector('.view'), w=v.clientWidth, h=v.clientHeight; if(!w||!h) return;
+  const s=Math.min(1.15, w/VIEW_W);
+  t.frame.style.width=(w/s)+'px'; t.frame.style.height=(h/s)+'px'; t.frame.style.transform=`scale(${s})`;
+}
+function fitAll(){ tiles.forEach(fit); }
+window.addEventListener('resize',fitAll);
+
+function openBig(sid){
+  closeBig(); const t=tiles.get(sid); if(!t) return;
+  big=sid; t.el.classList.add('big'); $('#shade').hidden=false; t.el.querySelector('[data-big]').textContent='작게 보기';
+  if(t.ready) t.frame.contentWindow.postMessage({type:'rehab-lite',on:false},location.origin);   // 크게 볼 때만 3D 켬
+  fit(t);
+}
+function closeBig(){
+  if(!big) return; const t=tiles.get(big); big=null; $('#shade').hidden=true;
+  if(t){ t.el.classList.remove('big'); t.el.querySelector('[data-big]').textContent='크게 보기'; fit(t); }
+}
+$('#shade').addEventListener('click',closeBig);
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeBig(); });
+
+$('#btnClear').addEventListener('click',async()=>{
+  if(!confirm('현황판을 비우고 새 수업을 시작할까요?\n\n· 지금 보이는 조 화면이 모두 현황판에서 사라집니다.\n· 학생 화면과 시트에 제출한 기록은 지워지지 않습니다.')) return;
+  closeBig();
+  try{ const j=await call({action:'boardClear',key}); if(j.error) alert(j.error); }catch(e){ alert('연결에 실패했습니다. 다시 시도해 주세요.'); }
+  poll();
+});
+
+setInterval(()=>{ tiles.forEach(t=>{ if(t.item) paintAge(t); }); paintStats(); },1000);
+if(key) poll(true); else showGate();
+</script>
+</body>
+</html>
