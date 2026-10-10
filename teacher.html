@@ -66,6 +66,8 @@ button{font-family:inherit}
 .chip.warn{background:#FFF1D6;color:#8A5200}
 .chip.bad{background:#FDE7E4;color:var(--alert)}
 .chip.none{background:#fff;color:var(--ink3);border:1px dashed #C5D1CA}
+.chip.ph1{background:#fff;color:var(--ink);border:1px solid var(--ink)}
+.chip.ph2{background:#E6F0FB;color:#1F4E7A;border:1px solid #9CC0E6}
 
 .view{flex:1;min-height:0;position:relative;overflow:hidden;background:var(--paper)}
 .view iframe{position:absolute;left:0;top:0;border:0;transform-origin:0 0;background:var(--paper)}
@@ -237,6 +239,7 @@ function paintStrip(t){
   const b=d.built, risk=RISK[sum.risk];
   const chips=[
     `<span class="steps">${Array.from({length:8},(_,i)=>`<i class="${i+1<step?'on':i+1===step?'cur':''}"></i>`).join('')}</span>`,
+    b ? `<span class="chip ${d.phase===2?'ph2':'ph1'}">${d.phase===2?'2차시 · 3~4주차':'1차시 · 1~2주차'}</span>` : '',
     `<span class="chip step">${step}단계 · ${STEP_NAMES[step]||''}</span>`,
     b ? `<span class="chip">${esc(b.nm)} · ${esc(String(b.dx||'').split(' · ')[0].slice(0,22))}</span>` : `<span class="chip">대상자 아직 안 뽑음</span>`,
     b&&risk ? `<span class="chip ${risk[1]}">${risk[0]}</span>` : '',
@@ -275,6 +278,7 @@ function paintStats(){
   const idle=all.filter(t=>t.el.dataset.st!=='live').length, bad=all.filter(t=>(t.item.sum||{}).bad).length;
   $('#stats').innerHTML=[
     `<span class="stat"><b>${n}</b>개 조</span>`,
+    (()=>{ const p2=all.filter(t=>t.item.data.phase===2).length; return `<span class="stat">1차시 <b>${n-p2}</b> · 2차시 <b>${p2}</b></span>`; })(),
     `<span class="stat">평균 <b>${avg}</b>단계</span>`,
     Math.max(...steps)>min ? `<span class="stat">가장 느린 조 <b>${esc(slow.join(', '))}</b> (${min}단계)</span>` : '',
     idle ? `<span class="stat warn">멈춘 조 <b>${idle}</b></span>` : '',

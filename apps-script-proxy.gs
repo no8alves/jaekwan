@@ -251,7 +251,7 @@ function saveProgress_(d, code) {
     sh.appendRow([
       new Date(), String(d.team || '').slice(0, 30), lead,
       members.map(function (m) { return m.name; }).join(', '),
-      b.nm || '', b.dx || '', STEP_NAMES[d.step] || d.step,
+      b.nm || '', b.dx || '', (d.phase === 2 ? '2차시(3~4주차) · ' : '1차시(1~2주차) · ') + (STEP_NAMES[d.step] || d.step),
       (d.picked || []).length, d.reviews || 0, id, raw, ''
     ]);
     sh.getRange(sh.getLastRow(), COL_CODE).setNumberFormat('@').setValue(String(code));
