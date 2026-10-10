@@ -880,6 +880,30 @@ html.watch .picktray{position:static}
 .rx-tag.add{background:#E6F0FB;color:#1F4E7A}
 @media(max-width:720px){.mid-row{grid-template-columns:1fr 60px 80px}.mid-bar{grid-column:1/-1;order:5}.mid-do{grid-column:1/-1}}
 @media print{.phasebar,#midReport,#phaseEnd{display:none !important}}
+
+/* ---------- 시작 화면(조 로그인) ---------- */
+html.gated body{overflow:hidden}
+html.gated .wrap>*:not(.gate){filter:blur(7px);pointer-events:none;user-select:none}   /* 시작 화면 뒤의 내용만 흐리게 (.wrap 자체에 걸면 시작 화면까지 흐려짐) */
+.gate{position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto;
+  background:radial-gradient(900px 480px at 80% -10%,rgba(11,132,98,.16),transparent 60%),rgba(243,245,242,.86)}
+.gate-box{width:100%;max-width:440px;background:#fff;border:1px solid var(--rule);border-radius:22px;padding:30px 28px 24px;box-shadow:0 30px 70px -20px rgba(15,36,32,.35);display:flex;flex-direction:column;gap:12px}
+.gate-eyebrow{margin:0;font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;color:var(--signal);font-weight:600}
+.gate-box h2{margin:0;font-size:26px;font-weight:800;letter-spacing:-.035em}
+.gate-help{margin:0 0 4px;font-size:14px;line-height:1.6;color:var(--ink2)}
+.gate-f{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:var(--ink)}
+.gate-f span{font-weight:500;color:var(--ink3);font-size:12px;margin-left:4px}
+.gate-f input{font-family:var(--sans) !important;font-size:17px !important;padding:12px 14px !important;border-radius:12px !important;width:100%}
+#gCode{font-family:var(--mono) !important;letter-spacing:.35em;font-size:20px !important}
+.gate-box .btn{margin-top:6px;padding:13px 22px;font-size:15.5px}
+.gate-msg{margin:0;font-size:13.5px;line-height:1.55;color:var(--ink2);background:var(--band);border-radius:12px;padding:10px 13px}
+.gate-msg[data-err="1"]{background:#FDF0EE;color:#8A1C12}
+.gate-off{display:flex;flex-wrap:wrap;gap:8px}
+.gate-off .btn{margin:0;padding:8px 14px;font-size:13px}
+.gate-foot{margin:4px 0 0;font-size:12px;line-height:1.55;color:var(--ink3)}
+.dupbar{position:sticky;top:0;z-index:45;background:#FFF1D6;color:#6B4200;border-bottom:1px solid #F0D9A8;font-size:13.5px;padding:9px 20px;text-align:center}
+#teamName[readonly],#drawTeam[readonly]{cursor:default}
+html.watch .gate,html.watch .dupbar{display:none !important}
+@media print{.gate,.dupbar{display:none !important}}
 /* ============================================================
    PREMIUM THEME — 화면 전용 (인쇄 스타일은 위 규칙 유지)
    ============================================================ */
@@ -1092,14 +1116,13 @@ html.watch .picktray{position:static}
   <div class="brandline">
     <h1 class="brand"><small>Nursing × AI · Clinical Exercise Rx</small>재활운동 처방 실습실</h1>
     <div class="teamtag">
-      TEAM <input id="teamName" type="text" placeholder="팀 이름 입력" maxlength="18"><br>
+      TEAM <input id="teamName" type="text" placeholder="조 이름" maxlength="18" readonly tabindex="-1"><br>
       <span id="stamp"></span>
-      <div class="savebar"><span id="saveState" class="savestate">자동 저장 켜짐</span></div>
+      <div class="savebar"><span id="saveState" class="savestate">시트 자동 저장</span></div>
       <div class="savebar savebtns">
-        <button type="button" id="btnCloudSave" class="freshbtn filebtn" title="선생님 시트에 지금까지의 진행 상황을 제출합니다">☁ 시트에 제출</button>
-        <button type="button" id="btnCloudLoad" class="freshbtn filebtn" title="선생님 시트에 제출한 진행 상황을 불러옵니다">↻ 불러오기</button>
-        <button type="button" id="btnFresh" class="freshbtn">처음부터</button>
-        <input type="file" id="fileImport" accept=".json,application/json" hidden>
+        <button type="button" id="btnSyncNow" class="freshbtn filebtn" title="지금 바로 선생님 시트에 저장합니다">☁ 지금 저장</button>
+        <button type="button" id="btnExport" class="freshbtn filebtn" title="인터넷이 안 될 때 진행 상황을 파일로 받아 둡니다">⬇ 파일</button>
+        <button type="button" id="btnLogout" class="freshbtn" title="수업을 마치거나 다른 조로 바꿀 때 누릅니다">나가기</button>
       </div>
     </div>
   </div>
@@ -1108,23 +1131,32 @@ html.watch .picktray{position:static}
 <nav class="rail" id="rail" aria-label="진행 단계"></nav>
 <div class="phasebar" id="phaseBar" hidden></div>
 
-<div class="cmodal" id="cloudModal" hidden>
-  <div class="cm-box" role="dialog" aria-modal="true" aria-labelledby="cmTitle">
-    <div class="cm-head"><b id="cmTitle">우리 조 진행 상황 불러오기</b><button type="button" class="cm-x" id="cmClose" aria-label="닫기">✕</button></div>
-    <p class="cm-help">제출할 때 쓴 <b>조 이름</b>과 <b>조 암호(숫자 4자리)</b>를 입력하면 우리 조 기록만 나옵니다.</p>
-    <form class="cm-form" id="cmForm" autocomplete="off">
-      <input type="text" id="cmTeam" placeholder="조 이름 (예: 3조)" maxlength="30">
-      <input type="text" id="cmCode" placeholder="암호 4자리" inputmode="numeric" maxlength="4" pattern="[0-9]{4}">
-      <button type="submit" class="btn small" id="cmFind">찾기</button>
-    </form>
-    <div class="cm-list" id="cmList"></div>
-    <div class="cm-foot">
-      <span>인터넷 연결이 불안할 때:</span>
-      <button type="button" class="cm-link" id="btnExport">⬇ 파일로 저장</button>
-      <button type="button" class="cm-link" id="btnImport">⬆ 파일에서 불러오기</button>
+<div class="dupbar" id="dupBar" hidden>⚠ <b>다른 기기에서도 이 조로 사용 중입니다.</b> 한 기기에서만 입력하세요. 두 곳에서 입력하면 나중에 저장한 쪽 내용만 남습니다.</div>
+
+<div class="gate" id="gate">
+  <form class="gate-box" id="gateForm" autocomplete="off">
+    <p class="gate-eyebrow">REHAB LAB · 재활운동 처방 실습실</p>
+    <h2>우리 조로 들어가기</h2>
+    <p class="gate-help">조 이름과 암호를 입력하세요. <b>처음이면</b> 조원끼리 정해서 입력하면 새로 시작하고, <b>전에 쓰던 조 이름과 암호</b>를 입력하면 하던 곳부터 이어집니다.</p>
+    <label class="gate-f">조 이름<input type="text" id="gTeam" maxlength="18" placeholder="예) 2-1반 3조"></label>
+    <label class="gate-f"><div>조 암호 <span>숫자 4자리</span></div><input type="text" id="gCode" inputmode="numeric" maxlength="4" placeholder="0000" autocomplete="off"></label>
+    <button type="submit" class="btn" id="gGo">시작하기</button>
+    <p class="gate-msg" id="gMsg" hidden></p>
+    <div class="gate-off" id="gOff" hidden>
+      <button type="button" class="btn ghost small" id="gLocal" hidden>이 컴퓨터에 남은 기록으로 이어하기</button>
+      <button type="button" class="btn ghost small" id="gFile">파일에서 불러오기</button>
+      <button type="button" class="btn ghost small" id="gFresh">새로 시작하기</button>
+      <input type="file" id="fileImport" accept=".json,application/json" hidden>
     </div>
-  </div>
+    <p class="gate-foot">진행 상황은 선생님 시트에 자동으로 저장됩니다. 암호는 실제로 쓰는 비밀번호 말고 새로 정하고, 잊으면 선생님께 물어보세요.</p>
+  </form>
 </div>
+<script>
+// 보기 전용(교사용 현황판)이거나 이미 들어온 탭이면 시작 화면을 띄우지 않음
+(function(){ var g=document.getElementById('gate'), ok=false;
+  try{ ok = new URLSearchParams(location.search).has('watch') || !!sessionStorage.getItem('rehablab.sess'); }catch(e){}
+  if(ok) g.hidden=true; else document.documentElement.classList.add('gated'); })();
+</script>
 
 <!-- ===== STEP 1 ===== -->
 <section class="panel" data-step="1">
@@ -1135,7 +1167,7 @@ html.watch .picktray{position:static}
   <div class="chart">
     <h3>우리 조 <span class="hint">TEAM</span></h3>
     <div class="body">
-      <div class="fld"><label class="flab">조 이름</label><input type="text" id="drawTeam" placeholder="예) 3조" maxlength="18"></div>
+      <div class="fld"><label class="flab">조 이름</label><input type="text" id="drawTeam" placeholder="조 이름" maxlength="18" readonly tabindex="-1"></div>
       <label class="flab">조원 <span class="fsub">이름을 적고, 왼쪽 ★을 눌러 조장을 지정하세요</span></label>
       <div id="memberList" style="margin:6px 0 8px"></div>
       <button class="btn ghost small" id="btnAddMember" type="button">+ 조원 추가</button>
@@ -1417,10 +1449,10 @@ html.watch .picktray{position:static}
     <div class="body">
       <ol class="pe-steps">
         <li>위에서 <b>AI 검토</b>를 받고, 3D로 <b>2주 뒤 모습</b>을 확인했나요? 아직 빨갛게 남은 부위는 2차시에 운동을 더해야 할 곳입니다.</li>
-        <li><b>[☁ 시트에 제출]</b>을 눌러 오늘 한 내용을 저장하세요.</li>
-        <li>다음 시간에 <b>[↻ 불러오기]</b>로 이어서 연 뒤, 아래 <b>[2차시 시작]</b>을 누릅니다.</li>
+        <li>진행 상황은 <b>선생님 시트에 자동으로 저장</b>됩니다. 오른쪽 위에 「시트에 저장됨」이 보이는지 확인하고, 안 보이면 <b>[☁ 지금 저장]</b>을 누르세요.</li>
+        <li>다음 시간에 <b>같은 조 이름과 암호</b>로 들어온 뒤, 아래 <b>[2차시 시작]</b>을 누릅니다.</li>
       </ol>
-      <div class="rv-actions"><button type="button" class="btn ghost" id="btnPhaseSubmit">☁ 시트에 제출</button><button type="button" class="btn" id="btnPhase2">2차시 시작 → 2주 경과 보고 3~4주차 처방하기</button></div>
+      <div class="rv-actions"><button type="button" class="btn ghost" id="btnPhaseSubmit">☁ 지금 저장</button><button type="button" class="btn" id="btnPhase2">2차시 시작 → 2주 경과 보고 3~4주차 처방하기</button></div>
     </div>
   </div>
 
@@ -4283,7 +4315,7 @@ const Save = (()=>{
       weekPlan:S.weekPlan, weekPlanKey:S.weekPlanKey, activeWeek:S.activeWeek,
       goal:S.goal, team:S.team, members:S.members, roles:S.roles, evalRes:S.evalRes,
       tools:[...S.tools], trial:S.trial, dropped:[...S.dropped], talk:S.talk, reviews:S.reviews,
-      phase:S.phase, p1:S.p1
+      phase:S.phase, p1:S.p1, owner:Auth.owner()
     };
   }
   function write(){
@@ -4295,9 +4327,7 @@ const Save = (()=>{
   function soon(){ if(!ready) return; clearTimeout(timer); timer=setTimeout(write,400); }
   function mark(t,msg){
     const el=$('#saveState'); if(!el) return;
-    if(msg){ el.textContent=msg; el.dataset.st='err'; return; }
-    el.textContent='자동 저장됨 · '+new Date(t).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
-    el.dataset.st='ok';
+    if(msg){ el.textContent=msg; el.dataset.st='err'; }   // 평소 상태 표시는 시트 저장(Sync)이 맡음
   }
   function restore(){
     let d=null;
@@ -4350,7 +4380,7 @@ const Save = (()=>{
     setTimeout(()=>URL.revokeObjectURL(a.href),2000);
     const el=$('#saveState'); if(el){ el.textContent='파일로 저장했습니다'; el.dataset.st='ok'; }
   }
-  function importFile(file){
+  function importFile(file, done){
     if(!file) return;
     const rd=new FileReader();
     rd.onload=()=>{
@@ -4361,6 +4391,7 @@ const Save = (()=>{
       if(d.builtId && !CASES.some(c=>c.id===d.builtId) && !d.built){ alert('파일에 있는 대상자를 찾을 수 없습니다.'); return; }
       apply(d); write();
       const el=$('#saveState'); if(el){ el.textContent='파일에서 불러왔습니다'; el.dataset.st='ok'; }
+      if(done) done();
     };
     rd.readAsText(file,'utf-8');
   }
@@ -4387,7 +4418,7 @@ $('#btnToSchedule').addEventListener('click',()=>{ applyTrial(); if(S.picked.siz
 $('#btnToReview').addEventListener('click',()=>go(7));
 $('#btnToCard').addEventListener('click',()=>go(8));
 $('#btnPhase2').addEventListener('click',startPhase2);
-$('#btnPhaseSubmit').addEventListener('click',()=>Cloud.submit());
+$('#btnPhaseSubmit').addEventListener('click',()=>Sync.now(true));
 $('#btnAI').addEventListener('click',()=>{ S.reviews=(S.reviews||0)+1; renderAiCount(); aiReview(); });
 $('#btnBack4').addEventListener('click',()=>go(4));
 $('#btnBack4c').addEventListener('click',()=>go(4));
@@ -4425,11 +4456,12 @@ const Live = (()=>{
             sub: sub&&sub.at ? {at:sub.at, same:sub.h===stateHash()} : null};
   }
   // 시트에 제출한 시점의 내용과 지금 내용이 같은지 비교하기 위한 요약값 (단계 이동만 한 것은 변경으로 치지 않음)
-  function stateHash(){
-    const d=Save.snap(); delete d.at; delete d.step; delete d.activeWeek;
+  function hashOf(src){
+    const d=JSON.parse(JSON.stringify(src)); delete d.at; delete d.step; delete d.activeWeek; delete d.owner;
     const t=JSON.stringify(d); let h=5381; for(let i=0;i<t.length;i++) h=((h<<5)+h+t.charCodeAt(i))|0; return h;
   }
-  function markSubmitted(){ try{ localStorage.setItem('rehablab.sub',JSON.stringify({at:Date.now(),h:stateHash()})); }catch(e){} soon(); }
+  function stateHash(){ return hashOf(Save.snap()); }
+  function markSubmitted(){ try{ localStorage.setItem('rehablab.sub',JSON.stringify({at:Date.now(),h:stateHash(),owner:Auth.owner()})); }catch(e){} soon(); }
   function send(){
     timer=null;
     if(!S.built && !S.team.trim()) return;                 // 아직 아무것도 안 한 화면은 보내지 않음
@@ -4440,8 +4472,8 @@ const Live = (()=>{
     fetch(AI_PROXY,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body,keepalive:body.length<60000}).catch(()=>{ lastBody=''; });
   }
   function soon(){ if(timer) return; timer=setTimeout(send, Math.max(2500, 10000-(Date.now()-lastSent))); }   // 최소 10초 간격
-  function start(){ sid=getSid(); ['input','change','click'].forEach(t=>document.addEventListener(t,soon)); soon(); }
-  return {start, markSubmitted};
+  function start(){ sid=Auth.liveId(); ['input','change','click'].forEach(t=>document.addEventListener(t,soon)); soon(); }
+  return {start, markSubmitted, stateHash, hashOf, deviceId:getSid};
 })();
 
 /* ---- 보기 전용 모드: 교사용 현황판(teacher.html)이 보내 주는 조의 진행 상황을 그대로 그림 ---- */
@@ -4471,86 +4503,132 @@ const Watch = (()=>{
   return {start};
 })();
 
-// 이전 진행 상황 불러오기 → 이후 변경은 자동 저장
-if(WATCH){ Watch.start(); }
-else{
-  if(Save.restore()){ const el=$('#saveState'); if(el){ el.textContent='이전 진행 상황을 불러왔습니다'; el.dataset.st='ok'; } }
-  Save.start(); Live.start();
-}
-$('#btnExport').addEventListener('click',()=>Save.exportFile());
-
-/* ---- 선생님 시트에 제출 / 불러오기 (apps-script-proxy.gs 의 save·list·load) ---- */
-const Cloud = (()=>{
-  const call = async body => {
-    const r = await fetch(AI_PROXY,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)});
-    const j = await r.json(); if(j.error) throw new Error(j.error); return j;
+/* ============================================================
+   조 로그인 — 조 이름 + 암호(숫자 4자리)로 들어오고, 진행 상황은 선생님 시트에 자동 저장
+   (apps-script-proxy.gs 의 login · sync)
+   ============================================================ */
+const Auth = (()=>{
+  let creds=null;
+  const hash=t=>{ let h=5381; for(let i=0;i<t.length;i++) h=((h<<5)+h+t.charCodeAt(i))|0; return (h>>>0).toString(36); };
+  const keyOf=c=>c.team.replace(/\s+/g,'').toLowerCase()+'|'+c.code;
+  const ownerOf=c=>hash(keyOf(c))+hash('#'+keyOf(c)+'#');
+  const okCode=c=>/^\d{4}$/.test(c);
+  const call=async body=>{
+    const r=await fetch(AI_PROXY,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)});
+    const j=await r.json(); if(j.error) throw Object.assign(new Error(j.error),{server:true}); return j;
   };
-  const status = (t,st)=>{ const el=$('#saveState'); if(el){ el.textContent=t; el.dataset.st=st||'ok'; } };
-  let items=[], code='';   // 조 암호는 이 화면이 열려 있는 동안만 기억 (저장 파일·시트 데이터에는 넣지 않음)
-  const okCode = c => /^\d{4}$/.test(c);
-  function askCode(){
-    const c=(prompt(`「${S.team}」 조 암호를 숫자 4자리로 입력하세요.\n\n· 처음 제출이면 조원끼리 정해서 입력하고 꼭 기억해 두세요.\n· 다음 시간에 불러올 때 이 암호가 필요합니다.\n· 전에 제출한 적이 있으면 같은 암호를 쓰세요.`, code)||'').trim();
-    if(!c) return '';
-    if(!okCode(c)){ alert('암호는 숫자 4자리여야 합니다. (예: 0412)'); return ''; }
-    return c;
+  function readSess(){ try{ const c=JSON.parse(sessionStorage.getItem('rehablab.sess')||'null'); return c&&c.team&&okCode(c.code)?c:null; }catch(e){ return null; } }
+  // 이 컴퓨터에 남아 있는 기록 — 같은 조(이름+암호)의 것일 때만 사용
+  function localCopy(c){ try{ const d=JSON.parse(localStorage.getItem(SAVE_KEY)||'null'); return d&&d.v===1&&d.owner===ownerOf(c)?d:null; }catch(e){ return null; } }
+  const msg=(t,err)=>{ const el=$('#gMsg'); el.hidden=!t; el.innerHTML=t||''; el.dataset.err=err?'1':'0'; };
+  const busy=on=>{ const b=$('#gGo'); b.disabled=on; b.textContent=on?'확인하는 중…':'시작하기'; };
+
+  function enter(c, data, note, fromSheet){
+    creds=c; try{ sessionStorage.setItem('rehablab.sess',JSON.stringify(c)); }catch(e){}
+    if(data) Save.apply(data);
+    syncTeam(c.team);                                            // 조 이름은 로그인한 이름으로 고정
+    $('#gate').hidden=true; document.documentElement.classList.remove('gated');
+    Save.start(); Save.now(); Live.start(); Sync.start(!!fromSheet);
+    if(note){ const el=$('#saveState'); if(el){ el.textContent=note; el.dataset.st='ok'; } }
+  }
+  function offline(c){
+    const local=localCopy(c);
+    msg('인터넷에 연결되지 않아 선생님 시트를 확인하지 못했습니다. 연결을 확인하고 <b>[시작하기]</b>를 다시 누르거나, 아래에서 고르세요. 연결되면 그때부터 자동으로 저장됩니다.', true);
+    $('#gOff').hidden=false; $('#gLocal').hidden=!local;
+    $('#gLocal').onclick=()=>enter(c, local, '이 컴퓨터에 남은 기록으로 이어갑니다');
+    $('#gFresh').onclick=()=>{ if(confirm(`「${c.team}」 조로 새로 시작할까요?\n시트에 이미 저장된 기록이 있다면 연결될 때 지금 내용으로 바뀝니다.`)) enter(c, null, '새로 시작합니다'); };
+    $('#gFile').onclick=()=>$('#fileImport').click();
+    $('#fileImport').onchange=e=>{ const f=e.target.files[0]; e.target.value=''; Save.importFile(f, ()=>enter(c, null, '파일에서 불러왔습니다')); };
   }
   async function submit(){
-    if(!S.team.trim()){ alert('조 이름을 먼저 적어 주세요. (오른쪽 위 TEAM 칸)'); $('#teamName').focus(); return; }
-    if(!S.built){ alert('대상자를 뽑은 뒤에 제출할 수 있습니다.'); return; }
-    const c=askCode(); if(!c) return; code=c;
-    const b=$('#btnCloudSave'); b.disabled=true; status('시트에 제출하는 중…','ok');
-    try{ await call({action:'save',data:Save.snap(),code}); Live.markSubmitted(); status('시트에 제출 완료 · '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})); alert(`「${S.team}」 진행 상황을 선생님 시트에 제출했습니다.\n\n다음 시간에 [↻ 불러오기]에서\n조 이름 「${S.team}」 과 암호 ${code} 를 입력하면 이어서 할 수 있어요.`); }
-    catch(e){ status('제출 실패','err'); alert('시트에 제출하지 못했습니다.\n('+e.message+')\n\n인터넷 연결을 확인하거나, [↻ 불러오기] 창 아래의 「파일로 저장」을 사용하세요.'); }
-    finally{ b.disabled=false; }
+    const c={team:$('#gTeam').value.trim(), code:$('#gCode').value.trim()};
+    $('#gOff').hidden=true;
+    if(!c.team){ msg('조 이름을 입력해 주세요.',true); $('#gTeam').focus(); return; }
+    if(!okCode(c.code)){ msg('암호는 숫자 4자리로 입력해 주세요. (예: 0412)',true); $('#gCode').focus(); return; }
+    msg(''); busy(true);
+    let j;
+    try{ j=await call({action:'login',team:c.team,code:c.code,sid:Live.deviceId()}); }
+    catch(e){ busy(false); if(e.server) msg(_esc(e.message),true); else offline(c); return; }
+    busy(false);
+    const local=localCopy(c);
+    if(j.exists){
+      if(j.other && !confirm(`「${c.team}」 조는 지금 다른 기기에서 사용 중입니다.\n\n두 기기에서 동시에 입력하면 나중에 저장한 쪽 내용만 남습니다.\n그래도 이 기기에서 들어갈까요?`)){ msg('다른 기기에서 쓰고 있는 조원에게 확인해 보세요.'); return; }
+      // 이 컴퓨터에 시트로 올라가지 못한 내용이 남아 있으면(저장 실패 뒤 창을 닫은 경우) 어느 쪽으로 이어갈지 물어봄
+      let useLocal=false;
+      if(local && Live.hashOf(local)!==Live.hashOf(j.data)){
+        let sub=null; try{ sub=JSON.parse(localStorage.getItem('rehablab.sub')||'null'); }catch(e){}
+        const unsynced = !(sub && sub.owner===local.owner && sub.h===Live.hashOf(local));
+        if(unsynced) useLocal=confirm(`이 컴퓨터에 시트에 저장되지 못한 「${c.team}」 조의 내용이 남아 있습니다.\n\n[확인] 이 컴퓨터에 남은 내용으로 이어가기\n[취소] 시트에 저장된 내용으로 이어가기`);
+      }
+      enter(c, useLocal?local:j.data, useLocal?'이 컴퓨터에 남은 내용으로 이어갑니다':'하던 곳부터 이어갑니다', !useLocal);
+    } else {
+      if(j.nameTaken && !confirm(`「${c.team}」(이)라는 조 이름은 이미 다른 암호로 쓰이고 있습니다.\n\n· 암호를 잘못 입력했다면 [취소]를 누르고 다시 입력하세요.\n· 다른 반의 새 조라면 [확인]을 눌러 새로 시작합니다.`)){ $('#gCode').focus(); $('#gCode').select(); return; }
+      enter(c, local, local?'이 컴퓨터에 남은 기록으로 이어갑니다':'새 조로 시작합니다');
+    }
   }
-  const msg = t => { $('#cmList').innerHTML=`<div class="cm-empty">${t}</div>`; };
-  function render(){
-    $('#cmList').innerHTML = items.length ? items.map(it=>`
-      <button type="button" class="cm-item" data-id="${escAttr(it.id)}">
-        <span class="cm-team">${_esc(it.team||'')}</span>
-        <span class="cm-at">${_esc(it.at||'')}</span>
-        <span class="cm-mem">${_esc(it.members||'')}</span>
-        <span class="cm-case">${_esc(it.case||'')} · ${_esc(it.step||'')}</span>
-      </button>`).join('') : `<div class="cm-empty">조 이름과 암호가 맞는 기록이 없습니다.<br>띄어쓰기 말고 글자가 같은지, 암호가 맞는지 확인해 보세요.<br>암호를 잊었으면 선생님께 물어보세요.</div>`;
+  function boot(){
+    $('#gateForm').addEventListener('submit',e=>{ e.preventDefault(); submit(); });
+    $('#gCode').addEventListener('input',e=>{ e.target.value=e.target.value.replace(/\D/g,'').slice(0,4); });
+    const c=readSess();
+    if(c){ enter(c, localCopy(c)); return; }                     // 새로고침: 다시 로그인하지 않고 그대로 이어감
+    $('#gate').hidden=false; document.documentElement.classList.add('gated'); $('#gTeam').focus();
   }
-  function open(){
-    $('#cloudModal').hidden=false; items=[];
-    $('#cmTeam').value=S.team||''; $('#cmCode').value=code;
-    msg('조 이름과 암호를 입력하고 「찾기」를 누르세요.');
-    ($('#cmTeam').value ? $('#cmCode') : $('#cmTeam')).focus();
+  async function logout(){
+    if(!confirm('나가시겠어요?\n\n지금까지의 내용을 시트에 저장한 뒤 시작 화면으로 돌아갑니다.\n같은 조 이름과 암호로 다시 들어오면 이어서 할 수 있습니다.')) return;
+    const ok=await Sync.now();
+    if(!ok && !confirm('시트에 저장하지 못했습니다(인터넷 확인).\n\n이 컴퓨터에는 저장되어 있어, 이 컴퓨터에서 같은 조 이름·암호로 들어오면 이어집니다.\n그래도 나갈까요?')) return;
+    try{ sessionStorage.removeItem('rehablab.sess'); }catch(e){}
+    location.reload();
   }
-  async function find(){
-    const team=$('#cmTeam').value.trim(), c=$('#cmCode').value.trim();
-    if(!team){ msg('조 이름을 입력해 주세요.'); $('#cmTeam').focus(); return; }
-    if(!okCode(c)){ msg('암호는 숫자 4자리입니다.'); $('#cmCode').focus(); return; }
-    msg('찾는 중…'); $('#cmFind').disabled=true;
-    try{ items=(await call({action:'list',team,code:c})).items||[]; code=c; render(); }
-    catch(e){ msg(`목록을 가져오지 못했습니다. (${_esc(e.message)})<br>아래 「파일에서 불러오기」를 사용할 수 있습니다.`); }
-    finally{ $('#cmFind').disabled=false; }
-  }
-  function close(){ $('#cloudModal').hidden=true; }
-  async function pick(id){
-    const it=items.find(x=>x.id===id); if(!it) return;
-    if(!confirm(`「${it.team}」 (${it.members})\n대상자 ${it.case} · ${it.step} · ${it.at} 제출\n\n이 기록을 불러올까요? 지금 화면의 내용은 바뀝니다.`)) return;
-    msg('불러오는 중…');
-    try{ const j=await call({action:'load',id,code}); Save.apply(j.data); Live.markSubmitted(); close(); status('시트에서 불러왔습니다'); }
-    catch(e){ alert('불러오지 못했습니다. ('+e.message+')'); render(); }
-  }
-  $('#btnCloudSave').addEventListener('click',submit);
-  $('#btnCloudLoad').addEventListener('click',open);
-  $('#cmClose').addEventListener('click',close);
-  $('#cloudModal').addEventListener('click',e=>{ if(e.target.id==='cloudModal') close(); const b=e.target.closest('.cm-item'); if(b) pick(b.dataset.id); });
-  $('#cmForm').addEventListener('submit',e=>{ e.preventDefault(); find(); });
-  $('#cmCode').addEventListener('input',e=>{ e.target.value=e.target.value.replace(/\D/g,'').slice(0,4); });
-  document.addEventListener('keydown',e=>{ if(e.key==='Escape' && !$('#cloudModal').hidden) close(); });
-  return {submit, open};
+  return {boot, logout, creds:()=>creds, owner:()=>creds?ownerOf(creds):'',
+          liveId:()=>('t'+ownerOf(creds||{team:'',code:''})).replace(/[^a-z0-9]/g,'').padEnd(8,'0').slice(0,24)};
 })();
-$('#btnImport').addEventListener('click',()=>$('#fileImport').click());
-$('#fileImport').addEventListener('change',e=>{ $('#cloudModal').hidden=true; Save.importFile(e.target.files[0]); e.target.value=''; });
-$('#btnFresh').addEventListener('click',()=>{
-  if(!confirm('저장된 진행 상황을 지우고 처음부터 시작할까요?\n(조 이름·조원·선택한 운동·계획이 모두 지워집니다)')) return;
-  Save.clear(); location.reload();
-});
+
+/* ---- 선생님 시트에 자동 저장: 바뀐 내용이 있으면 30초에 한 번, 화면을 떠날 때, [지금 저장]을 누를 때 ---- */
+const Sync = (()=>{
+  const MIN=30000;
+  let timer=null, last=0, lastKey=null, busy=false, again=false;
+  const status=(t,st)=>{ const el=$('#saveState'); if(el){ el.textContent=t; el.dataset.st=st||'ok'; } };
+  const hhmm=()=>new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
+  const keyNow=()=>Live.stateHash()+'|'+S.step;
+  async function push(leaving){
+    const c=Auth.creds(); if(!c) return false;
+    if(busy){ again=true; return false; }
+    const k=keyNow(); if(k===lastKey) return true;               // 바뀐 게 없으면 보내지 않음
+    const body=JSON.stringify({action:'sync',team:c.team,code:c.code,sid:Live.deviceId(),data:Save.snap()});
+    busy=true; if(!leaving) status('시트에 저장하는 중…');
+    try{
+      const r=await fetch(AI_PROXY,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body,keepalive:!!leaving&&body.length<60000});
+      const j=await r.json(); if(j.error) throw new Error(j.error);
+      lastKey=k; last=Date.now(); Live.markSubmitted();
+      status('시트에 저장됨 · '+hhmm()); $('#dupBar').hidden=!j.other;
+      return true;
+    }catch(e){ status('시트 저장 실패 · 이 컴퓨터에는 저장됨','err'); return false; }
+    finally{ busy=false; if(again){ again=false; soon(); } }
+  }
+  function soon(){ if(timer) return; timer=setTimeout(()=>{ timer=null; push(); }, Math.max(3000, MIN-(Date.now()-last))); }
+  function start(loaded){
+    if(loaded){ lastKey=keyNow(); Live.markSubmitted(); }        // 방금 시트에서 받은 내용은 다시 올리지 않음
+    else { try{ localStorage.removeItem('rehablab.sub'); }catch(e){} }
+    ['input','change','click'].forEach(t=>document.addEventListener(t,soon));
+    document.addEventListener('visibilitychange',()=>{ if(document.hidden) push(true); });
+    window.addEventListener('pagehide',()=>push(true));
+    setInterval(()=>{ if(keyNow()!==lastKey) soon(); }, 60000);   // 저장에 실패했으면 1분마다 다시 시도
+    soon();
+  }
+  async function now(tell){
+    clearTimeout(timer); timer=null; lastKey=null;
+    const ok=await push();
+    if(tell) alert(ok?'선생님 시트에 저장했습니다.\n다음 시간에 같은 조 이름과 암호로 들어오면 이어서 할 수 있어요.':'시트에 저장하지 못했습니다.\n인터넷 연결을 확인하고 다시 눌러 주세요. (이 컴퓨터에는 저장되어 있습니다)');
+    return ok;
+  }
+  return {start, now};
+})();
+
+if(WATCH){ Watch.start(); } else { Auth.boot(); }
+$('#btnExport').addEventListener('click',()=>Save.exportFile());
+$('#btnSyncNow').addEventListener('click',()=>Sync.now(true));
+$('#btnLogout').addEventListener('click',()=>Auth.logout());
 </script>
 </body>
 </html>

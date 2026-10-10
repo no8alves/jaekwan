@@ -124,7 +124,7 @@ button{font-family:inherit}
 <div class="center" id="empty" hidden>
   <div class="empty">
     <b>아직 진행 중인 조가 없습니다</b>
-    학생들이 조 이름을 적거나 대상자를 뽑으면 10~20초 안에 여기에 나타납니다.
+    학생들이 조 이름과 암호로 들어오면 10~20초 안에 여기에 나타납니다.
   </div>
 </div>
 
@@ -254,14 +254,14 @@ function paintStrip(t){
   el.dataset.bad = sum.bad?'1':'0';
   paintAge(t);
 }
-// 시트 제출 여부: 제출함 / 제출 뒤에 내용이 바뀜 / 아직 안 함
+// 시트 자동 저장 상태: 저장됨 / 바뀐 내용이 곧 저장될 예정 / 아직 한 번도 저장 안 됨
 const hhmm = ms => new Date(ms).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',hour12:false});
 function subState(sub){ return !sub ? 'none' : sub.same ? 'done' : 'changed'; }
 function subChip(sub, hasCase){
   const st=subState(sub);
-  if(st==='done') return `<span class="chip ok">시트 제출함 ✓ ${hhmm(sub.at)}</span>`;
-  if(st==='changed') return `<span class="chip warn">제출 후 내용 바뀜 · ${hhmm(sub.at)} 제출</span>`;
-  return hasCase ? `<span class="chip none">아직 제출 안 함</span>` : '';
+  if(st==='done') return `<span class="chip ok">시트 저장됨 ✓ ${hhmm(sub.at)}</span>`;
+  if(st==='changed') return `<span class="chip">곧 저장됨 · 마지막 저장 ${hhmm(sub.at)}</span>`;
+  return hasCase ? `<span class="chip none">아직 시트에 저장 안 됨</span>` : '';
 }
 function paintAge(t){
   const age=Math.max(0, Date.now()-skew-t.item.at);
@@ -284,7 +284,7 @@ function paintStats(){
     idle ? `<span class="stat warn">멈춘 조 <b>${idle}</b></span>` : '',
     bad ? `<span class="stat bad">금기 운동 담은 조 <b>${bad}</b></span>` : '',
     (()=>{ const done=all.filter(t=>subState((t.item.sum||{}).sub)==='done').length, ch=all.filter(t=>subState((t.item.sum||{}).sub)==='changed').length;
-      return `<span class="stat">시트 제출 <b>${done}/${n}</b>${ch?` · 바뀐 조 ${ch}`:''}</span>`; })()
+      return `<span class="stat">시트 저장 <b>${done+ch}/${n}</b></span>`; })()
   ].join('');
 }
 

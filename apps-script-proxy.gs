@@ -21,7 +21,12 @@
  *   /exec           → {"ok":true,"keyConfigured":true,"keyLength":50,...}
  *   /exec?models=1  → 이 키로 쓸 수 있는 모델 목록
  *
- * [진행 상황 시트 저장 / 불러오기]
+ * [조 로그인 · 자동 저장]  (학생 화면의 시작 화면)
+ *   POST {"action":"login","team":"3조","code":"1234","sid":"..."}  → 그 조의 저장된 진행 상황(있으면)과 다른 기기 사용 여부
+ *   POST {"action":"sync","team":"3조","code":"1234","sid":"...","data":{...}}  → 그 조의 줄을 최신 내용으로 갱신(없으면 새 줄)
+ *   조는 「조 이름 + 암호」로 구분합니다. 조마다 시트에 한 줄만 두고 계속 갱신합니다.
+ *
+ * [진행 상황 시트 저장 / 불러오기]  (예전 방식 — 호환용으로 남겨 둠)
  *   POST {"action":"save","data":{...},"code":"1234"}        → 시트에 한 줄 추가
  *   POST {"action":"list","team":"3조","code":"1234"}        → 그 조의 제출 목록 (조 이름·암호가 맞는 것만)
  *   POST {"action":"load","id":"...","code":"1234"}          → 해당 제출의 진행 데이터 (암호가 맞을 때만)
@@ -100,6 +105,8 @@ function doPost(e) {
     if (body.action === 'board') return json_(liveBoard_(body.key));
     if (body.action === 'boardRemove') return json_(liveRemove_(body.key, body.sid));
     if (body.action === 'boardClear') return json_(liveClear_(body.key));
+    if (body.action === 'login') return json_(loginTeam_(body.team, body.code, body.sid));
+    if (body.action === 'sync') return json_(syncTeam_(body.team, body.code, body.sid, body.data));
     if (body.action === 'save') return json_(saveProgress_(body.data, body.code));
     if (body.action === 'list') return json_(listProgress_(body.team, body.code));
     if (body.action === 'load') return json_(loadProgress_(body.id, body.code));
@@ -182,7 +189,7 @@ function json_(obj) {
    진행 상황 시트 저장 / 불러오기
    ============================================================ */
 var SAVE_SHEET_NAME = '진행 저장';
-var SAVE_HEADERS = ['제출 시각', '조 이름', '조장', '조원', '대상자', '진단', '진행 단계', '담은 운동 수', 'AI 검토 횟수', 'ID', '진행 데이터(수정 금지)', '암호'];
+var SAVE_HEADERS = ['마지막 저장', '조 이름', '조장', '조원', '대상자', '진단', '진행 단계', '담은 운동 수', 'AI 검토 횟수', 'ID', '진행 데이터(수정 금지)', '암호'];
 var COL_ID = 10, COL_DATA = 11, COL_CODE = 12;
 var STEP_NAMES = ['', '1 대상자 뽑기', '2 대상자 확인', '3 사정 결과', '4 운동 후보', '5 체험 기록', '6 주차별 계획', '7 검토·3D', '8 처방카드'];
 
@@ -204,6 +211,7 @@ function saveSheet_() {
     sh.setFrozenRows(1);
     sh.setColumnWidth(4, 220); sh.setColumnWidth(6, 260); sh.setColumnWidth(11, 120);
   }
+  if (sh.getRange(1, 1).getValue() === '제출 시각') sh.getRange(1, 1).setValue('마지막 저장');
   // 암호 열이 없던 예전 시트에는 머리글을 추가하고, 앞자리 0 이 지워지지 않게 텍스트 서식으로
   if (sh.getRange(1, COL_CODE).getValue() !== '암호') {
     sh.getRange(1, COL_CODE).setValue('암호').setFontWeight('bold').setBackground('#E3F3EC');
@@ -379,4 +387,79 @@ function liveClear_(key) {
   if (idx.length) cache.removeAll(idx.map(function (s) { return 'live:' + s; }));
   cache.put(LIVE_INDEX, '[]', LIVE_TTL);
   return { ok: true };
+}
+
+/* ============================================================
+   조 로그인 · 자동 저장 (조 이름 + 암호로 구분, 조마다 한 줄을 갱신)
+   ============================================================ */
+var SESS_RECENT = 3 * 60000;   // 이 시간 안에 다른 기기가 저장했으면 "다른 기기에서 사용 중"
+
+function rowValues_(d, id, raw) {
+  var members = (d.members || []).filter(function (m) { return m && m.name; });
+  var lead = members.filter(function (m) { return m.lead; }).map(function (m) { return m.name; }).join(', ');
+  var b = d.built || {};
+  return [
+    new Date(), String(d.team || '').slice(0, 30), lead,
+    members.map(function (m) { return m.name; }).join(', '),
+    b.nm || '', b.dx || '', (d.phase === 2 ? '2차시(3~4주차) · ' : '1차시(1~2주차) · ') + (STEP_NAMES[d.step] || d.step),
+    (d.picked || []).length, d.reviews || 0, id, raw
+  ];
+}
+
+// 조 이름·암호가 맞는 가장 최근 줄을 찾음. nameTaken = 같은 조 이름이 다른 암호로 이미 있음
+function findTeamRow_(sh, team, code) {
+  var n = sh.getLastRow() - 1, out = { row: 0, nameTaken: false, values: null };
+  if (n < 1) return out;
+  var rows = sh.getRange(2, 1, n, COL_CODE).getValues();
+  for (var i = rows.length - 1; i >= 0; i--) {
+    if (!sameTeam_(rows[i][1], team)) continue;
+    if (sameCode_(rows[i][COL_CODE - 1], code)) { out.row = i + 2; out.values = rows[i]; return out; }
+    out.nameTaken = true;
+  }
+  return out;
+}
+
+function sessKey_(team, code) { return 'sess:' + String(team).replace(/\s+/g, '').toLowerCase() + '|' + code; }
+// 다른 기기(sid 가 다름)가 최근에 이 조로 저장했는지
+function otherDevice_(team, code, sid, touch) {
+  var cache = CacheService.getScriptCache(), key = sessKey_(team, code), now = Date.now(), prev = null;
+  try { prev = JSON.parse(cache.get(key) || 'null'); } catch (x) { prev = null; }
+  if (touch) cache.put(key, JSON.stringify({ sid: String(sid || ''), at: now }), LIVE_TTL);
+  return (prev && prev.sid && prev.sid !== String(sid || '') && now - prev.at < SESS_RECENT) ? { at: prev.at } : null;
+}
+
+function loginTeam_(team, code, sid) {
+  team = String(team || '').trim();
+  if (!team) return { error: '조 이름을 입력해 주세요.' };
+  if (!validCode_(code)) return { error: '암호는 숫자 4자리입니다.' };
+  var f = findTeamRow_(saveSheet_(), team, code);
+  if (!f.row) return { ok: true, exists: false, nameTaken: f.nameTaken };
+  var data = null;
+  try { data = JSON.parse(f.values[COL_DATA - 1]); } catch (x) { return { error: '시트의 진행 데이터가 손상되었습니다. 선생님께 알려 주세요.' }; }
+  var at = f.values[0] instanceof Date ? f.values[0].getTime() : 0;
+  return { ok: true, exists: true, data: data, savedAt: at, other: otherDevice_(team, code, sid, false) };
+}
+
+function syncTeam_(team, code, sid, d) {
+  team = String(team || '').trim();
+  if (!team) return { error: '조 이름이 없습니다.' };
+  if (!validCode_(code)) return { error: '암호(숫자 4자리)가 필요합니다. 다시 들어와 주세요.' };
+  if (!d || d.v !== 1) return { error: '진행 데이터가 올바르지 않습니다.' };
+  d.team = team;
+  var raw = JSON.stringify(d);
+  if (raw.length > 45000) return { error: '진행 데이터가 너무 큽니다.' };
+  var lock = LockService.getScriptLock();
+  lock.waitLock(15000);
+  try {
+    var sh = saveSheet_(), f = findTeamRow_(sh, team, code);
+    if (f.row) {
+      sh.getRange(f.row, 1, 1, COL_DATA).setValues([rowValues_(d, f.values[COL_ID - 1] || Utilities.getUuid().slice(0, 8), raw)]);
+    } else {
+      sh.appendRow(rowValues_(d, Utilities.getUuid().slice(0, 8), raw).concat(['']));
+      sh.getRange(sh.getLastRow(), COL_CODE).setNumberFormat('@').setValue(String(code));
+    }
+  } finally {
+    lock.releaseLock();
+  }
+  return { ok: true, at: Date.now(), other: otherDevice_(team, code, sid, true) };
 }
