@@ -4550,6 +4550,8 @@ const Auth = (()=>{
     try{ j=await call({action:'login',team:c.team,code:c.code,sid:Live.deviceId()}); }
     catch(e){ busy(false); if(e.server) msg(_esc(e.message),true); else offline(c); return; }
     busy(false);
+    // 띄어쓰기만 다르게 입력했으면 처음 저장된 조 이름 표기를 그대로 씀
+    if(j.exists && j.data && j.data.team && keyOf({team:String(j.data.team),code:c.code})===keyOf(c)) c.team=String(j.data.team);
     const local=localCopy(c);
     if(j.exists){
       if(j.other && !confirm(`「${c.team}」 조는 지금 다른 기기에서 사용 중입니다.\n\n두 기기에서 동시에 입력하면 나중에 저장한 쪽 내용만 남습니다.\n그래도 이 기기에서 들어갈까요?`)){ msg('다른 기기에서 쓰고 있는 조원에게 확인해 보세요.'); return; }
