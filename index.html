@@ -904,6 +904,55 @@ html.gated .wrap>*:not(.gate){filter:blur(7px);pointer-events:none;user-select:n
 #teamName[readonly],#drawTeam[readonly]{cursor:default}
 html.watch .gate,html.watch .dupbar{display:none !important}
 @media print{.gate,.dupbar{display:none !important}}
+
+/* ---------- 운동 고르기(4단계): 왼쪽 3D 고정 + 오른쪽 목록 ---------- */
+.s4grid{display:grid;grid-template-columns:minmax(280px,340px) minmax(0,1fr);gap:18px;align-items:start}
+.s4side{position:sticky;top:84px}
+.s4side .chart{margin-bottom:0}
+.s4side .chart .body{padding:12px}
+.s4side .realcanvas{height:clamp(240px,calc(100vh - 470px),400px)}
+.s4side .real-views{gap:4px;margin-top:8px}
+.s4side .real-views button{padding:4px 10px;font-size:12px}
+.s4side .bodylegend{margin-top:10px;gap:7px}
+.s4side .covgoal{margin:10px 0 0;font-size:13px}
+.covhelp{margin-top:10px;border-top:1px solid var(--rule);padding-top:8px}
+.covhelp summary{cursor:pointer;font-size:12.5px;font-weight:700;color:var(--ink2)}
+.covhelp .covkey{grid-template-columns:1fr;margin:8px 0 0;gap:6px}
+.covhelp .ck{padding:8px 10px}
+.covhelp .ck b{font-size:12.5px} .covhelp .ck span,.covhelp .ck em{font-size:12px}
+.s4main{min-width:0}
+.s4main .picktray{top:84px}
+.s4main .exgrp .exlist{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.exfilter button u{text-decoration:none;font-family:var(--mono);font-size:11px;font-weight:700;background:var(--signal);color:#fff;border-radius:999px;min-width:18px;height:18px;display:inline-grid;place-items:center;padding:0 5px}
+.exfilter button[data-on="1"] u{background:#fff;color:var(--ink)}
+.exfilter button[data-sick="1"]:not([data-on="1"]){border-color:#E9B7B0}
+.toolfilter{margin-top:10px;padding-top:10px;border-top:1px solid var(--rule)}
+.toolfilter summary{cursor:pointer;font-size:12.5px;font-weight:700;color:var(--ink2)}
+.toolfilter summary span{font-weight:500;color:var(--ink3)}
+.toolfilter .tool-chips button[data-on="0"]{opacity:.5;text-decoration:line-through}
+.exmore{margin-top:10px}
+.exmore>summary{cursor:pointer;list-style:none;text-align:center;font-size:13px;font-weight:700;color:var(--ink2);background:var(--band);border-radius:10px;padding:9px 12px}
+.exmore>summary::-webkit-details-marker{display:none}
+.exmore>summary:hover{color:var(--signal)}
+.exmore[open]>summary{margin-bottom:10px}
+.pt-warn{display:block;margin-top:8px;font-size:12.5px;font-weight:600;color:#8A5200;background:#FFF1D6;border-radius:8px;padding:6px 10px}
+.ex-lv{font-size:11px;font-weight:800;border-radius:999px;padding:1px 8px;background:#E3F3EC;color:var(--signal)}
+.ex-lv[data-lv="2"]{background:#FFF1D6;color:#8A5200}
+.ex-lv[data-lv="3"]{background:#FDE7E4;color:var(--alert)}
+details.chart.fold>summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:13px 18px;font-size:14px;background:linear-gradient(180deg,#FBFCFB,#F5F8F6)}
+details.chart.fold>summary::-webkit-details-marker{display:none}
+details.chart.fold>summary b{font-weight:700;letter-spacing:-.015em}
+details.chart.fold>summary .hint{font-family:var(--sans);font-size:12px;color:var(--ink3);font-weight:500;letter-spacing:0}
+details.chart.fold>summary::after{content:"▾";color:var(--ink3);margin-left:4px}
+details.chart.fold[open]>summary{border-bottom:1px solid var(--rule)}
+details.chart.fold[open]>summary::after{content:"▴"}
+html.watch .s4side,html.watch .s4main .picktray{position:static}
+@media(max-width:900px){
+  .s4grid{grid-template-columns:1fr}
+  .s4side{position:static}
+  .s4side .realcanvas{height:300px}
+  .s4main .picktray{top:64px}
+}
 /* ============================================================
    PREMIUM THEME — 화면 전용 (인쇄 스타일은 위 규칙 유지)
    ============================================================ */
@@ -1244,74 +1293,69 @@ html.watch .gate,html.watch .dupbar{display:none !important}
 
   <div id="midReport" hidden></div>
 
-  <div class="chart">
-    <h3>① 사용할 소도구 <span class="hint">TOOLS</span></h3>
-    <div class="body">
-      <p class="ex-guide">학교에 있는 도구를 고르면, 그 도구로 할 수 있는 실습 운동이 바로 아래에 나옵니다.</p>
-      <div class="tool-chips" id="toolChips"></div>
-    </div>
-  </div>
-
-  <div class="picktray"><div id="pickTray"></div><div class="exfilter" id="exFilter"></div></div>
-
-  <div class="chart">
-    <h3>② 소도구 실습 운동 <span class="hint" id="toolExCount"></span></h3>
-    <div class="body">
-      <p class="ex-guide">고른 소도구로 직접 해볼 수 있는 운동입니다. <strong>카드를 누르면 담기고, 다시 누르면 빠집니다.</strong> 「자세히」를 누르면 쉽게 → 어렵게 단계와 주의할 점이 나옵니다.</p>
-      <div id="toolExList"></div>
-    </div>
-  </div>
-
-  <div class="chart">
-    <h3>③ 기본 중재 유형 <span class="hint" id="exCount">0개 선택됨</span></h3>
-    <div class="body">
-      <p class="ex-guide">병원 재활에서 쓰는 일반적인 운동 종류입니다. <strong>소도구 운동만으로 부족한 부분</strong>이 있을 때 여기서 채우세요.</p>
-      <button type="button" class="btn ghost small" id="btnSuggest" style="margin:0 0 10px">＋ 권장 기본 중재 모두 담기</button>
-      <div id="exList"></div>
-    </div>
-  </div>
-
-  <div class="chart">
-    <h3>운동 강도 설계 <span class="hint">INTENSITY</span></h3>
-    <div class="body">
-      <div class="kv" id="intensityKv" style="margin-bottom:14px"></div>
-      <div class="rows" id="doseRows"></div>
-    </div>
-  </div>
-
-  <div class="chart">
-    <h3>부위 커버리지 · 3D <span class="hint">BODY COVERAGE</span></h3>
-    <div class="body">
-      <p class="ex-guide">위에서 담은 운동이 <strong>대상자의 아픈 부위를 잘 다루고 있는지</strong> 인체 모델의 색으로 확인하는 곳입니다. 운동 카드를 담으면 그 운동을 하는 모습이 나오고, 그 운동이 쓰는 근육이 빛납니다.</p>
-      <div class="covkey">
-        <div class="ck" data-k="gap"><i></i><div><b>노랑 · 아직 처방이 없어요</b><span>대상자의 아픈 부위인데, 담은 운동 중 이 부위를 쓰는 운동이 없습니다.</span><em>→ 이 부위를 쓰는 운동을 추가하세요</em></div></div>
-        <div class="ck" data-k="good"><i></i><div><b>초록 · 잘 처방했어요</b><span>대상자의 아픈 부위를 담은 운동이 다루고 있습니다.</span><em>→ 그대로 두면 됩니다</em></div></div>
-        <div class="ck" data-k="bad"><i></i><div><b>빨강 · 다시 확인하세요</b><span>지금 대상자 상태에서 운동하면 안 되는 부위(금기)를 쓰는 운동이 들어갔습니다.</span><em>→ 그 운동을 빼거나 다른 운동으로 바꾸세요</em></div></div>
-        <div class="ck" data-k="extra"><i></i><div><b>파랑 · 추가로 운동하는 부위</b><span>대상자의 아픈 부위는 아니지만, 담은 운동이 함께 쓰는 부위입니다. 혈액순환·전신 체력처럼 도움이 될 수 있어요.</span><em>→ 꼭 필요한 운동인지 팀에서 이유를 말할 수 있으면 됩니다</em></div></div>
-        <div class="ck" data-k="none"><i></i><div><b>회색 · 신경 쓰지 않아도 돼요</b><span>대상자의 문제와 관계없고, 담은 운동도 쓰지 않는 부위입니다.</span></div></div>
-      </div>
-      <p class="covgoal">🎯 목표: <b>노랑을 모두 초록으로</b> 바꾸고, <b>빨강은 하나도 없게</b> 만드세요. 파랑은 있어도 괜찮습니다.</p>
-      <div class="bodywrap">
-        <div>
+  <div class="s4grid">
+    <aside class="s4side">
+      <div class="chart">
+        <h3>아픈 부위 확인 · 3D <span class="hint">BODY</span></h3>
+        <div class="body">
           <div id="covRealSlot"></div>
           <div id="coverCanvasHost" style="display:none"><canvas id="bodyCanvas"></canvas></div>
           <div class="real-views">
-            <button data-rview="front">앞면</button>
-            <button data-rview="side">옆면</button>
-            <button data-rview="back">뒷면 (등 근육)</button>
-            <button data-rview="auto" data-on="1">⟳ 자동 회전</button>
-            <button data-covstop="1">■ 미리보기 멈춤</button>
+            <button data-rview="front">앞</button>
+            <button data-rview="side">옆</button>
+            <button data-rview="back">뒤</button>
+            <button data-rview="auto" data-on="1">⟳ 회전</button>
+            <button data-covstop="1">■ 동작 멈춤</button>
           </div>
+          <div class="bodylegend" id="bodyLegend"></div>
+          <details class="covhelp">
+            <summary>색깔이 뜻하는 것 보기</summary>
+            <div class="covkey">
+              <div class="ck" data-k="gap"><i></i><div><b>노랑 · 아직 처방이 없어요</b><span>아픈 부위인데 이 부위를 쓰는 운동이 없습니다.</span><em>→ 이 부위 운동을 추가하세요</em></div></div>
+              <div class="ck" data-k="good"><i></i><div><b>초록 · 잘 처방했어요</b><span>아픈 부위를 담은 운동이 다루고 있습니다.</span><em>→ 그대로 두면 됩니다</em></div></div>
+              <div class="ck" data-k="bad"><i></i><div><b>빨강 · 다시 확인하세요</b><span>지금 상태에서 운동하면 안 되는 부위(금기)를 쓰는 운동이 들어갔습니다.</span><em>→ 그 운동을 빼거나 바꾸세요</em></div></div>
+              <div class="ck" data-k="extra"><i></i><div><b>파랑 · 추가로 운동하는 부위</b><span>아픈 부위는 아니지만 담은 운동이 함께 쓰는 부위입니다.</span><em>→ 이유를 말할 수 있으면 됩니다</em></div></div>
+              <div class="ck" data-k="none"><i></i><div><b>회색 · 신경 쓰지 않아도 돼요</b><span>문제와 관계없고 운동도 쓰지 않는 부위입니다.</span></div></div>
+            </div>
+          </details>
+          <p class="covgoal">🎯 <b>노랑을 모두 초록으로</b>, <b>빨강은 없게</b> 만드세요.</p>
         </div>
-        <div class="bodylegend" id="bodyLegend"></div>
       </div>
-    </div>
-  </div>
+    </aside>
 
-  <div class="chart">
-    <h3>팀 목표 진술 <span class="hint">GOAL STATEMENT</span></h3>
-    <div class="body">
-      <textarea id="goalText" rows="3" placeholder="예) 4주 후 대상자는 보조기구 없이 실내 10m를 통증 NRS 3 이하로 보행할 수 있다."></textarea>
+    <div class="s4main">
+      <div class="picktray">
+        <div id="pickTray"></div>
+        <div class="exfilter" id="exFilter"></div>
+        <details class="toolfilter">
+          <summary>도구로 걸러 보기 <span id="toolSum"></span></summary>
+          <p class="ex-guide" style="margin:8px 0">우리 학교에 없는 도구는 눌러서 꺼 두세요. 꺼진 도구를 쓰는 운동은 목록에서 빠집니다.</p>
+          <div class="tool-chips" id="toolChips"></div>
+        </details>
+      </div>
+
+      <div class="chart">
+        <h3><span id="exListTitle">운동 고르기</span> <span class="hint" id="exCount"></span></h3>
+        <div class="body">
+          <p class="ex-guide"><strong>카드를 누르면 담기고, 다시 누르면 빠집니다.</strong> 담으면 왼쪽 3D의 색이 바로 바뀝니다. 「자세히」를 누르면 쉽게 → 어렵게 단계와 주의할 점이 나옵니다.</p>
+          <div id="exList"></div>
+        </div>
+      </div>
+
+      <details class="chart fold">
+        <summary><b>운동 강도 설계</b><span class="hint" id="doseSum">기본값이 채워져 있어요 · 바꾸려면 펼치기</span></summary>
+        <div class="body">
+          <div class="kv" id="intensityKv" style="margin-bottom:14px"></div>
+          <div class="rows" id="doseRows"></div>
+        </div>
+      </details>
+
+      <div class="chart">
+        <h3>팀 목표 진술 <span class="hint">GOAL STATEMENT</span></h3>
+        <div class="body">
+          <textarea id="goalText" rows="3" placeholder="예) 4주 후 대상자는 보조기구 없이 실내 10m를 통증 NRS 3 이하로 보행할 수 있다."></textarea>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1720,15 +1764,12 @@ const EX_LIB = [
  {id:'band', icon:'🎗️', nm:'탄력밴드 저항운동', tags:['ortho-lower','ortho-upper','metabolic','frailty','sarcopenia','neuro','amputation'],
   d:'낮은 저항의 밴드로 근력을 점진적으로 키웁니다. 강도 조절이 쉬워 재활 초기 저항운동에 적합합니다.',
   dose:'12–15회 × 2세트 · 주 2–3회', cond:a=>a.mmt>=3, block:a=>a.pain>=7?'통증 NRS 7 이상 — 통증 중재 후 재평가':null},
- {id:'aerobic', icon:'🚴', nm:'유산소 운동 (고정식 자전거·트레드밀)', tags:['cardiac','pulmonary','metabolic','neuro','spine'],
-  d:'심폐지구력을 회복시키고 혈당·혈압 조절을 돕습니다. 낙상 위험이 있으면 고정식 자전거를 우선합니다.',
+ {id:'aerobic', icon:'🚶‍♀️', nm:'유산소 운동 (체육관 걷기)', tags:['cardiac','pulmonary','metabolic','neuro','spine'],
+  d:'체육관을 일정한 속도로 걸어 심폐지구력을 회복시키고 혈당·혈압 조절을 돕습니다. 옆 사람과 말할 수 있는 속도를 지키고, 낙상 위험이 있으면 벽 쪽에서 보조자와 함께 걷습니다.',
   dose:'10분에서 시작해 주당 2–5분씩 증량', block:a=>a.spo2<88?'SpO₂ 88% 미만 — 산소 적용 후 재평가':null},
  {id:'interval', icon:'⏱️', nm:'간헐적 유산소 (운동–휴식 교대)', tags:['pulmonary','cardiac','frailty'],
   d:'2분 운동 후 1분 휴식을 반복합니다. 지속 운동을 견디지 못하는 호흡곤란·저체력 대상자에게 씁니다.',
   dose:'운동 2분 · 휴식 1분 × 5주기'},
- {id:'aqua', icon:'🏊', nm:'수중운동 (부력 활용)', tags:['ortho-lower','metabolic','spine','osteoporosis'],
-  d:'부력이 체중부하를 줄여 관절 충격 없이 움직일 수 있습니다. 비만·관절통 대상자에게 유리합니다.',
-  dose:'20–30분 · 주 2–3회', block:a=>a.temp>=37.8?'발열 상태 — 감염 관리 우선':null},
  {id:'balance', icon:'🧘', nm:'균형 훈련 (지지물 곁에서)', tags:['frailty','neuro','sarcopenia','osteoporosis','ortho-lower','amputation'],
   d:'양발 서기 → 일렬 서기 → 한발 서기 순으로 지지면을 좁혀갑니다. 반드시 손잡이나 벽 옆에서 시행합니다.',
   dose:'각 자세 20–30초 × 3회', note:'낙상 고위험군은 보호자 또는 감독자가 항상 곁에 있어야 합니다.'},
@@ -1741,9 +1782,6 @@ const EX_LIB = [
  {id:'adl', icon:'🏠', nm:'일상생활동작(ADL) 훈련', tags:['neuro','frailty','postop','cognitive','sarcopenia','amputation'],
   d:'앉았다 일어서기, 옷 입기, 화장실 이동 등 실제 생활 과제를 그대로 연습합니다.',
   dose:'과제당 5–10회 · 1일 1–2회'},
- {id:'stump', icon:'🦿', nm:'절단부 관리 · 체중부하 적응 훈련', tags:['amputation'],
-  d:'절단부를 점진적으로 눌러 의족 착용에 대비하고, 붕대 압박으로 부종을 줄입니다. 성숙 전 과부하는 피합니다.',
-  dose:'압박 5–10분 · 체중이동 10회 × 2세트', note:'절단부 상처·감염 징후를 매 회 확인하고 통증 범위 내에서만 시행합니다.'},
  {id:'sts', icon:'🪑', nm:'앉았다 일어서기 (Sit-to-Stand)', tags:['frailty','sarcopenia','neuro','metabolic'],
   d:'하지 근력과 기립 능력을 동시에 키우는 가장 효율적인 기능적 운동입니다.',
   dose:'5–10회 × 2–3세트', block:a=>a.mmt<=1?'MMT 1 이하 — 등척성 운동부터 선행':null},
@@ -1760,14 +1798,14 @@ const EX_LIB = [
  {id:'t_pump', tool:'body', icon:'🦶', nm:'발목 펌프 (발목 까딱이기)', tags:['ortho-lower','postop','cardiac','frailty','metabolic'], sr:[2,20],
   d:'발끝과 뒤꿈치를 번갈아 들어 종아리 근육으로 혈액을 짜 올립니다. 수술 후 혈전 예방의 기본입니다.', dose:'20회 × 2세트 · 1일 3회', prog:'누워서 → 앉아서 → 서서 벽 짚고'},
  {id:'t_calf', tool:'body', icon:'⬆️', nm:'발뒤꿈치 들기', tags:['ortho-lower','frailty','sarcopenia','metabolic'], sr:[2,12],
-  d:'종아리 근력과 발목 안정성을 기릅니다. 걷기·계단 동작의 기초입니다.', dose:'10–15회 × 2세트', prog:'벽 짚고 양발 → 양발 → 한 발 → 계단 끝에서'},
+  d:'종아리 근력과 발목 안정성을 기릅니다. 걷기·계단 동작의 기초입니다.', dose:'10–15회 × 2세트', prog:'벽 짚고 양발 → 양발 → 한 발 → 스텝박스 끝에서'},
  {id:'t_wallsit', tool:'body', icon:'🧱', nm:'벽에 기대 앉기 (월 싯)', tags:['ortho-lower','sarcopenia','frailty'], sr:[3,0],
   d:'벽에 등을 대고 무릎을 굽혀 버팁니다. 무릎을 움직이지 않고 허벅지 앞 근육을 강화하는 등척성 운동입니다.', dose:'20–45초 × 3회', prog:'얕게 20초 → 깊게 45초 (무릎이 발끝을 넘지 않게)',
   block:a=>a.sbp>=160?'혈압 상승 유발 — 수축기 160 미만에서 시행':null, note:'버티는 동안 숨을 참지 않습니다.'},
  {id:'t_bridge', tool:'body', icon:'🌉', nm:'브릿지 (엉덩이 들기)', tags:['spine','ortho-lower','postop','frailty','sarcopenia'], sr:[2,10],
   d:'누워서 엉덩이를 들어 엉덩이·허리 주변 근육을 강화합니다. 허리 통증과 보행 안정에 도움이 됩니다.', dose:'10회 × 2세트 · 3초 유지', prog:'양발 → 한 발 → 한 발 + 3초 유지'},
  {id:'t_wallpush', tool:'body', icon:'🙌', nm:'벽 팔굽혀펴기', tags:['ortho-upper','cardiac','sarcopenia','frailty'], sr:[2,10],
-  d:'벽을 짚고 팔을 굽혔다 펴서 가슴·팔 근력을 부담 없이 기릅니다.', dose:'10회 × 2세트', prog:'벽 → 책상 → 무릎 대고 바닥'},
+  d:'벽을 짚고 팔을 굽혔다 펴서 가슴·팔 근력을 부담 없이 기릅니다.', dose:'10회 × 2세트', prog:'벽 → 스텝박스에 손 짚고 → 무릎 대고 바닥'},
  {id:'t_march', tool:'body', icon:'🚶', nm:'제자리 걷기·행진', tags:['cardiac','pulmonary','metabolic','frailty','neuro','ortho-lower'], sr:[2,0],
   d:'제자리에서 무릎을 들며 걸어 심폐 기능과 다리 근력을 함께 기릅니다.', dose:'1–3분 × 2–3회', prog:'천천히 1분 → 무릎 높이 → 2~3분'},
  {id:'t_birddog', tool:'body', icon:'🐕', nm:'서서 버드독 (팔다리 뻗기)', tags:['spine','neuro','frailty'], sr:[2,8],
@@ -1817,7 +1855,57 @@ const EX_LIB = [
   d:'공을 5초간 꽉 쥐었다 펴서 손 근력과 손목 기능을 회복합니다.', dose:'10회 × 2세트', prog:'말랑한 공 → 단단한 공 → 손가락 하나씩'},
  {id:'t_cone', tool:'cone', icon:'🔺', nm:'콘 사이 옆걸음·방향 전환', tags:['ortho-lower','neuro'], sr:[3,0],
   d:'바닥의 콘 사이를 옆걸음·앞뒤로 이동하며 방향 전환 능력을 기릅니다. 일상·운동 복귀 직전 단계입니다.', dose:'콘 5개 왕복 × 3회', prog:'천천히 걷기 → 옆걸음 → 빠르게',
-  block:a=>a.fall!=='저위험'?'낙상 위험 — 패드·균형 훈련 먼저':null}
+  block:a=>a.fall!=='저위험'?'낙상 위험 — 패드·균형 훈련 먼저':null},
+ // ── 팔·어깨·손 ──
+ {id:'t_pendulum', tool:'chair', icon:'🕰️', nm:'팔 늘어뜨려 흔들기 (진자 운동)', tags:['ortho-upper','postop'], sr:[2,10],
+  d:'의자 등받이를 짚고 몸을 숙여 아픈 팔을 힘 빼고 늘어뜨린 뒤, 몸을 살짝 흔들어 팔이 저절로 작은 원을 그리게 합니다. 어깨에 힘을 주지 않고 관절을 부드럽게 풉니다.', dose:'앞뒤·좌우·원 각 10회 × 2세트', prog:'작은 원 → 큰 원 → 가벼운 물병 들고',
+  note:'팔 힘으로 돌리지 않고 몸의 흔들림으로만 움직입니다.'},
+ {id:'t_wallwalk', tool:'body', icon:'🧗', nm:'벽 타고 손 올리기', tags:['ortho-upper','neuro','postop'], sr:[2,10],
+  d:'벽을 보고 서서 손가락으로 벽을 걸어 올라가듯 팔을 올립니다. 얼마나 올라갔는지 눈으로 확인할 수 있어 굳은 어깨의 가동범위 회복에 좋습니다.', dose:'10회 × 2세트 · 끝에서 5초', prog:'앞을 보고 → 옆으로 서서 → 조금 더 높이',
+  note:'통증이 시작되는 높이 바로 앞에서 멈춥니다.'},
+ {id:'t_wrist', tool:'body', icon:'✋', nm:'손목 굽혔다 펴기·돌리기', tags:['ortho-upper','neuro'], sr:[2,10],
+  d:'팔꿈치를 몸에 붙이고 손목을 위아래로 굽혔다 펴고, 손바닥을 뒤집었다 엎습니다. 골절이나 고정 후 굳은 손목·아래팔을 풉니다.', dose:'각 10회 × 2세트', prog:'반대 손으로 도와서 → 혼자서 → 가벼운 물병 들고'},
+ {id:'t_towelwring', tool:'towel', icon:'🧺', nm:'수건 비틀어 짜기', tags:['ortho-upper','neuro','sarcopenia'], sr:[2,10],
+  d:'수건을 양손으로 잡고 빨래를 짜듯 비틉니다. 손아귀와 아래팔 힘을 길러 병뚜껑 열기 같은 일상 동작을 돕습니다.', dose:'양방향 10회 × 2세트', prog:'얇은 수건 → 두껍게 접은 수건 → 비튼 채 5초 버티기'},
+ {id:'t_bpress', tool:'band', icon:'🫸', nm:'밴드 앞으로 밀기', tags:['ortho-upper','sarcopenia','frailty'], sr:[2,12],
+  d:'밴드를 등 뒤로 두르고 양손으로 잡아 앞으로 밉니다. 가슴과 팔 뒤쪽 근육을 길러 밀고 일어나는 힘을 키웁니다.', dose:'10–12회 × 2세트', prog:'앉아서 약한 밴드 → 서서 → 강한 밴드'},
+ {id:'t_chairpush', tool:'chair', icon:'🙌', nm:'의자 짚고 엉덩이 들기', tags:['sarcopenia','frailty','neuro','amputation','ortho-lower'], sr:[2,8],
+  d:'의자에 앉아 좌석이나 팔걸이를 짚고 팔 힘으로 엉덩이를 살짝 띄웁니다. 일어서기와 옮겨 앉기에 필요한 팔 힘을 기릅니다.', dose:'5초 버티기 × 8회 × 2세트', prog:'발로 도와서 → 발 힘을 줄여서 → 발을 떼고',
+  block:a=>a.sbp>=160?'혈압 상승 유발 — 안정 시 수축기 160 미만에서 시행':null, note:'버티는 동안 숨을 참지 않습니다.'},
+ // ── 등·척추·몸통 ──
+ {id:'t_pelvictilt', tool:'body', icon:'🛏️', nm:'누워서 골반 기울이기', tags:['spine','frailty','postop'], sr:[2,10],
+  d:'무릎을 세우고 누워 허리를 바닥에 지그시 눌렀다 풉니다. 허리를 크게 움직이지 않고 배와 허리 깊은 근육을 깨우는 가장 기초적인 운동입니다.', dose:'5초 × 10회 × 2세트', prog:'누워서 → 앉아서 → 서서 벽에 기대어'},
+ {id:'t_kneelift', tool:'body', icon:'🚴', nm:'누워서 무릎 번갈아 들기', tags:['spine','frailty','sarcopenia','postop'], sr:[2,10],
+  d:'누워서 허리를 바닥에 붙인 채 무릎을 한쪽씩 가슴 쪽으로 듭니다. 다리를 움직여도 허리가 흔들리지 않게 버티는 몸통 힘을 기릅니다.', dose:'좌우 10회 × 2세트', prog:'한 발씩 천천히 → 반대쪽 팔도 함께 → 발을 바닥에 안 닿게'},
+ {id:'t_seatext', tool:'chair', icon:'🙆', nm:'앉아서 등 펴기', tags:['spine','pulmonary','ortho-upper','frailty'], sr:[2,10],
+  d:'의자 등받이에 등을 대고 양손을 머리 뒤에 받친 채 가슴을 천장 쪽으로 엽니다. 굽은 등을 펴 주고 숨이 깊어집니다.', dose:'5초 × 10회 × 2세트', prog:'손을 가슴에 → 손을 머리 뒤에 → 팔꿈치 넓게 벌려',
+  note:'허리가 아니라 등 가운데가 펴지도록 합니다.'},
+ {id:'t_wallangel', tool:'body', icon:'👼', nm:'벽에 기대 팔 올리기 (벽 천사)', tags:['spine','ortho-upper'], sr:[2,10],
+  d:'벽에 등·엉덩이·뒤통수를 대고 팔을 W자에서 Y자로 올렸다 내립니다. 굽은 어깨와 등을 펴는 자세 교정 운동입니다.', dose:'10회 × 2세트', prog:'W자만 → Y자까지 → 손등을 벽에서 떼지 않고',
+  block:a=>['부축 필요','휠체어','침상안정'].includes(a.amb)?'혼자 서기 어려움 — 앉아서 하는 운동부터':null},
+ // ── 가슴·호흡·심폐 ──
+ {id:'t_pursed', tool:'body', icon:'😮‍💨', nm:'입술 오므리기 호흡', tags:['pulmonary','cardiac','frailty'], sr:[3,0],
+  d:'코로 2초 들이쉬고, 촛불을 끄듯 입술을 오므려 4초 이상 길게 내쉽니다. 숨이 찰 때 호흡을 가라앉히는 기본 기술입니다.', dose:'5회 × 3세트 · 운동 사이사이', prog:'앉아서 → 서서 → 걸으면서'},
+ {id:'t_diaph', tool:'body', icon:'🫁', nm:'배로 숨쉬기 (횡격막 호흡)', tags:['pulmonary','cardiac','spine','postop'], sr:[3,0],
+  d:'한 손은 가슴, 한 손은 배에 얹고 배만 부풀도록 들이쉽니다. 얕은 가슴 호흡을 깊은 호흡으로 바꾸고 몸통 안쪽 근육도 함께 씁니다.', dose:'5–10회 × 3세트', prog:'누워서 → 앉아서 → 서서'},
+ {id:'t_armbreath', tool:'body', icon:'🌬️', nm:'팔 들며 숨쉬기', tags:['pulmonary','cardiac','ortho-upper','postop'], sr:[2,8],
+  d:'숨을 들이쉬며 양팔을 옆으로 들어 올리고, 내쉬며 내립니다. 가슴우리를 넓혀 호흡과 어깨 움직임을 함께 돕습니다.', dose:'8회 × 2세트', prog:'어깨 높이까지 → 머리 위까지 → 서서'},
+ {id:'t_sitmarch', tool:'chair', icon:'👣', nm:'앉아서 제자리 걷기', tags:['cardiac','pulmonary','metabolic','frailty','neuro','sarcopenia'], sr:[3,0],
+  d:'의자에 앉아 무릎을 번갈아 들며 팔을 흔듭니다. 서 있기 어려운 대상자도 할 수 있는 가벼운 유산소 운동입니다.', dose:'1–2분 × 3회', prog:'천천히 → 팔을 크게 흔들며 → 시간 늘리기'},
+ // ── 머리·인지·시선 ──
+ {id:'t_sitdual', tool:'chair', icon:'💬', nm:'앉아서 발 구르며 말하기 (이중과제)', tags:['neuro','cognitive','frailty'], sr:[3,0],
+  d:'앉아서 제자리 걸음을 하며 끝말잇기를 하거나 100에서 3씩 뺍니다. 몸을 움직이면서 동시에 생각하는 능력을 기릅니다.', dose:'1분 × 3회', prog:'요일 거꾸로 말하기 → 끝말잇기 → 숫자 빼기'},
+ {id:'t_dualwalk', tool:'body', icon:'🚶', nm:'숫자 세며 걷기 (이중과제)', tags:['neuro','cognitive','frailty'], sr:[3,0],
+  d:'걸으면서 숫자를 거꾸로 세거나 색깔 이름을 댑니다. 걷는 중에 말을 걸어도 균형을 잃지 않는 능력을 기릅니다.', dose:'10m 왕복 × 3회', prog:'천천히 걷기 + 쉬운 과제 → 보통 속도 → 어려운 과제',
+  block:a=>a.fall!=='저위험'?'낙상 위험 — 앉아서 하는 이중과제부터':null, note:'보조자가 옆에서 함께 걷습니다.'},
+ {id:'t_conetouch', tool:'cone', icon:'🎯', nm:'불러 주는 색 콘 짚기', tags:['neuro','cognitive','ortho-upper'], sr:[3,0],
+  d:'앞에 놓인 콘 중 보조자가 불러 주는 색을 손으로 짚습니다. 주의력과 팔 뻗기, 몸통 균형을 함께 훈련합니다.', dose:'10번 짚기 × 3회', prog:'앉아서 가까이 → 조금 멀리 → 서서'},
+ {id:'t_gaze', tool:'body', icon:'👀', nm:'한 점 보며 고개 돌리기 (시선 안정)', tags:['neuro'], sr:[3,0],
+  d:'눈앞의 한 점을 계속 보면서 고개를 좌우·위아래로 천천히 돌립니다. 어지럼이나 균형 장애가 있을 때 눈과 머리의 협응을 회복합니다.', dose:'30초 × 3회', prog:'앉아서 천천히 → 서서 → 조금 빠르게',
+  note:'어지럼이 심해지면 멈추고 쉽니다.'},
+ // ── 엉덩이·다리 (앉아서) ──
+ {id:'t_seathip', tool:'band', icon:'🦋', nm:'앉아서 밴드 무릎 벌리기', tags:['ortho-lower','frailty','sarcopenia','neuro'], sr:[2,12],
+  d:'의자에 앉아 무릎 위에 밴드를 두르고 무릎을 바깥으로 벌렸다 모읍니다. 서지 않고도 엉덩이 옆 근육을 기를 수 있습니다.', dose:'12회 × 2세트', prog:'약한 밴드 → 벌린 채 3초 버티기 → 강한 밴드'}
 ];
 // 학교에 있는 소도구
 const TOOLS=[
@@ -1837,7 +1925,7 @@ const ROLES = [
 /* ============================================================
    STATE
    ============================================================ */
-const S = {step:1, age:null, built:null, a:{}, redraws:0, picked:new Set(), dose:{freq:3,time:15,weeks:4,rpe:11}, weekPlan:null, weekPlanKey:'', activeWeek:0, goal:'', team:'', members:[{name:'',lead:false},{name:'',lead:false},{name:'',lead:false}], roles:['','','',''], evalRes:null, tools:new Set(['body','chair','band','pad']), trial:{}, dropped:new Set(), talk:{changed:'',fixed:''}, reviews:0, phase:1, p1:null};
+const S = {step:1, age:null, built:null, a:{}, redraws:0, picked:new Set(), dose:{freq:3,time:15,weeks:4,rpe:11}, weekPlan:null, weekPlanKey:'', activeWeek:0, goal:'', team:'', members:[{name:'',lead:false},{name:'',lead:false},{name:'',lead:false}], roles:['','','',''], evalRes:null, tools:new Set(TOOLS.map(t=>t.id)), trial:{}, dropped:new Set(), talk:{changed:'',fixed:''}, reviews:0, phase:1, p1:null};
 const DRAW_MAX = 3;
 const TOTAL_WEEKS = 4;   // 1차시 = 1~2주차 처방, 2차시 = 3~4주차 처방
 const WATCH = new URLSearchParams(location.search).has('watch');   // 교사용 현황판 안에서 보기 전용으로 열림
@@ -1962,7 +2050,7 @@ function applyCase(c){
   if(S.a.bg == null) delete S.a.bg;   // 대사질환 아니면 혈당 항목 제외
   S.picked.clear(); S.doseSet = false; S.goal = '';
   S.weekPlan = null; S.weekPlanKey = ''; S.activeWeek = 0;
-  S.phase = 1; S.p1 = null; S.dose.weeks = TOTAL_WEEKS; S.trial = {}; S.dropped.clear();
+  S.phase = 1; S.p1 = null; S.dose.weeks = TOTAL_WEEKS; S.trial = {}; S.dropped.clear(); S.exPart = null;
   evaluate();
 }
 
@@ -2448,7 +2536,11 @@ function startPhase2(){
   S.phase=2; S.dropped.clear();
   Object.keys(S.trial).forEach(id=>{ if(!S.picked.has(id)) delete S.trial[id]; });   // 1차시에 뺀 운동을 다시 넣으면 새로 체험
   S.a=assessNow(); evaluate();
-  S.weekPlan=null; S.weekPlanKey=''; S.activeWeek=2; S.exPart='all';
+  S.weekPlan=null; S.weekPlanKey=''; S.activeWeek=2;
+  // 2차시 첫 화면: 2주 동안 변화가 없었던(또는 부족했던) 부위의 운동부터 보여 줌
+  const GRP={legL:'leg',legR:'leg',hipL:'hip',hipR:'hip',core:'core',back:'back',armL:'arm',armR:'arm',chest:'chest',head:'head'};
+  const mr=midReport(), need=mr&&(mr.rows.find(o=>o.st==='none')||mr.rows.find(o=>o.st==='some'));
+  S.exPart = need ? GRP[need.r] : null;
   go(4);
 }
 function backToPhase1(){
@@ -2469,8 +2561,8 @@ function applyPhaseUI(){
     bar.innerHTML=`<span class="pb" data-s="${ph2?'done':'on'}"><b>1차시</b>1~2주차 처방${ph2?' ✓':''}</span><span class="pb-arrow">→</span><span class="pb" data-s="${ph2?'on':'lock'}"><b>2차시</b>2주 경과 확인 · 3~4주차 처방${ph2?'':' 🔒'}</span>`; }
   set('s4Title', ph2?'3~4주차 운동 조정하기 — 더하거나 빼기':'1~2주차 운동 고르기');
   set('s4Lede', ph2
-    ? '아래 <b>2주 경과</b>를 먼저 읽으세요. 변화가 없는 부위에는 운동을 <b>더하고</b>, 맞지 않았던 운동은 <b>빼세요</b>. 1~2주차에 하던 운동은 이미 담겨 있습니다(카드를 누르면 빠집니다).'
-    : '학교에 있는 소도구를 고르고, 대상자가 <b>처음 2주 동안</b> 할 운동을 후보로 담으세요. <b>아직 확정이 아닙니다.</b> 다음 단계에서 조원이 직접 해보고 정합니다. 3~4주차 운동은 2차시에 2주 경과를 보고 정합니다.');
+    ? '아래 <b>2주 경과</b>를 먼저 읽으세요. 변화가 없는 부위는 <b>부위 버튼</b>을 눌러 운동을 <b>더하고</b>, 맞지 않았던 운동은 <b>빼세요</b>. 1~2주차에 하던 운동은 이미 담겨 있습니다(카드를 누르면 빠집니다).'
+    : '① 왼쪽 3D에서 <b>아픈 부위</b>를 확인하고 ② 그 <b>부위 버튼</b>을 눌러 ③ 대상자가 <b>처음 2주 동안</b> 할 운동을 담으세요. 노랑이 초록으로 바뀌면 다음 부위로 넘어갑니다. <b>아직 확정이 아닙니다</b> — 다음 단계에서 조원이 직접 해보고 정합니다.');
   set('s5Lede', ph2
     ? '3~4주차에 <b>새로 넣은 운동</b>만 조원이 직접 해봅니다. 결과를 보고 <b>3주차부터 할지, 4주차부터 할지</b> 정합니다.'
     : '후보 운동을 조원이 직접 해봅니다. 운동마다 역할을 돌아가며 맡으세요. 결과를 보고 각 운동을 <b>1주차부터 할지, 2주차부터 할지</b> 정합니다.');
@@ -2543,7 +2635,7 @@ function renderProgram(){
       <div class="ex-main">
         <div class="ex-top"><h4>${x.nm}</h4><span class="ex-state">${state}</span></div>
         <p class="ex-sum">${x.d}</p>
-        <div class="ex-foot">${x.tool?`<span class="ex-tool">${toolNm(x.tool)}</span>`:''}<span class="dose">${x.dose}</span></div>
+        <div class="ex-foot"><span class="ex-lv" data-lv="${EX_PHASE[x.id]||2}">${['','쉬움','보통','어려움'][EX_PHASE[x.id]||2]}</span>${x.tool?`<span class="ex-tool">${toolNm(x.tool)}</span>`:'<span class="ex-tool">🏥 재활 기본</span>'}<span class="dose">${x.dose}</span></div>
         <div class="ex-more">
           ${x.prog?`<div class="ex-prog"><b>쉽게 → 어렵게</b> ${x.prog}</div>`:''}
           ${x.note?`<div class="ex-note">⚠ ${x.note}</div>`:''}
@@ -2553,44 +2645,58 @@ function renderProgram(){
       </div>
       <div class="ex-check">✓</div>
     </div>`;
-    return {rank, html, grp: blocked?'blk' : rel?'rec' : 'opt'};
+    return {rank, html, grp: blocked?'blk' : rel?'rec' : 'opt', lv:EX_PHASE[x.id]||2, base:!x.tool};
   };
   // 권장 → 선택 가능 → 제외(접어 둠) 순으로 묶어서 보여줌
   const listHTML = arr => {
-    const cards=arr.map(cardOf), g=k=>cards.filter(o=>o.grp===k);
-    const sec=(k,title,sub)=>{ const c=g(k); return c.length?`<div class="exgrp" data-g="${k}"><div class="exgrp-h"><b>${title}</b><span>${c.length}개</span><em>${sub}</em></div><div class="exlist">${c.map(o=>o.html).join('')}</div></div>`:''; };
+    const cards=arr.map(cardOf).sort((p,q)=>(p.lv-q.lv)||(p.base-q.base)), g=k=>cards.filter(o=>o.grp===k);   // 쉬운 것부터, 직접 해 볼 수 있는 소도구 운동 먼저
+    const FIRST=9;   // 한 번에 보이는 카드 수. 담은 운동은 항상 보이게 하고, 나머지는 「더 보기」로 펼침
+    const body=c=>{ const top=[], rest=[]; c.forEach(o=>((top.length<FIRST||o.rank===0)?top:rest).push(o));
+      return `<div class="exlist">${top.map(o=>o.html).join('')}</div>` + (rest.length?`<details class="exmore"><summary>나머지 ${rest.length}개 더 보기</summary><div class="exlist">${rest.map(o=>o.html).join('')}</div></details>`:''); };
+    const sec=(k,title,sub)=>{ const c=g(k); return c.length?`<div class="exgrp" data-g="${k}"><div class="exgrp-h"><b>${title}</b><span>${c.length}개</span><em>${sub}</em></div>${body(c)}</div>`:''; };
     const blk=g('blk');
-    return sec('rec','⭐ 이 대상자에게 권장','대상자의 문제와 관련 있는 운동입니다. 여기부터 살펴보세요.')
-      + (g('opt').length?`<details class="exgrp" data-g="opt"${g('rec').length?'':' open'}><summary class="exgrp-h"><b>그 밖에 고를 수 있는 운동</b><span>${g('opt').length}개</span><em>꼭 필요할 때 눌러서 펼쳐 보세요</em></summary><div class="exlist">${g('opt').map(o=>o.html).join('')}</div></details>`:'')
+    return sec('rec','⭐ 이 대상자에게 권장','대상자의 문제와 관련 있는 운동입니다. 쉬운 것부터 차례로 나옵니다.')
+      + (g('opt').length?`<details class="exgrp" data-g="opt"${g('rec').length?'':' open'}><summary class="exgrp-h"><b>그 밖에 고를 수 있는 운동</b><span>${g('opt').length}개</span><em>꼭 필요할 때 눌러서 펼쳐 보세요</em></summary>${body(g('opt'))}</details>`:'')
       + (blk.length?`<details class="exgrp" data-g="blk"><summary class="exgrp-h"><b>🚫 지금은 할 수 없는 운동</b><span>${blk.length}개</span><em>눌러서 이유 보기</em></summary><div class="exlist">${blk.map(o=>o.html).join('')}</div></details>`:'');
   };
-  // ① 소도구 칩
-  $('#toolChips').innerHTML = TOOLS.map(t=>{
-    const n=EX_LIB.filter(x=>x.tool===t.id).length;
-    return `<button type="button" data-tool="${t.id}" data-on="${S.tools.has(t.id)?'1':'0'}"><span>${t.ic}</span>${t.nm}<i>${n}</i></button>`;
-  }).join('');
-  // ② 소도구 실습 운동 / ③ 기본 중재
-  // 부위로 골라 보기: 한 번에 보이는 카드 수를 줄임
+  // 도구 걸러 보기 (학교에 없는 도구 끄기) — 결정 단계가 아니라 보조 필터
+  const renderTools=()=>{
+    $('#toolChips').innerHTML = TOOLS.map(t=>{
+      const n=EX_LIB.filter(x=>x.tool===t.id).length;
+      return `<button type="button" data-tool="${t.id}" data-on="${S.tools.has(t.id)?'1':'0'}"><span>${t.ic}</span>${t.nm}<i>${n}</i></button>`;
+    }).join('');
+    const off=TOOLS.filter(t=>!S.tools.has(t.id));
+    $('#toolSum').textContent = off.length ? `· 꺼 둔 도구 ${off.length}개 (${off.map(t=>t.nm).join(', ')})` : '· 모든 도구 사용 중';
+  };
+  // 부위로 골라 보기: 아픈 부위에서 출발해 그 부위 운동을 고름
   const PART_GROUPS=[['all','전체',null],['leg','다리',['legL','legR']],['hip','엉덩이·골반',['hipL','hipR']],['core','몸통·코어',['core']],
     ['back','등·척추',['back']],['arm','팔·어깨',['armL','armR']],['chest','가슴·심폐',['chest']],['head','머리·인지',['head']]];
-  const crNow=caseRegions();
-  const hitsPart=(x,regs)=>{ if(!regs) return true; const r=EX_REGIONS[x.id], list=r==='CASE'?[...crNow]:(r||[]); return list.some(k=>regs.includes(k)); };
+  const crNow=caseRegions(), someSick=crNow.size<BODY_REGIONS.length;
+  const isSick=regs=>!!regs && someSick && regs.some(k=>crNow.has(k));
+  const regsOf=x=>{ const r=EX_REGIONS[x.id]; return r==='CASE'?[...crNow]:(r||[]); };
+  const hitsPart=(x,regs)=>!regs || regsOf(x).some(k=>regs.includes(k));
+  if(!PART_GROUPS.some(g=>g[0]===S.exPart)){                     // 처음에는 대상자의 주된 문제 부위부터 보여 줌
+    const MAIN={lowback:'back',spine:'back',chest:'chest',shoulderL:'arm',shoulderR:'arm',armL:'arm',armR:'arm',wristL:'arm',wristR:'arm',
+      hipL:'hip',hipR:'hip',kneeL:'leg',kneeR:'leg',legL:'leg',legR:'leg',footL:'leg',footR:'leg',head:'head',sideL:'arm',sideR:'arm'};
+    const main=(c.part||[]).map(k=>MAIN[k]).find(id=>id && isSick((PART_GROUPS.find(g=>g[0]===id)||[])[2]));
+    const first=PART_GROUPS.find(g=>isSick(g[2]));
+    S.exPart = main || (first?first[0]:'all');
+  }
   const partOf=()=>PART_GROUPS.find(g=>g[0]===S.exPart)||PART_GROUPS[0];
+  const avail=()=>EX_LIB.filter(x=>!x.tool || S.tools.has(x.tool));
   const renderFilter=()=>{
-    $('#exFilter').innerHTML = '<span class="exf-l">부위로 골라 보기</span>' + PART_GROUPS.map(([id,nm,regs])=>{
-      const sick=regs&&regs.some(k=>crNow.has(k)) && crNow.size<BODY_REGIONS.length;
-      return `<button type="button" data-part="${id}" data-on="${partOf()[0]===id?'1':'0'}">${nm}${sick?'<i title="이 대상자의 아픈 부위">아픈 부위</i>':''}</button>`;
+    const picked=EX_LIB.filter(x=>S.picked.has(x.id));
+    $('#exFilter').innerHTML = '<span class="exf-l">부위 고르기</span>' + PART_GROUPS.map(([id,nm,regs])=>{
+      const n=regs?picked.filter(x=>hitsPart(x,regs)).length:picked.length;
+      return `<button type="button" data-part="${id}" data-on="${partOf()[0]===id?'1':'0'}" data-sick="${isSick(regs)?'1':'0'}">${nm}${isSick(regs)?'<i title="이 대상자의 아픈 부위">아픈 부위</i>':''}${n?`<u title="이 부위를 쓰는 담은 운동 수">${n}</u>`:''}</button>`;
     }).join('');
   };
-  const emptyMsg='<p class="ex-guide" style="margin:0">이 부위를 쓰는 운동이 여기에는 없습니다. 「전체」를 누르거나 다른 목록을 보세요.</p>';
   const renderLists=()=>{
-    const regs=partOf()[2];
-    const tlAll=EX_LIB.filter(x=>x.tool && S.tools.has(x.tool)), tl=tlAll.filter(x=>hitsPart(x,regs));
-    $('#toolExList').innerHTML = !tlAll.length ? '<p class="ex-guide" style="margin:0">위에서 소도구를 하나 이상 고르세요.</p>' : tl.length ? listHTML(tl) : emptyMsg;
-    $('#toolExCount').textContent = `${tlAll.length}개 운동 · ${tlAll.filter(x=>S.picked.has(x.id)).length}개 담음`;
-    const base=EX_LIB.filter(x=>!x.tool && hitsPart(x,regs));
-    $('#exList').innerHTML = base.length ? listHTML(base) : emptyMsg;
-    renderFilter(); updateExCount();
+    const [pid,pnm,regs]=partOf(), all=avail(), list=all.filter(x=>hitsPart(x,regs));
+    $('#exList').innerHTML = list.length ? listHTML(list) : '<p class="ex-guide" style="margin:0">이 부위를 쓰는 운동이 없습니다. 「도구로 걸러 보기」에서 꺼 둔 도구가 있는지 확인하거나 「전체」를 눌러 보세요.</p>';
+    $('#exListTitle').textContent = pid==='all' ? '운동 고르기 · 전체' : `운동 고르기 · ${pnm}`;
+    $('#exCount').textContent = `${list.length}개 보는 중 · 전체 ${all.length}개`;
+    renderFilter(); renderTools(); updateExCount();
   };
   $('#exFilter').onclick = e=>{ const b=e.target.closest('[data-part]'); if(!b) return; S.exPart=b.dataset.part; renderLists(); };
   renderLists();
@@ -2598,7 +2704,6 @@ function renderProgram(){
     const b=e.target.closest('[data-tool]'); if(!b) return;
     const id=b.dataset.tool;
     if(S.tools.has(id)) S.tools.delete(id); else S.tools.add(id);
-    b.dataset.on = S.tools.has(id)?'1':'0';
     renderLists();
   };
   const onPick = e=>{
@@ -2609,9 +2714,7 @@ function renderProgram(){
     if(S.picked.has(id)){ S.picked.delete(id); } else { S.picked.add(id); S.dropped.delete(id); }
     el.dataset.on = S.picked.has(id)?'1':'0';
     el.querySelector('.ex-state').textContent = exStateText(S.picked.has(id), el.dataset.rel==='1', el.dataset.carry==='1');
-    updateExCount();
-    const tl=EX_LIB.filter(x=>x.tool && S.tools.has(x.tool));
-    $('#toolExCount').textContent = `${tl.length}개 운동 · ${tl.filter(x=>S.picked.has(x.id)).length}개 담음`;
+    updateExCount(); renderFilter();
     Body3D.update();
     if(window.RealBody){ RealBody.applyCoverage();
       if(S.picked.has(id)){ const x=EX_LIB.find(e=>e.id===id);
@@ -2622,8 +2725,6 @@ function renderProgram(){
     $$('#rail button').forEach(b=>b.disabled=!reachable(+b.dataset.go));
   };
   $('#exList').onclick = onPick;
-  $('#btnSuggest').onclick = ()=>{ suggest().forEach(id=>{ S.picked.add(id); S.dropped.delete(id); }); renderLists(); Body3D.update(); if(window.RealBody) RealBody.applyCoverage(); $$('#rail button').forEach(b=>b.disabled=!reachable(+b.dataset.go)); };
-  $('#toolExList').onclick = onPick;
   $('#pickTray').onclick = e=>{
     const b=e.target.closest('[data-unpick],[data-repick]'); if(!b) return;
     if(b.dataset.repick) S.picked.add(b.dataset.repick); else S.picked.delete(b.dataset.unpick);
@@ -2736,8 +2837,8 @@ function renderTalk(){
   }
 }
 function updateExCount(){
-  const el=$('#exCount'); if(el) el.textContent = `후보 총 ${S.picked.size}개 담음`;
   const tray=$('#pickTray'); if(!tray) return;
+  const many = S.picked.size>6 ? `<span class="pt-warn">운동이 ${S.picked.size}개예요. 다음 단계에서 모두 직접 해 봐야 하니 3~6개가 알맞습니다.</span>` : '';
   const items=EX_LIB.filter(x=>S.picked.has(x.id));
   const chip=(x,cls,tag)=>`<span class="pt-chip ${cls}">${x.icon||'🔹'} ${x.nm.split(' (')[0]}${tag?`<em>${tag}</em>`:''}<button type="button" data-unpick="${x.id}" aria-label="${escAttr(x.nm)} 빼기">✕</button></span>`;
   if(S.phase===2 && S.p1){
@@ -2745,11 +2846,11 @@ function updateExCount(){
     const cut=EX_LIB.filter(x=>isCarried(x.id)&&!S.picked.has(x.id));
     tray.innerHTML = `<div class="pt-h"><b>3~4주차 운동 ${items.length}개</b><span>계속 ${keep.length} · 새로 추가 ${add.length} · 뺀 운동 ${cut.length}</span></div>`
       + `<div class="pt-list">${keep.map(x=>chip(x,'','계속')).join('')}${add.map(x=>chip(x,'add','추가')).join('')}`
-      + cut.map(x=>`<span class="pt-chip cut">${x.icon||'🔹'} ${x.nm.split(' (')[0]}<em>뺌</em><button type="button" data-repick="${x.id}" title="다시 넣기" aria-label="${escAttr(x.nm)} 다시 넣기">↩</button></span>`).join('') + `</div>`;
+      + cut.map(x=>`<span class="pt-chip cut">${x.icon||'🔹'} ${x.nm.split(' (')[0]}<em>뺌</em><button type="button" data-repick="${x.id}" title="다시 넣기" aria-label="${escAttr(x.nm)} 다시 넣기">↩</button></span>`).join('') + `</div>` + many;
     return;
   }
   tray.innerHTML = `<div class="pt-h"><b>1~2주차 운동 ${items.length}개</b><span>${items.length?'✕ 를 누르면 뺄 수 있어요':'아래에서 운동 카드를 눌러 담아 보세요'}</span></div>`
-    + (items.length?`<div class="pt-list">${items.map(x=>chip(x,'','')).join('')}</div>`:'');
+    + (items.length?`<div class="pt-list">${items.map(x=>chip(x,'','')).join('')}</div>`:'') + many;
 }
 
 /* ============================================================
@@ -2763,6 +2864,8 @@ const EX_PHASE = {
   t_pump:1, t_calf:1, t_wallsit:2, t_bridge:1, t_wallpush:2, t_march:1, t_birddog:2, t_sts:1, t_seatknee:1,
   t_bext:2, t_brow:2, t_bapart:2, t_bcurl:2, t_bside:3, t_pad2:2, t_pad1:3, t_padsq:3, t_padtoss:3,
   t_steptap:2, t_stepdown:3, t_ballsq:2, t_roller:1, t_quadset:1, t_hamstr:1, t_grip:1, t_cone:3,
+  t_pendulum:1, t_wallwalk:1, t_towelslide:1, t_wrist:1, t_towelwring:2, t_bpress:2, t_chairpush:2, t_pelvictilt:1, t_kneelift:2,
+  t_seatext:1, t_wallangel:2, t_pursed:1, t_diaph:1, t_armbreath:1, t_sitmarch:1, t_sitdual:2, t_dualwalk:3, t_conetouch:2, t_gaze:1, t_seathip:1,
 };
 // 체험 결정 반영: 「1주차부터」→ 초기, 「나중 주차에」→ 한 단계 뒤(최소 중기)
 function exPhase(id){
@@ -3603,11 +3706,24 @@ const EX_REGIONS = {
   t_pad1:['legL','legR','hipL','hipR','core'], t_padsq:['hipL','hipR','legL','legR','core'], t_padtoss:['legL','legR','core','head'],
   t_steptap:['hipL','hipR','legL','legR'], t_stepdown:['hipL','hipR','legL','legR','core'], t_ballsq:['hipL','hipR','legL','legR','core'],
   t_roller:['back','chest','armL','armR'], t_quadset:['legL','legR'], t_hamstr:['legL','legR','back'], t_grip:['armL','armR'],
-  t_cone:['hipL','hipR','legL','legR','core','head']
+  t_cone:['hipL','hipR','legL','legR','core','head'],
+  t_pendulum:['armL','armR'], t_wallwalk:['armL','armR'], t_towelslide:['armL','armR'], t_wrist:['armL','armR'], t_towelwring:['armL','armR'],
+  t_bpress:['armL','armR','chest'], t_chairpush:['armL','armR','core'], t_pelvictilt:['core','back'], t_kneelift:['core','hipL','hipR'],
+  t_seatext:['back','chest'], t_wallangel:['back','armL','armR'], t_pursed:['chest'], t_diaph:['chest','core'], t_armbreath:['chest','armL','armR'],
+  t_sitmarch:['chest','legL','legR','hipL','hipR'], t_sitdual:['head','legL','legR'], t_dualwalk:['head','legL','legR','core'],
+  t_conetouch:['head','armL','armR','core'], t_gaze:['head'], t_seathip:['hipL','hipR','legL','legR']
+};
+// 대상자 확인 그림에 빨갛게 표시되는 부위(c.part) → 3D 부위. 그림에서 아프다고 본 곳은 3D·부위 버튼에서도 아픈 부위로 다룸
+const PART_REGIONS = {
+  lowback:['back','core'], spine:['back'], chest:['chest'], head:['head'], whole:[],
+  shoulderL:['armL','armR'], shoulderR:['armL','armR'], armL:['armL','armR'], armR:['armL','armR'], wristL:['armL','armR'], wristR:['armL','armR'],
+  hipL:['hipL','hipR'], hipR:['hipL','hipR'], kneeL:['legL','legR'], kneeR:['legL','legR'], legL:['legL','legR'], legR:['legL','legR'],
+  footL:['legL','legR'], footR:['legL','legR'], sideL:['armL','armR','legL','legR'], sideR:['armL','armR','legL','legR']
 };
 function caseRegions(){
   const c=caseObj(), set=new Set();
   if(c) c.tags.forEach(t=>(SYS_REGIONS[t]||[]).forEach(r=>set.add(r)));
+  if(c) (c.part||[]).forEach(k=>(PART_REGIONS[k]||[]).forEach(r=>set.add(r)));
   if(!set.size) BODY_REGIONS.forEach(r=>set.add(r));
   return set;
 }
@@ -4072,16 +4188,20 @@ const RealBody = (()=>{
   const EX_MOTION_TOOL={t_pump:'pump', t_calf:'heel', t_wallsit:'wallsit', t_bridge:'bridge', t_wallpush:'wallpush', t_march:'march',
     t_birddog:'birddog', t_sts:'sitstand', t_seatknee:'seatknee', t_bext:'extrot', t_brow:'row', t_bapart:'apart', t_bcurl:'band',
     t_bside:'sidestep', t_pad2:'padstand', t_pad1:'balance', t_padsq:'squat', t_padtoss:'toss', t_steptap:'steptap', t_stepdown:'stepdown',
-    t_ballsq:'ballsquat', t_roller:'roller', t_quadset:'quadset', t_hamstr:'hamstr', t_grip:'grip', t_cone:'sidestep'};
+    t_ballsq:'ballsquat', t_roller:'roller', t_quadset:'quadset', t_hamstr:'hamstr', t_grip:'grip', t_cone:'sidestep',
+    t_pendulum:'raise', t_wallwalk:'raise', t_towelslide:'reach', t_wrist:'grip', t_towelwring:'grip', t_bpress:'wallpush', t_chairpush:'hold',
+    t_pelvictilt:'bridge', t_kneelift:'march', t_seatext:'posture', t_wallangel:'posture', t_pursed:'breath', t_diaph:'breath', t_armbreath:'raise',
+    t_sitmarch:'march', t_sitdual:'march', t_dualwalk:'walk', t_conetouch:'reach', t_gaze:'idle', t_seathip:'seatknee'};
   // 소도구 3D 표시: 운동 → 보일 도구
   const EX_PROP={t_pump:['wallFront'], t_calf:['wallFront'], t_wallsit:['wallBack'], t_bridge:['mat'], t_wallpush:['wallFar'],
     t_sts:['chair'], t_seatknee:['chair'], t_bext:['band'], t_brow:['band'], t_bapart:['band'], t_bcurl:['band'], band:['band'], t_bside:['band'],
     t_pad2:['pad'], t_pad1:['pad'], t_padsq:['pad'], t_padtoss:['pad','toyball'], t_steptap:['stepFront'], t_stepdown:['stepUnder'],
-    t_ballsq:['ball','wallBall'], t_roller:['roller','mat'], t_quadset:['towelRoll','mat'], t_hamstr:['mat','band'], t_grip:['tball'], t_cone:['cones']};
+    t_ballsq:['ball','wallBall'], t_roller:['roller','mat'], t_quadset:['towelRoll','mat'], t_hamstr:['mat','band'], t_grip:['tball'], t_cone:['cones'],
+    t_pelvictilt:['mat'], t_wallangel:['wallBack'], t_conetouch:['cones'], t_bpress:['band'], t_wallwalk:['wallFront']};
   const BAND_SPEC={t_bext:[['handL','handR']], t_bapart:[['handL','handR']], t_brow:[['anchorF','handL'],['anchorF','handR']],
     t_bcurl:[['footL','handL'],['footR','handR']], band:[['footL','handL'],['footR','handR']], t_bside:[['kneeL','kneeR']],
     t_hamstr:[['handL','footR'],['handR','footR']]};
-  const EX_MOTION={aarom:'raise', rom:'raise', iso:'hold', band:'band', aerobic:'march', interval:'march', aqua:'walk',
+  const EX_MOTION={aarom:'raise', rom:'raise', iso:'hold', band:'band', aerobic:'walk', interval:'march', aqua:'walk',
     balance:'balance', gait:'walk', breath:'breath', adl:'reach', stump:'shift', sts:'sts', posture:'posture', stretch:'stretch', cognitive:'march', ...EX_MOTION_TOOL};
   let curMotion='idle', motionT0=performance.now(), targetRegions=new Set(), frozenT=null;
   const cur={}; // 현재 각도(부드러운 전환용)
@@ -4340,12 +4460,17 @@ const Save = (()=>{
     S.a=d.a||{}; S.redraws=d.redraws||0;
     S.picked.clear(); (d.picked||[]).forEach(x=>S.picked.add(x));
     S.dropped.clear(); (d.dropped||[]).forEach(x=>S.dropped.add(x));
-    S.tools=new Set(d.tools||['body','chair','band','pad']);
+    S.tools=new Set(d.tools||TOOLS.map(t=>t.id));
     Object.assign(S.dose,d.dose||{}); S.doseSet=!!d.doseSet;
     S.weekPlan=d.weekPlan||null; S.weekPlanKey=d.weekPlanKey||''; S.activeWeek=d.activeWeek||0;
     S.goal=d.goal||''; S.members=(d.members&&d.members.length)?d.members:S.members;
     S.roles=d.roles||S.roles; S.evalRes=d.evalRes||null; S.trial=d.trial||{};
     S.talk=d.talk||{changed:'',fixed:''}; S.reviews=d.reviews||0;
+    // 목록에서 뺀 운동(체육관에서 못 하는 운동 등)이 예전 기록에 남아 있으면 걸러 냄
+    const known=id=>EX_LIB.some(x=>x.id===id), cleanWeeks=w=>(w||[]).forEach(wk=>{ wk.items=(wk.items||[]).filter(known); (wk.days||[]).forEach(dy=>{ dy.ex=(dy.ex||[]).filter(e=>known(e.id)); }); });
+    [...S.picked].forEach(id=>{ if(!known(id)) S.picked.delete(id); }); [...S.dropped].forEach(id=>{ if(!known(id)) S.dropped.delete(id); });
+    cleanWeeks(S.weekPlan);
+    if(d.p1 && Array.isArray(d.p1.picked)){ d.p1.picked=d.p1.picked.filter(known); cleanWeeks(d.p1.weeks); }
     // 차시(1~2주차 / 3~4주차) — 예전 저장본은 1차시로 보고 주차 계획을 새로 만듦
     S.phase = (d.phase===2 && d.p1 && Array.isArray(d.p1.picked) && Array.isArray(d.p1.weeks)) ? 2 : 1;
     S.p1 = S.phase===2 ? d.p1 : null; S.dose.weeks = TOTAL_WEEKS;
@@ -4431,7 +4556,7 @@ $('#btnReautoWeeks').addEventListener('click',()=>{ S.weekPlan=autoWeekPlan(); S
 $('#btnBack3').addEventListener('click',()=>go(3));
 $('#btnBack5').addEventListener('click',()=>go(5));
 $('#btnReset').addEventListener('click',()=>{
-  S.built=null;S.age=null;S.a={};S.redraws=0;S.picked.clear();S.evalRes=null;S.goal='';S.trial={};S.dropped.clear();S.talk={changed:'',fixed:''};S.reviews=0;S.tools=new Set(['body','chair','band','pad']);['talkGoal','talkChanged','talkFixed'].forEach(i=>{const el=$('#'+i); if(el) el.value='';});
+  S.built=null;S.age=null;S.a={};S.redraws=0;S.picked.clear();S.evalRes=null;S.goal='';S.trial={};S.dropped.clear();S.talk={changed:'',fixed:''};S.reviews=0;S.tools=new Set(TOOLS.map(t=>t.id));['talkGoal','talkChanged','talkFixed'].forEach(i=>{const el=$('#'+i); if(el) el.value='';});
   S.weekPlan=null;S.weekPlanKey='';S.activeWeek=0;S.doseSet=false;S.roles=['','','',''];S.phase=1;S.p1=null;
   renderDraw(false);
   $('#btnDraw').hidden=false; $('#btnRedraw').hidden=true; $('#btnDrawNext').hidden=true;
