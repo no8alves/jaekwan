@@ -574,6 +574,8 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
 .real-ex-chips button[data-on="1"]{background:var(--signal);color:#fff;border-color:var(--signal)}
 .realcaption{position:absolute;left:10px;right:10px;top:10px;padding:8px 12px;border-radius:8px;background:rgba(18,48,42,.82);color:#F3F7F0;font-size:13px;line-height:1.45;pointer-events:none;display:none}
 .realcaption b{color:#8FF0C0}
+.realcaption .cap-now{display:block;font-size:11px;letter-spacing:.04em;opacity:.75}
+.realcaption .cap-nm{display:block;font-size:18px;line-height:1.3;margin:1px 0 3px}
 .realwrap.cov .realcaption{position:static;margin-top:8px;font-size:12.5px;padding:7px 10px;background:var(--band);color:var(--ink2)}   /* 4단계: 운동 미리보기 글은 3D 아래에 */
 .realwrap.cov .realcaption b{color:var(--signal)}
 .realwrap.cov{display:flex;flex-direction:column}
@@ -1555,9 +1557,9 @@ html.watch .fam-modal,html.watch .fam-shade{display:none !important}
           <div class="real-ex-h">🏃 우리 조 운동 동작 보기 <span>버튼을 누르면 그 운동을 하는 모습이 나오고, 그 운동이 쓰는 근육이 빛납니다.</span></div>
           <div class="real-ex-chips" id="realExChips"></div>
           <div class="prog-ctl">
-            <button class="btn" id="btnProgramPlay">🎬 우리 프로그램 주차별로 보기</button>
+            <button class="btn" id="btnProgramPlay" title="한 주에 한 장면씩, 그 주에 한 운동과 좋아진 정도를 보여 줍니다">🎬 우리 프로그램 주차별로 보기</button>
             <label class="spd">재생 속도
-              <select id="progSpeed"><option value="0.55">느리게</option><option value="1" selected>보통</option><option value="1.8">빠르게</option></select>
+              <select id="progSpeed"><option value="0.55">느리게</option><option value="1" selected>보통</option><option value="1.8">빠르게</option><option value="3">아주 빠르게</option></select>
             </label>
           </div>
         </div>
@@ -3623,33 +3625,29 @@ function initRecovery(){
       stopProg(); markChip(b.dataset.rex);
       const id=b.dataset.rex;
       RealBody.setExercise(id||null);
-      caption(id?`<b>${exMotionText(id)}</b><br>쓰는 근육(빛남): ${regText(id)}`:'');
+      caption(id?`<span class="cap-now">지금 보는 운동</span><b class="cap-nm">${exMotionText(id)}</b><br>쓰는 근육(빛남): ${regText(id)}`:'');
     };
   }
-  // ── 주차별로 보기: 주차 소개 → 그 주 운동만 차례로 → 다음 주 (회복은 그 주 운동량만큼) ──
+  // ── 주차별로 보기: 한 주에 한 장면씩, 그 주에 한 운동과 좋아진 정도만 (동작은 위 버튼으로 따로) ──
   const speed=()=>+($('#progSpeed')&&$('#progSpeed').value||1);
-  const INTRO=3200, PER=4200, REST=2600;
+  const WEEK=3000;
   const buildTimeline=()=>{
     const segs=[], wkRange=[]; let t=0;
     WR.weeks.forEach((wk,i)=>{ const st=t;
       const prev=i?WR.weeks[i-1].ids:[], added=wk.ids.filter(id=>!prev.includes(id)), removed=prev.filter(id=>!wk.ids.includes(id));
-      segs.push({type:'intro', w:wk.w, t0:t, dur:INTRO, added, removed}); t+=INTRO;
-      if(!wk.ids.length){ segs.push({type:'rest', w:wk.w, t0:t, dur:REST}); t+=REST; }
-      wk.ids.forEach(id=>{ segs.push({type:'ex', w:wk.w, id, t0:t, dur:PER}); t+=PER; });
+      segs.push({type:'week', w:wk.w, t0:t, dur:WEEK, added, removed}); t+=WEEK;
       wkRange.push([st,t]); });
     return {segs, wkRange, total:t};
   };
   const pAt=(TL,t)=>{ for(let i=0;i<TL.wkRange.length;i++){ const [a,b]=TL.wkRange[i]; if(t<b) return (i+(t-a)/(b-a))/W; } return 1; };
   const showSeg=seg=>{
     const wk=WR.weeks[seg.w-1];
-    if(seg.type==='intro'){ RealBody.setExercise(null); markChip('');
-      caption(`<b>📅 ${seg.w}주차 시작</b> · 주 ${wk.days}회 운동 · ${wk.ids.length}가지`
-        +(seg.added.length?`<br>➕ 새로 추가: ${seg.added.map(nameOf).join(', ')}`:'')
-        +(seg.removed.length?`<br>➖ 이번 주 빠짐: ${seg.removed.map(nameOf).join(', ')}`:'')
-        +(wk.goal?`<br>🎯 ${wk.goal}`:'')); }
-    else if(seg.type==='rest'){ RealBody.setExercise(null); markChip(''); caption(`<b>${seg.w}주차</b> · 배치된 운동이 없습니다 → 이번 주는 회복이 멈춥니다.`); }
-    else { RealBody.setExercise(seg.id); markChip(seg.id);
-      caption(`<b>${seg.w}주차</b> · ${exMotionText(seg.id)} <span class="cap-sub">주 ${wk.cnt[seg.id]}회</span><br>쓰는 근육(빛남): ${regText(seg.id)}`); }
+    RealBody.setExercise(null); markChip('');
+    const now=probRegs.map(r=>`${REGION_KO[r]} ${WR.bad.has(r)?'금기':Math.round(WR.cum[r][seg.w]*100)+'%'}`).join(' · ');
+    caption(`<b>📅 ${seg.w}주차</b> · `+(wk.ids.length?`주 ${wk.days}회 · ${wk.ids.map(nameOf).join(', ')}`:'배치된 운동이 없습니다 → 이번 주는 멈춥니다')
+      +(seg.w>1&&seg.added.length?`<br>➕ 추가: ${seg.added.map(nameOf).join(', ')}`:'')
+      +(seg.removed.length?`<br>➖ 빠짐: ${seg.removed.map(nameOf).join(', ')}`:'')
+      +`<br>이번 주가 끝나면 → <b>${now}</b>`);
   };
   if(progBtn) progBtn.onclick=()=>{
     if(prog){ prog.playing=!prog.playing; progBtn.textContent=prog.playing?'⏸ 일시정지':'▶ 계속 보기'; prog.last=performance.now(); return; }
@@ -3684,11 +3682,11 @@ function initRecovery(){
     if(t==='real'&&window.RealBody) RealBody.resizeNow();
     if(t==='paint'&&window.Body3D&&Body3D.resizeNow){ moveBodyCanvas(7); Body3D.resizeNow(); }
   });
-  // 색 변화만 빠르게: 한 주에 3초씩
+  // 색 변화만 빠르게: 한 주에 1.5초씩
   playBtn.onclick = ()=>{
     stopProg(); RealBody.setExercise(null); caption('');
     if(anim){ cancelAnimationFrame(anim); anim=null; }
-    const dur=3000*W/speed(), t0=performance.now();
+    const dur=1500*W/speed(), t0=performance.now();
     playBtn.disabled=true; playBtn.textContent='재생 중…';
     const stepFn=(now)=>{
       const t=Math.min(1,(now-t0)/dur);
@@ -4813,7 +4811,26 @@ const RealBody = (()=>{
     if(!drag&&auto) rot.y+=0.004;
     avatar.rotation.set(rot.x+(mode==='recovery'?0.05*(1-recProgress):0), rot.y, 0); // 회복 모드: 치료 전 살짝 수그림
     animate(performance.now());
+    fitCam();
     renderer.render(scene,cam); requestAnimationFrame(loop);
+  }
+  // 누운 동작처럼 몸이 낮고 길게 놓이면 화면 밖으로 잘리지 않게, 카메라가 몸 가운데를 따라가며 필요한 만큼 물러남
+  const FIT_BONES=['head','handL','handR','footL','footR','pelvis','shinL','shinR'];
+  const camNow={x:0,y:0.93,z:0,d:4.1,up:0.005};
+  function fitCam(){
+    if(!V1||!bones.head) return;
+    avatar.updateMatrixWorld(true);
+    let ax=1e9,ay=1e9,az=1e9,bx=-1e9,by=-1e9,bz=-1e9;
+    FIT_BONES.forEach(n=>{ bones[n].getWorldPosition(V1);
+      ax=Math.min(ax,V1.x); ay=Math.min(ay,V1.y); az=Math.min(az,V1.z); bx=Math.max(bx,V1.x); by=Math.max(by,V1.y); bz=Math.max(bz,V1.z); });
+    const low=curMotion!=='idle'&&(by-ay)<1.0;
+    let g={x:0,y:0.93,z:0,d:4.1,up:0.005};
+    if(low){
+      const R=Math.hypot(bx-ax,by-ay,bz-az)/2+0.32, v=cam.fov*Math.PI/360, half=Math.min(v,Math.atan(Math.tan(v)*cam.aspect));
+      g={x:(ax+bx)/2, y:(ay+by)/2, z:(az+bz)/2, d:Math.max(4.1,R/Math.sin(half)), up:0.26};   // 살짝 위에서 내려다봄
+    }
+    for(const k in g) camNow[k]+=(g[k]-camNow[k])*0.08;
+    cam.position.set(camNow.x, camNow.y+camNow.up*camNow.d, camNow.z+camNow.d); cam.lookAt(camNow.x,camNow.y,camNow.z);
   }
   function paint(r,hex){ (regionMeshes[r]||[]).forEach(o=>o.material.color.setHex(hex)); }
   // 4단계 부위 커버리지: 부위 색칠 3D와 같은 규칙을 근육 단위로
