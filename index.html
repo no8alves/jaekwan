@@ -589,6 +589,64 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
 .sicktag i u{text-decoration:none;font-size:10.5px;font-weight:800;border-radius:999px;padding:1px 7px;background:rgba(255,255,255,.7)}
 .sicktag i[data-st="good"]{background:#2E9E77;color:#fff} .sicktag i[data-st="good"] u{background:rgba(255,255,255,.24)}
 .sicktag i[data-st="bad"]{background:#C0392B;color:#fff} .sicktag i[data-st="bad"] u{background:rgba(255,255,255,.24)}
+.sicktag i[data-st="mid"]{background:#E0A93B;color:#3D2600}
+.sicktag i[data-st="red"]{background:#D14B3C;color:#fff} .sicktag i[data-st="red"] u{background:rgba(255,255,255,.24)}
+/* 2차시 4단계: 2주 뒤 모습 / 4주 뒤 예상 */
+html:not(.ph2) #s4View,html:not(.ph2) #p2Box{display:none}
+html.ph2 .s4side .covhelp,html.ph2 .s4side .covgoal,html.ph2 .s4side #bodyLegend,html.ph2 .s4main details.fold{display:none}
+.s4view{margin-bottom:8px}
+.s4v-btns{display:flex;gap:6px;margin-bottom:6px}
+.s4v-btns button{flex:1;border:1px solid var(--rule);background:#fff;border-radius:8px;padding:8px 6px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--ink2)}
+.s4v-btns button[data-on="1"]{background:var(--ink);border-color:var(--ink);color:#F3F7F0}
+.s4v-sum{font-size:12.5px;line-height:1.5;color:var(--ink2)}
+.s4v-key{display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:4px;font-size:11.5px;color:var(--ink3)}
+.s4v-key i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+.s4v-warn{margin-top:6px;padding:7px 9px;border-radius:8px;background:#FBEAE7;color:#7A2418;font-size:12.5px}
+.s4v-warn ul{margin:4px 0 0;padding-left:18px}
+.p2dose{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:12px 0;padding:10px 12px;border-radius:8px;background:var(--band);font-size:13.5px}
+.p2dose .p2d-h{flex-basis:100%;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
+.p2dose .p2d-h span{font-size:12px;color:var(--ink3)}
+.p2dose select{font:inherit;padding:4px 6px;border-radius:6px;border:1px solid var(--rule);background:#fff}
+/* 발표 모드 */
+html.presenting body{overflow:hidden}
+.pres{position:fixed;inset:0;z-index:300;background:var(--paper);display:flex;flex-direction:column;padding:14px 18px;box-sizing:border-box}
+.pres[hidden]{display:none}
+.pres-top{display:flex;align-items:center;gap:14px;margin-bottom:10px;font-size:14px;color:var(--ink2)}
+.pres-top b{color:var(--ink);font-size:16px}
+.pres-dots{display:flex;gap:6px;margin-left:auto}
+.pres-dots i{width:34px;height:5px;border-radius:3px;background:var(--rule)}
+.pres-dots i.on{background:var(--signal)}
+.pres-grid{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:16px}
+.pres-stage{min-height:0;position:relative}
+.pres-stage .realcanvas{height:calc(100vh - 150px)}
+.pres-stage .realcaption{font-size:16px;top:12px;left:12px;right:12px}
+.pres-stage .realcaption .cap-nm{font-size:24px}
+.pres-side{overflow:auto;background:var(--card);border:1px solid var(--rule);border-radius:12px;padding:20px 24px;font-size:18px;line-height:1.55}
+.pr-k{margin:14px 0 6px;font-size:14px;font-weight:700;color:var(--ink3)}
+.pr-k:first-child{margin-top:0}
+.pr-h{margin:0 0 4px;font-size:28px;line-height:1.3}
+.pr-dx{margin:0 0 12px;color:var(--ink2)}
+.pr-kv{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0}
+.pr-kv div{flex:1;min-width:110px;background:var(--band);border-radius:8px;padding:8px 12px}
+.pr-kv b{display:block;font-size:22px}
+.pr-kv span{font-size:13px;color:var(--ink3)}
+.pr-say{border-left:5px solid var(--signal);background:var(--band);padding:10px 14px;font-size:21px;line-height:1.5}
+.pr-say.empty{font-size:15px;color:var(--ink3);border-left-color:var(--rule)}
+.pr-chips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0}
+.pr-chips button{border:1px solid var(--rule);background:#fff;border-radius:10px;padding:8px 12px;font-size:17px;cursor:pointer;font-family:inherit;text-align:left}
+.pr-chips button small{display:block;font-size:12px;color:var(--ink3)}
+.pr-chips button[data-on="1"]{background:var(--ink);color:#F3F7F0;border-color:var(--ink)}
+.pr-chips button[data-on="1"] small{color:#C9D6DC}
+.pr-small{font-size:14px;color:var(--ink2);margin:6px 0}
+.pr-tb{border-collapse:collapse;width:100%;font-size:16px;margin:6px 0 10px}
+.pr-tb th,.pr-tb td{padding:6px 8px;border-bottom:1px solid var(--rule);text-align:center}
+.pr-tb td:first-child,.pr-tb th:first-child{text-align:left}
+.pr-row{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--rule)}
+.pr-q{margin:14px 0 0;padding:10px 14px;border-radius:8px;background:#FFF4DC;color:#5C3D00;font-size:17px}
+.pres-nav{display:flex;justify-content:space-between;margin-top:10px}
+.pres-nav .btn{min-width:120px}
+@media (max-width:900px){.pres-grid{grid-template-columns:1fr;overflow:auto}.pres-stage .realcanvas{height:46vh}}
+@media print{body.print-card .panel[data-step="7"]>*:not(#presentBox),body.print-card #presentBox>*:not(#rxCard){display:none !important}}
 .lede .steps{display:flex;flex-wrap:wrap;gap:6px 8px;margin-bottom:8px}
 .lede .steps span{display:inline-flex;align-items:center;gap:7px;font-size:14px;font-weight:600;color:var(--ink);background:var(--card);border:1px solid var(--rule);border-radius:999px;padding:5px 14px 5px 6px}
 .lede .steps span b{font-size:12px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--ink);color:#fff}
@@ -667,6 +725,23 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--focus);outline-o
 .tr-card[data-dec="now"]{border-left-color:#2E9E77}
 .tr-card[data-dec="later"]{border-left-color:#E0A93B}
 .tr-card[data-dec="drop"]{border-left-color:#C0392B;opacity:.78}
+.tr-sec{margin:18px 0 8px;font-size:15px}
+.tr-sec span{font-size:12.5px;font-weight:500;color:var(--ink3);margin-left:6px}
+.tr-tag{font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--band);color:var(--ink2);margin-left:6px}
+.tr-before{font-size:13px;color:var(--ink2);margin:6px 0 8px}
+.tr-before b{margin-right:6px;color:var(--ink)}
+.tr-same{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:8px;border:1px solid var(--rule);background:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px}
+.tr-same input{width:18px;height:18px}
+.tr-carry[data-same="1"] .tr-same{background:#ECF7F1;border-color:#2E9E77;color:#1F6E52}
+.tr-carry[data-same="1"] .tr-redo{display:none}
+.tr-alt{margin-top:8px;padding:9px 12px;border-radius:8px;font-size:13.5px;display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px}
+.tr-alt:empty{display:none}
+.tr-alt[data-t="up"]{background:#ECF7F1;color:#1F6E52}
+.tr-alt[data-t="down"]{background:#FFF4DC;color:#5C3D00}
+.tr-alt b{margin-right:2px}
+.tr-alt button{border:1px solid currentColor;background:#fff;color:inherit;border-radius:16px;padding:4px 11px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
+.tr-alt button[disabled]{opacity:.6;cursor:default}
+.tr-from{font-size:12px;color:var(--ink3);margin:4px 0 0}
 .tr-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:14.5px}
 .tr-ic{font-size:19px}
 .tr-tool{font-size:11px;background:var(--band);border-radius:12px;padding:1px 8px;color:var(--ink2)}
@@ -880,6 +955,8 @@ html.watch .picktray{position:static}
 .mid-bar{height:8px;border-radius:999px;background:#fff;overflow:hidden;border:1px solid var(--rule)}
 .mid-bar i{display:block;height:100%;border-radius:999px;background:var(--signal)}
 .mid-pct{font-family:var(--mono);font-size:12.5px;font-weight:700;text-align:right}
+.s4main .mid-row{grid-template-columns:minmax(64px,auto) minmax(40px,1fr) 40px auto;gap:8px}
+.s4main .mid-do{grid-column:1/-1;font-size:12.5px}
 .mid-st{font-size:12px;font-weight:800;padding:2px 9px;border-radius:999px;text-align:center;background:#E3F3EC;color:var(--signal)}
 .mid-do{color:var(--ink2);font-size:13px}
 .mid-row[data-st="some"]{background:#FFF7E6} .mid-row[data-st="some"] .mid-st{background:#FBE7BD;color:#8A5200} .mid-row[data-st="some"] .mid-bar i{background:#E0A93B}
@@ -1385,13 +1462,15 @@ html.watch .fam-modal,html.watch .fam-shade{display:none !important}
   <h2 class="sec" id="s4Title">운동 후보 고르기 (1차 초안)</h2>
   <p class="lede" id="s4Lede">학교에 있는 소도구를 고르고, 대상자에게 맞을 것 같은 운동을 후보로 담으세요. <b>아직 확정이 아닙니다.</b> 다음 단계에서 조원이 직접 해보고 정합니다. 빗금 처리된 항목은 현재 상태에서 금기입니다.</p>
 
-  <div id="midReport" hidden></div>
-
   <div class="s4grid">
     <aside class="s4side">
       <div class="chart">
-        <h3>운동이 필요한 부위 <span class="hint">3D</span></h3>
+        <h3><span id="s4SideTitle">운동이 필요한 부위</span> <span class="hint">3D</span></h3>
         <div class="body">
+          <div class="s4view" id="s4View">
+            <div class="s4v-btns"><button type="button" data-s4v="mid" data-on="1">2주 뒤 모습</button><button type="button" data-s4v="end">4주 뒤 예상</button></div>
+            <div class="s4v-sum" id="s4ViewSum"></div>
+          </div>
           <div id="covRealSlot"></div>
           <div id="coverCanvasHost" style="display:none"><canvas id="bodyCanvas"></canvas></div>
           <div class="real-views">
@@ -1419,6 +1498,7 @@ html.watch .fam-modal,html.watch .fam-shade{display:none !important}
     </aside>
 
     <div class="s4main">
+      <div id="midReport" hidden></div>
       <div class="picktray">
         <div id="pickTray"></div>
         <div class="exfilter" id="exFilter"></div>
@@ -1434,6 +1514,15 @@ html.watch .fam-modal,html.watch .fam-shade{display:none !important}
         <div class="body">
           <p class="ex-guide">운동 묶음을 누르면 그 안의 운동을 고르는 창이 뜹니다. 한 묶음에서 여러 개를 담을 수 있습니다.</p>
           <div id="exList"></div>
+        </div>
+      </div>
+
+      <div class="chart" id="p2Box">
+        <h3>3~4주차 운동량 <span class="hint">2차시</span></h3>
+        <div class="body">
+          <p class="ex-guide">운동량을 바꾸면 왼쪽 「4주 뒤 예상」이 바로 바뀝니다. 새로 넣은 운동은 다음 단계에서 직접 해 보고 기록합니다.</p>
+          <div class="p2dose" id="p2Dose"></div>
+          <button type="button" class="btn ghost small" id="btnP2Detail">요일별 계획까지 자세히 고치기</button>
         </div>
       </div>
 
@@ -1471,7 +1560,7 @@ html.watch .fam-modal,html.watch .fam-shade{display:none !important}
 <!-- ===== STEP 5 : 스테이션 체험 기록 ===== -->
 <section class="panel" data-step="5">
   <p class="eyebrow">Step 05 — Try it</p>
-  <h2 class="sec">직접 해보고 기록하기</h2>
+  <h2 class="sec" id="s5Title">직접 해보고 기록하기</h2>
   <p class="lede" id="s5Lede">후보 운동을 조원이 직접 해봅니다. 운동마다 역할을 돌아가며 맡으세요. 결과를 보고 각 운동을 <b>언제 넣을지</b> 정합니다.</p>
 
   <div class="chart">
@@ -1603,21 +1692,10 @@ html.watch .fam-modal,html.watch .fam-shade{display:none !important}
     </div>
   </div>
 
-  <div class="act">
-    <button class="btn" id="btnToCard">처방 카드 · 발표 준비 →</button>
-    <button class="btn ghost small" id="btnBack6">주차별 계획 수정</button>
-    <button class="btn ghost small" id="btnBack4c">운동 후보 수정</button>
-  </div>
-</section>
-
-<!-- ===== STEP 8 : 처방카드 · 발표 ===== -->
-<section class="panel" data-step="8">
-  <p class="eyebrow">Step 08 — Present</p>
-  <h2 class="sec">처방 카드 · 발표 준비</h2>
-  <p class="lede">발표는 조당 2분, 아래 세 문장으로 합니다. 적은 내용은 처방 카드에 자동으로 들어가고, 인쇄하면 카드만 A4로 나옵니다.</p>
-
+  <div id="presentBox" hidden>
   <div class="chart">
     <h3>발표 준비 <span class="hint">3문장 · 2분</span></h3>
+    <p class="ex-guide" style="margin:0 18px">발표는 조당 2분, 아래 세 문장으로 합니다. 다 쓰면 <b>🎤 발표 시작</b>을 누르세요. 적은 내용은 아래 처방 카드에도 들어갑니다.</p>
     <div class="body talk">
       <label class="flab">① 우리 대상자의 목표 (한 문장)</label>
       <textarea id="talkGoal" rows="2" placeholder="예) 4주 뒤 손잡이를 잡고 계단을 혼자 안전하게 내려갈 수 있다."></textarea>
@@ -1630,15 +1708,27 @@ html.watch .fam-modal,html.watch .fam-shade{display:none !important}
 
   <div class="rx" id="rxCard"></div>
   <div class="act">
-    <button class="btn" onclick="window.print()">인쇄 · PDF 저장</button>
-    <button class="btn ghost small" id="btnBack7">검토 · 3D로</button>
+    <button class="btn" id="btnPresent">🎤 발표 시작</button>
+    <button class="btn ghost small" id="btnPrint">처방 카드 인쇄 · PDF 저장</button>
     <button class="btn ghost small" id="btnReset">새 대상자로 다시</button>
+  </div>
+  </div>
+
+  <div class="act">
+    <button class="btn ghost small" id="btnBack6">주차별 계획 수정</button>
+    <button class="btn ghost small" id="btnBack4c">운동 후보 수정</button>
   </div>
 </section>
 
 <p class="foot">
   교육용 시뮬레이션입니다. 판정 규칙은 ACSM 운동검사·처방 지침과 AACVPR 심장재활 기준을 교육 목적으로 단순화한 것으로, 실제 임상 판단이나 처방을 대신하지 않습니다.
 </p>
+</div>
+
+<div class="pres" id="pres" hidden role="dialog" aria-modal="true" aria-label="발표 모드">
+  <div class="pres-top"><b id="presTeam"></b><span id="presCase"></span><div class="pres-dots" id="presDots"></div><button type="button" class="btn ghost small" id="presClose">✕ 발표 끝내기</button></div>
+  <div class="pres-grid"><div class="pres-stage" id="presStage"></div><div class="pres-side" id="presSide"></div></div>
+  <div class="pres-nav"><button type="button" class="btn ghost" id="presPrev">← 이전</button><button type="button" class="btn" id="presNext">다음 →</button></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
@@ -2106,7 +2196,7 @@ const ageObj = ()=>AGES.find(a=>a.id===S.age);
 const caseObj = ()=>S.built;
 
 const STEPS = [
- {n:'01',t:'대상자 뽑기'},{n:'02',t:'대상자 확인'},{n:'03',t:'사정 결과'},{n:'04',t:'운동 후보'},{n:'05',t:'체험 기록'},{n:'06',t:'주차별 계획'},{n:'07',t:'검토·3D'},{n:'08',t:'처방카드'}
+ {n:'01',t:'대상자 뽑기'},{n:'02',t:'대상자 확인'},{n:'03',t:'사정 결과'},{n:'04',t:'운동 후보'},{n:'05',t:'체험 기록'},{n:'06',t:'주차별 계획'},{n:'07',t:'검토·발표'}
 ];
 
 /* ============================================================
@@ -2125,11 +2215,11 @@ function reachable(n){
   if(n===2) return !!S.built;
   if(n===3) return !!S.built;
   if(n===4) return !!S.evalRes;
-  if(n===8 && S.phase!==2) return false;                 // 처방 카드·발표는 2차시(3~4주차 처방)까지 마친 뒤
   if(n>=5) return !!S.evalRes && (S.picked.size>0 || S.dropped.size>0);
   return false;
 }
 function go(n){
+  if(n===8) n=7;                                          // 예전 저장본의 8단계(처방 카드)는 7단계에 합쳐짐
   if(!reachable(n)) return;
   S.step=n;
   $$('.panel').forEach(p=>p.dataset.on = (+p.dataset.step===n)?'1':'0');
@@ -2146,8 +2236,7 @@ function go(n){
   if(n===4){ moveBodyCanvas(4); moveRealHost(4); renderProgram(); }
   if(n===5) renderTrial();
   if(n===6) renderSchedule();
-  if(n===7){ moveBodyCanvas(7); moveRealHost(7); initRecovery(); renderAiCount(); }
-  if(n===8){ renderTalk(); renderCard(); }
+  if(n===7){ moveBodyCanvas(7); moveRealHost(7); initRecovery(); renderAiCount(); if(S.phase===2&&S.p1){ renderTalk(); renderCard(); } }
   window.scrollTo({top:0,behavior:'smooth'});
 }
 // 해부 모델(하나의 3D 화면)을 4단계 커버리지 ↔ 7단계 회복 자리로 옮김
@@ -2159,7 +2248,43 @@ function moveRealHost(step){
   const ch=document.getElementById('coverCanvasHost'); if(ch) ch.style.display=(window.RealBody&&RealBody.isFailed())?'':'none';
   host.classList.toggle('cov', step===4);            // 4단계: 3D 위에는 아픈 부위, 운동 미리보기 글은 3D 아래로
   if(step===4) sickTag(); else { const tg=document.getElementById('sickTag'); if(tg) tg.style.display='none'; }
-  if(window.RealBody){ RealBody.ensure(); RealBody.setMode(step===4?'coverage':'recovery'); RealBody.resizeNow(); }
+  if(window.RealBody){ RealBody.ensure(); RealBody.setMode(step===4&&!(S.phase===2&&S.p1)?'coverage':'recovery'); RealBody.resizeNow(); if(step===4) paintS4(); }
+}
+// 4단계 3D 색칠: 1차시 = 부위 커버리지, 2차시 = 2주 뒤 모습 / 4주 뒤 예상 (7단계 회복 시뮬레이션과 같은 규칙)
+let s4View='mid';
+function paintS4(){
+  if(!window.RealBody) return;
+  if(!(S.phase===2&&S.p1)){ RealBody.applyCoverage(); return; }
+  const WR=weeklyRecovery(), k=s4View==='mid'?2:WR.W, map={};
+  BODY_REGIONS.forEach(r=>map[r]=WR.cum[r][k]);
+  RealBody.applyRecovery(k/WR.W, map);
+  sickTag(); renderS4View(WR);
+}
+function renderS4View(WR){
+  const mid=s4View==='mid';
+  $$('#s4View [data-s4v]').forEach(b=>b.dataset.on=(b.dataset.s4v===s4View)?'1':'0');
+  const el=$('#s4ViewSum'); if(!el) return;
+  const late=[...WR.late.why,...WR.late.tired];
+  el.innerHTML=(mid
+      ? '1~2주차 처방을 2주 동안 한 결과입니다. <b>빨강·주황으로 남은 부위</b>에 3~4주차 운동을 더하세요.'
+      : '지금 고친 계획대로 <b>4주를 마쳤을 때</b>의 예상입니다. 운동을 더하거나 빼면 바로 바뀝니다.')
+    +`<div class="s4v-key"><span><i style="background:#D14B3C"></i>아픔·금기</span><span><i style="background:#E0A93B"></i>좋아지는 중</span><span><i style="background:#2FCE86"></i>4주 목표 달성</span><span><i style="background:#3B82C4"></i>추가로 운동하는 근육</span></div>`
+    +(!mid&&late.length?`<div class="s4v-warn"><b>⚠ 3~4주차 계획에서 고칠 점</b><ul>${late.map(t=>`<li>${t}</li>`).join('')}</ul></div>`:'');
+}
+document.addEventListener('click',e=>{ const b=e.target.closest('[data-s4v]'); if(!b) return; s4View=b.dataset.s4v; paintS4(); });
+// 2차시 4단계: 3~4주차 운동량 (새 운동 체험은 5단계에서)
+function p2Auto(){ const b=S.dose, cap=S.evalRes&&S.evalRes.risk==='caution'?13:15;
+  return {freq:Math.min(7,b.freq+1), rpe:[Math.min(cap,Math.round(b.rpe+2)), Math.min(cap,b.rpe+3)]}; }
+function renderP2(){
+  if(!(S.phase===2&&S.p1) || !$('#p2Dose')) return;
+  S.p2dose=S.p2dose||{};
+  const auto=p2Auto(), wk=S.p1.weeks[S.p1.weeks.length-1]||{days:[]};
+  const p1f=wk.days.filter(d=>!d.rest&&d.ex.length).length, p1r=Math.max(0,...wk.days.flatMap(d=>d.rest?[]:d.ex.map(e=>+e.rpe||0)));
+  const opt=(k,vals,fmt,autoTxt)=>`<select data-p2d="${k}"><option value="">자동 (${autoTxt})</option>${vals.map(v=>`<option value="${v}" ${S.p2dose[k]==v?'selected':''}>${fmt(v)}</option>`).join('')}</select>`;
+  $('#p2Dose').innerHTML=`<div class="p2d-h"><b>3~4주차 운동량</b><span>2주차에는 주 ${p1f}회 · RPE ${p1r||'-'}로 했습니다.</span></div>
+    <label>횟수 ${opt('freq',[2,3,4,5,6],v=>`주 ${v}회`,`주 ${auto.freq}회`)}</label>
+    <label>강도 ${opt('rpe',[9,11,12,13,14,15,16,17],v=>`RPE ${v}`,`RPE ${auto.rpe[0]}~${auto.rpe[1]}`)}</label>`;
+  $('#p2Dose').onchange=e=>{ const el=e.target.closest('[data-p2d]'); if(!el) return; S.p2dose[el.dataset.p2d]=el.value?+el.value:''; paintS4(); };
 }
 // 3D 위쪽(모델 밖)에 운동이 필요한 부위를 글로 표시 (부위마다 지금 상태: 운동 없음 / 처방함 / 금기)
 function sickTag(){
@@ -2169,6 +2294,15 @@ function sickTag(){
   if(!S.built || !S.evalRes || S.step!==4){ el.style.display='none'; return; }
   const GROUPS=[['다리',['legL','legR']],['엉덩이·골반',['hipL','hipR']],['몸통·코어',['core']],['등·척추',['back']],['팔·어깨',['armL','armR']],['가슴·심폐',['chest']],['머리·인지',['head']]];
   const sp=regionSplit(), pr=programRegions();
+  if(S.phase===2&&S.p1){
+    const WR=weeklyRecovery(), mid=s4View==='mid', k=mid?2:WR.W, h=mid?WR.harm:WR.late;
+    const tags=GROUPS.map(([nm,regs])=>{ const mine=regs.filter(r=>sp.main.has(r)); if(!mine.length) return '';
+      const v=Math.min(...mine.map(r=>WR.cum[r][k])), pct=Math.round(v*100)+'%';
+      const [st,txt] = mine.some(r=>WR.bad.has(r)) ? ['bad','금기 운동'] : mine.some(r=>h.regs.has(r)) ? ['bad','무리해서 악화'] : v>=0.9 ? ['good','목표 달성'] : v>0 ? ['mid',pct] : ['red','변화 없음'];
+      return `<i data-st="${st}">${nm}<u>${txt}</u></i>`; }).join('');
+    el.innerHTML=`<b>${mid?'2주 뒤':'4주 뒤 예상'} · 꼭 필요한 부위</b>${tags||'<i data-st="mid">전신</i>'}`;
+    el.style.display='flex'; return;
+  }
   const main=GROUPS.map(([nm,regs])=>{ const mine=regs.filter(r=>sp.main.has(r)); if(!mine.length) return '';
     const st = mine.some(r=>pr.bad.has(r)) ? 'bad' : mine.every(r=>pr.hit.has(r)) ? 'good' : 'gap';
     return `<i data-st="${st}">${nm}<u>${st==='bad'?'금기 운동':st==='good'?'처방함':'운동 없음'}</u></i>`; }).join('');
@@ -2728,8 +2862,8 @@ function planHarm(weeks, trial, risk, carried){
   const nm=id=>{ const x=EX_LIB.find(e=>e.id===id); return x?x.nm.split(' (')[0]:id; };
   weeks=weeks||[]; carried=carried||[];
   const first=weeks.length?Math.min(...weeks.map(w=>w.w)):1, early=first<=2;      // early = 1~2주차 구간
-  const w1=new Set(), all=new Set(), firstWk={};
-  weeks.forEach(wk=>wk.days.forEach(d=>{ if(d.rest) return; d.ex.forEach(e=>{ all.add(e.id); if(firstWk[e.id]==null||wk.w<firstWk[e.id]) firstWk[e.id]=wk.w; if(wk.w===first && !carried.includes(e.id)) w1.add(e.id); }); }));
+  const w1=new Set(), again=new Set(), all=new Set(), firstWk={};
+  weeks.forEach(wk=>wk.days.forEach(d=>{ if(d.rest) return; d.ex.forEach(e=>{ all.add(e.id); if(firstWk[e.id]==null||wk.w<firstWk[e.id]) firstWk[e.id]=wk.w; if(wk.w===first) (carried.includes(e.id)?again:w1).add(e.id); }); }));
   const regs=new Set(), ids=new Set(), why=[];
   const mark=(id,msg)=>{ if(ids.has(id)) return; ids.add(id); regOf(id).forEach(r=>regs.add(r)); why.push(msg); };
   // ⓪ 대상자의 주의사항과 맞지 않는 동작 (가장 중요한 판정)
@@ -2742,6 +2876,10 @@ function planHarm(weeks, trial, risk, carried){
     if(flags.length) mark(id, `「${nm(id)}」을(를) 체험에서 <b>${flags.join(' · ')}</b>(으)로 기록했는데 ${first}주차부터 넣었습니다.`);
     else if(early && (EX_PHASE[id]||2)===3) mark(id, `난이도 <b>어려움</b>인 「${nm(id)}」을(를) 1주차부터 넣었습니다.`);
   });
+  // ①' 1~2주차부터 하던 운동을 2주 뒤 다시 해 보니 무리였는데 그대로 계속
+  again.forEach(id=>{ const t=(trial||{})[id]||{}, r=t.re||{}; if(t.same) return;
+    const flags=[]; if(r.can==='x') flags.push('✕ 어려움'); if(+r.rpe>=15) flags.push('매우 힘듦'); if(r.worry) flags.push('불안함');
+    if(flags.length) mark(id, `「${nm(id)}」을(를) 2주 뒤 다시 해 보니 <b>${flags.join(' · ')}</b>(으)로 기록했는데 ${first}주차에도 그대로 계속했습니다.`); });
   const tired=[];
   if(weeks.some(wk=>wk.days.filter(d=>!d.rest&&d.ex.length).length>=6)) tired.push('쉬는 날이 하루 이하인 주가 있었습니다(주 6일 이상 운동).');
   const maxRpe=Math.max(0,...weeks.flatMap(wk=>wk.days.flatMap(d=>d.rest?[]:d.ex.map(e=>+e.rpe||0))));
@@ -2824,7 +2962,7 @@ function startPhase2(){
   if(!S.weekPlan || S.weekPlanKey!==planKey()){ S.weekPlan=autoWeekPlan(); S.weekPlanKey=planKey(); }
   const copy=o=>JSON.parse(JSON.stringify(o));
   S.p1={picked:[...S.picked], trial:copy(S.trial), weeks:copy(S.weekPlan.slice(0,2)), risk:S.evalRes?S.evalRes.risk:''};
-  S.phase=2; S.dropped.clear();
+  S.phase=2; S.dropped.clear(); S.p2dose={}; s4View='mid';
   Object.keys(S.trial).forEach(id=>{ if(!S.picked.has(id)) delete S.trial[id]; });   // 1차시에 뺀 운동을 다시 넣으면 새로 체험
   S.a=assessNow(); evaluate();
   S.weekPlan=null; S.weekPlanKey=''; S.activeWeek=2;
@@ -2850,22 +2988,36 @@ function applyPhaseUI(){
   const bar=$('#phaseBar');
   if(bar){ bar.hidden=!S.built || S.step<4;      // 차시 표시는 처방을 시작하는 4단계부터 (앞 단계는 한 화면에 들어오게)
     bar.innerHTML=`<span class="pb" data-s="${ph2?'done':'on'}"><b>1차시</b>1~2주차 처방${ph2?' ✓':''}</span><span class="pb-arrow">→</span><span class="pb" data-s="${ph2?'on':'lock'}"><b>2차시</b>2주 경과 확인 · 3~4주차 처방${ph2?'':' 🔒'}</span>`; }
-  set('s4Title', ph2?'3~4주차 운동 조정하기 — 더하거나 빼기':'1~2주차 운동 고르기');
+  document.documentElement.classList.toggle('ph2', ph2);
+  // 2차시는 「2주 경과 보고 고치기 → 검토·발표」 두 화면: 체험·주차 계획 단계는 4단계 안에서 함
+  $$('#rail button').forEach(b=>{ const i=+b.dataset.go, t=b.querySelector('.t'), n=b.querySelector('.n');
+    b.hidden = ph2 && i===6;
+    if(i===4&&t) t.textContent=ph2?'2주 경과·고치기':'운동 후보';
+    if(i===5&&t) t.textContent=ph2?'3~4주차 체험':'체험 기록';
+    if(i===7&&n) n.textContent=ph2?'06':'07'; });
+  const tt=$('#btnToTrial'); if(tt) tt.textContent=ph2?'운동 직접 해 보러 가기 →':'직접 체험하러 가기 →';
+  const ts=$('#btnToSchedule'); if(ts) ts.textContent=ph2?'검토 · 발표로 →':'체험 결과로 주차별 계획 세우기 →';
+  const bk=$('#btnBack4'); if(bk) bk.textContent=ph2?'2주 경과 화면으로':'운동 후보 수정';
+  const b5=$('#btnBack5'); if(b5) b5.textContent=ph2?'2주 경과 화면으로':'체험 기록으로';
+  const b4=$('#btnBack4c'); if(b4) b4.textContent=ph2?'2주 경과 화면에서 고치기':'운동 후보 수정';
+  set('s4Title', ph2?'2주 경과 보고 3~4주차 고치기':'1~2주차 운동 고르기');
+  set('s4SideTitle', ph2?'2주 경과와 4주 예상':'운동이 필요한 부위');
   set('s4Lede', ph2
-    ? '<span class="steps"><span><b>1</b>아래 2주 경과 읽기</span><span><b>2</b>변화 없는 부위에 운동 더하기</span><span><b>3</b>맞지 않았던 운동 빼기</span></span>1~2주차에 하던 운동은 이미 담겨 있습니다. 카드를 누르면 빠집니다.'
+    ? '<span class="steps"><span><b>1</b>왼쪽 3D로 2주 뒤 모습 보기</span><span><b>2</b>남은 부위에 운동 더하기 · 맞지 않은 운동 빼기</span><span><b>3</b>새 운동은 아래에서 직접 해 보기</span></span>1~2주차에 하던 운동은 이미 담겨 있습니다. 「4주 뒤 예상」을 눌러 고친 결과를 확인하세요.'
     : '<span class="steps"><span><b>1</b>왼쪽에서 꼭 필요한 부위 확인</span><span><b>2</b>부위 버튼 누르기</span><span><b>3</b>처음 2주 동안 할 운동 담기</span></span>노랑이 초록으로 바뀌면 다음 부위로 넘어가세요. 아직 확정이 아닙니다. 다음 단계에서 직접 해 보고 정합니다.');
+  set('s5Title', ph2?'3~4주차 운동 직접 해 보기':'직접 해보고 기록하기');
   set('s5Lede', ph2
-    ? '3~4주차에 <b>새로 넣은 운동</b>만 조원이 직접 해봅니다. 결과를 보고 <b>3주차부터 할지, 4주차부터 할지</b> 정합니다.'
+    ? '<b>기존 진행 운동(1~2주차)</b>은 2주 뒤 몸으로 다시 해 보고, 1차시 때와 같으면 체크만 하고 넘어갑니다. <b>추가된 운동(3~4주차)</b>은 처음 해 보고 3주차부터 할지, 4주차부터 할지, 뺄지 정합니다. 기록에 따라 4주 결과가 달라집니다.'
     : '후보 운동을 조원이 직접 해봅니다. 운동마다 역할을 돌아가며 맡으세요. 결과를 보고 각 운동을 <b>1주차부터 할지, 2주차부터 할지</b> 정합니다.');
   set('s6Title', ph2?'3~4주차 재활 계획':'1~2주차 재활 계획');
   set('s6Lede', ph2
     ? '<b>3주·4주</b> 계획을 세웁니다. 1~2주차는 1차시에 확정한 처방이라 보기만 할 수 있습니다. 재활의 핵심은 <b>점진적 진행</b>입니다 — 2주 동안의 반응을 보고 시간·횟수를 조금씩 늘리세요.'
     : '체험에서 정한 대로 운동이 <b>1주·2주</b>에 배치되어 있습니다(「빼기」는 제외). 강도와 목표를 정하세요. 재활의 핵심은 <b>점진적 진행</b>입니다 — 처음엔 적게 시작해 몸의 반응을 보며 서서히 늘립니다. 아래 자동 초안을 팀이 검토하며 조정하세요.');
-  set('s7Title', ph2?'검토받고 고치기 · 3D로 확인하기':'검토받고 고치기 · 2주 뒤 모습 확인하기');
+  set('s7Title', ph2?'검토받고 고치기 · 발표하기':'검토받고 고치기 · 2주 뒤 모습 확인하기');
   set('s7Lede', ph2
-    ? '① AI 검토로 계획의 문제를 찾아 고치세요. <b>최소 한 번은 고친 뒤 다시 검토</b>받습니다. ② 3D로 우리 프로그램을 4주 동안 하는 모습과 회복을 확인하고, <b>뒷면</b>에 빨갛게 남은 근육이 없는지도 보세요.'
+    ? '① AI 검토로 계획의 문제를 찾아 고치세요. <b>최소 한 번은 고친 뒤 다시 검토</b>받습니다. ② 4주 결과를 확인하세요. ③ 맨 아래에 발표 세 문장을 쓰고 <b>🎤 발표 시작</b>을 누르세요.'
     : '① AI 검토로 <b>1~2주차 처방</b>의 문제를 찾아 고치세요. ② 3D로 2주 동안 했을 때의 모습을 확인하세요. 4주 프로그램의 절반이므로 잘 처방한 부위도 아직 <b>주황(회복 중)</b>입니다. 빨갛게 남은 부위는 2차시에 운동을 더할 곳입니다. ③ 맨 아래에서 1차시를 마무리합니다.');
-  hide('phaseEnd', ph2); hide('btnToCard', !ph2); hide('midReport', !ph2);
+  hide('phaseEnd', ph2); hide('presentBox', !ph2); hide('midReport', !ph2);
 }
 
 function suggest(){
@@ -3124,7 +3276,7 @@ function renderProgram(){
     el.querySelector('.ex-state').textContent = exStateText(S.picked.has(id), el.dataset.rel==='1', el.dataset.carry==='1', el.dataset.side==='1');
     updateExCount(); renderFilter(); if(famOpenId) famFoot();
     Body3D.update();
-    if(window.RealBody){ RealBody.applyCoverage();
+    if(window.RealBody){ paintS4();
       if(S.picked.has(id)){ const x=EX_LIB.find(e=>e.id===id);
         RealBody.setExercise(id);
         const r=EX_REGIONS[id], regs=r==='CASE'?[...caseRegions()]:(r||[]);
@@ -3137,14 +3289,15 @@ function renderProgram(){
     const b=e.target.closest('[data-unpick],[data-repick]'); if(!b) return;
     if(b.dataset.repick) S.picked.add(b.dataset.repick); else S.picked.delete(b.dataset.unpick);
     renderLists(); Body3D.update();
-    if(window.RealBody){ RealBody.applyCoverage(); RealBody.setExercise(null); covCaption(''); }
+    if(window.RealBody){ paintS4(); RealBody.setExercise(null); covCaption(''); }
     $$('#rail button').forEach(x=>x.disabled=!reachable(+x.dataset.go));
   };
   renderMid();
   $('#goalText').value = S.goal;
   $('#goalText').oninput = e=>{S.goal=e.target.value;};
   Body3D.ensure(); Body3D.update();
-  if(window.RealBody){ RealBody.applyCoverage(); }
+  if(window.RealBody){ paintS4(); }
+  renderP2();
 }
 /* ============================================================
    STEP 5 — 직접 해보고 기록하기 (스테이션 체험)
@@ -3170,6 +3323,20 @@ function impairRules(){
   return L;
 }
 const CAN_TXT={o:'○ 할 수 있음',d:'△ 도움 필요',x:'✕ 어려움'};
+// 2차시 체험: 기존 운동을 다시 해 본 느낌에 따라 같은 묶음의 다음 단계(up) / 쉬운 단계(down) 운동
+function stepAlt(id, dir){
+  const fam=EX_FAMILIES.find(f=>f.ex.includes(id)); if(!fam) return [];
+  const lv=x=>EX_PHASE[x.id]||2, base=EX_PHASE[id]||2, mid=midReport();
+  const hurt=mid?new Set(mid.rows.filter(o=>o.st==='worse'||o.st==='bad').map(o=>o.r)):new Set();
+  const regs=x=>{ const r=EX_REGIONS[x.id]; return r==='CASE'?[...caseRegions()]:(r||[]); };
+  const ok=x=>x.id!==id && (!x.tool||S.tools.has(x.tool)) && !(x.block&&x.block(S.a)) && !(x.cond&&!x.cond(S.a)) && !contraOf(x.id,3)
+    && !(dir==='up' && regs(x).some(r=>hurt.has(r)));
+  const mem=fam.ex.map(k=>EX_LIB.find(x=>x.id===k)).filter(x=>x&&ok(x));
+  const cand=mem.filter(x=>dir==='up'?lv(x)>base:lv(x)<base);
+  if(!cand.length) return [];
+  const pick=dir==='up'?Math.min(...cand.map(lv)):Math.max(...cand.map(lv));
+  return cand.filter(x=>lv(x)===pick).slice(0,2);
+}
 // 체험 결정의 뜻은 차시마다 다름: 1차시 = 1·2주차, 2차시(새로 넣은 운동) = 3·4주차
 const decOpts = ph2 => ph2 ? [['now','3주차부터'],['later','4주차부터'],['drop','빼기']] : [['now','1주차부터'],['later','2주차부터'],['drop','빼기']];
 const decTxt = (id,d) => { const o=decOpts(S.phase===2 && !isCarried(id)).find(x=>x[0]===d); return o?o[1]:''; };
@@ -3177,12 +3344,21 @@ function renderTrial(){
   const c=caseObj(); if(!c) return;
   $('#trialGuide').innerHTML = `<div class="tr-rules"><div class="tr-rules-h">🧓 환자 역할 제약 — ${c.nm} 님(${c.dx})</div><ul>${impairRules().map(r=>`<li>${r}</li>`).join('')}</ul></div>`;
   const ph2=S.phase===2&&!!S.p1, DO=decOpts(ph2), NOW=`「${DO[0][1]}」`, LATER=`「${DO[1][1]}」`;
-  // 2차시에는 새로 넣은 운동만 체험 (1~2주차부터 계속하는 운동은 1차시에 이미 해 봄)
+  // 2차시: 새로 넣은 운동은 처음 체험, 1~2주차부터 하던 운동은 2주 뒤 다시 해 보고 같으면 체크만
   const items=EX_LIB.filter(x=>(S.picked.has(x.id)||S.dropped.has(x.id)) && !(ph2&&isCarried(x.id)));
-  if(ph2){ const keep=EX_LIB.filter(x=>S.picked.has(x.id)&&isCarried(x.id));
-    $('#trialGuide').innerHTML += `<div class="tr-keep"><b>1~2주차부터 계속하는 운동 ${keep.length}개</b> <span>1차시에 이미 체험했으므로 다시 기록하지 않습니다.</span><div>${keep.map(x=>`<i>${x.icon||'🔹'} ${x.nm.split(' (')[0]}</i>`).join('')||'<i>없음</i>'}</div></div>`; }
-  const seg=(id,k,opts)=>`<div class="seg" data-id="${id}" data-k="${k}">${opts.map(([v,t])=>`<button type="button" data-v="${v}" data-on="${(S.trial[id]||{})[k]==v?'1':'0'}">${t}</button>`).join('')}</div>`;
+  const again=ph2?EX_LIB.filter(x=>(S.picked.has(x.id)||S.dropped.has(x.id)) && isCarried(x.id)):[];
+  const seg=(id,k,opts,re)=>{ const t=S.trial[id]||{}, src=re?(t.re||{}):t;
+    return `<div class="seg" data-id="${id}" data-k="${k}"${re?' data-re="1"':''}>${opts.map(([v,tx])=>`<button type="button" data-v="${v}" data-on="${src[k]==v?'1':'0'}">${tx}</button>`).join('')}</div>`; };
+  const carryDec=id=>{ const t=S.trial[id]||{}; return t.dec==='drop'?'drop':(t.same||(t.re&&t.re.can))?'now':''; };
   const hint=id=>{
+    if(ph2&&isCarried(id)){ const t=S.trial[id]||{}, r=t.re||{}, rp=+r.rpe||0;
+      if(t.dec==='drop') return '💡 3~4주차에는 이 운동을 하지 않습니다.';
+      if(t.same) return '💡 1차시 때와 같아요 → 3~4주차에도 그대로 계속합니다.';
+      if(r.can==='x'||rp>=15) return '💡 2주 전보다 힘들어졌어요 → 쉬운 단계로 바꾸거나 빼세요. 그대로 계속하면 무리가 될 수 있습니다.';
+      if(r.can==='d'||r.worry) return '💡 보조자와 함께 하세요. 불안하면 쉬운 단계로 바꾸는 것도 고려하세요.';
+      if(r.can==='o'&&rp&&rp<=11) return '💡 쉬워졌어요 → 다음 단계 운동을 더해 볼 수 있어요.';
+      if(r.can) return '💡 할 수 있어요. 3~4주차에도 계속합니다.';
+      return ''; }
     const t=S.trial[id]||{}, r=+t.rpe||0;
     if(t.can==='x'||r>=15) return `💡 지금은 어려워요 → ${LATER}로 미루거나 쉬운 단계로 바꾸세요.`;
     if(t.can==='d'||t.worry) return `💡 보조자와 함께 쉬운 단계부터 시작하는 게 좋아요. ${LATER}도 고려하세요.`;
@@ -3203,27 +3379,77 @@ function renderTrial(){
         <div class="tr-f"><span class="tr-l">결정</span>${seg(x.id,'dec',DO)}</div>
       </div>
       <div class="tr-hint" id="hint_${x.id}">${hint(x.id)}</div>
+      ${t.from?`<p class="tr-from">${t.from.t==='up'?'⬆':'⬇'} 「${(EX_LIB.find(e=>e.id===t.from.id)||{nm:''}).nm.split(' (')[0]}」을(를) 다시 해 보니 ${t.from.t==='up'?'쉬워서 다음 단계로 담은':'힘들어서 바꾼'} 운동입니다.</p>`:''}
     </div>`;
-  }).join('') || (ph2 ? '<p class="ex-guide">3~4주차에 새로 추가한 운동이 없습니다. 체험 없이 바로 주차별 계획으로 넘어가세요.</p>' : '<p class="ex-guide">담은 운동이 없습니다. 운동 후보로 돌아가 담아주세요.</p>');
+  }).join('') || (ph2 ? '<p class="ex-guide">3~4주차에 추가된 운동이 없습니다. 필요하면 2주 경과 화면에서 운동을 더하세요.</p>' : '<p class="ex-guide">담은 운동이 없습니다. 운동 후보로 돌아가 담아주세요.</p>');
+  if(ph2){
+    const added=$('#trialList').innerHTML;
+    $('#trialList').innerHTML = `<h3 class="tr-sec">기존 진행 운동 (1~2주차) <span>2주 뒤 다시 해 보고, 1차시 때와 같으면 체크만 하세요</span></h3>`
+      + (again.map(x=>{ const t=S.trial[x.id]||{}, p=(S.p1.trial||{})[x.id]||{}, tool=x.tool?TOOLS.find(k=>k.id===x.tool):null;
+        const before=[p.can?CAN_TXT[p.can]:'기록 없음', p.rpe?`RPE ${p.rpe}`:'', p.worry?'불안함':''].filter(Boolean).join(' · ');
+        return `<div class="tr-card tr-carry" data-id="${x.id}" data-dec="${carryDec(x.id)}" data-same="${t.same?'1':'0'}">
+          <div class="tr-h"><span class="tr-ic">${x.icon||'🔹'}</span><b>${x.nm}</b>${tool?`<span class="tr-tool">${tool.ic} ${tool.nm}</span>`:''}<span class="tr-tag">기존 진행</span></div>
+          <div class="tr-before"><b>1차시 기록</b>${before}</div>
+          <label class="tr-same"><input type="checkbox" data-id="${x.id}" data-k="same" ${t.same?'checked':''}> ✓ 다시 해 보니 1차시 때와 같아요</label>
+          <div class="tr-grid tr-redo">
+            <div class="tr-f"><span class="tr-l">2주 뒤 다시 해 보니</span>${seg(x.id,'can',[['o','○ 할 수 있음'],['d','△ 도움 필요'],['x','✕ 어려움']],true)}</div>
+            <div class="tr-f"><span class="tr-l">힘든 정도 (RPE)</span>${seg(x.id,'rpe',[['9','가벼움 9'],['11','조금 힘듦 11'],['13','힘듦 13'],['15','매우 힘듦 15+']],true)}</div>
+            <label class="tr-worry"><input type="checkbox" data-id="${x.id}" data-k="worry" data-re="1" ${(t.re||{}).worry?'checked':''}> 불안했거나 넘어질 뻔했다</label>
+            <input class="tr-memo" data-id="${x.id}" data-k="memo" data-re="1" value="${escAttr((t.re||{}).memo||'')}" placeholder="달라진 점 메모 (예: 2주 전보다 덜 흔들림 · 무릎 통증이 생김)">
+          </div>
+          <div class="tr-grid"><div class="tr-f"><span class="tr-l">결정</span>${seg(x.id,'dec',[['keep','3~4주차에도 계속'],['drop','빼기']])}</div></div>
+          <div class="tr-hint" id="hint_${x.id}">${hint(x.id)}</div>
+          <div class="tr-alt" id="alt_${x.id}"></div>
+        </div>`; }).join('') || '<p class="ex-guide">기존에 진행하던 운동이 없습니다.</p>')
+      + `<h3 class="tr-sec">추가된 운동 (3~4주차) <span>처음 해 보고 언제부터 할지 정합니다</span></h3>` + added;
+  }
+  // 다시 해 본 느낌 → 다음 단계 담기 / 쉬운 단계로 바꾸기 (누를 때만 바뀜)
+  const altDir=id=>{ const t=S.trial[id]||{}, r=t.re||{}, rp=+r.rpe||0;
+    if(t.same||t.dec==='drop') return '';
+    if(r.can==='x'||rp>=15) return 'down';
+    if(r.can==='o'&&rp&&rp<=11) return 'up';
+    return ''; };
+  const altHTML=id=>{ const dir=altDir(id); if(!dir) return '';
+    const L=stepAlt(id,dir), nm=x=>x.nm.split(' (')[0];
+    if(!L.length) return dir==='up' ? '<b>⬆ 쉬워졌어요.</b> 같은 묶음에 더 어려운 운동이 없습니다. 횟수·시간을 늘리거나 다른 부위 운동을 더해 보세요.'
+                                  : '<b>⬇ 힘들어졌어요.</b> 같은 묶음에 더 쉬운 운동이 없습니다. 이 운동을 빼는 것을 고려하세요.';
+    return (dir==='up'?'<b>⬆ 쉬워졌어요. 다음 단계:</b>':'<b>⬇ 힘들어졌어요. 쉬운 단계:</b>')
+      + L.map(x=>{ const has=S.picked.has(x.id);
+        return `${x.icon||''} ${nm(x)} <button type="button" data-alt="${x.id}" data-from="${id}" data-dir="${dir}" ${has?'disabled':''}>${has?'담음 ✓':dir==='up'?'담기':'이걸로 바꾸기'}</button>`; }).join(' '); };
+  const drawAlt=id=>{ const el=$('#alt_'+id); if(!el) return; el.innerHTML=altHTML(id); el.dataset.t=altDir(id); };
+  again.forEach(x=>drawAlt(x.id));
   const prog=()=>{
-    const done=items.filter(x=>{const t=S.trial[x.id]||{}; return t.can&&t.dec;}).length;
-    $('#trialProgress').innerHTML = `<b>기록 ${done} / ${items.length}</b> <span>${done<items.length?'「해보니」와 「결정」을 모두 고르면 기록 완료입니다. 결정하지 않은 운동은 기본 시기에 배치됩니다.':'모든 운동을 기록했습니다. 주차별 계획으로 넘어가세요!'}</span><i style="width:${items.length?done/items.length*100:0}%"></i>`;
+    const done=items.filter(x=>{const t=S.trial[x.id]||{}; return t.can&&t.dec;}).length
+      + again.filter(x=>{const t=S.trial[x.id]||{}; return t.dec==='drop'||t.same||(t.re&&t.re.can);}).length;
+    const all=items.length+again.length;
+    $('#trialProgress').innerHTML = `<b>기록 ${done} / ${all}</b> <span>${done<items.length?'「해보니」와 「결정」을 모두 고르면 기록 완료입니다. 결정하지 않은 운동은 기본 시기에 배치됩니다.':(S.phase===2?'모든 운동을 기록했습니다. 검토 · 발표로 넘어가세요!':'모든 운동을 기록했습니다. 주차별 계획으로 넘어가세요!')}</span><i style="width:${all?done/all*100:0}%"></i>`;
   };
   prog();
   const root=$('#trialList');
   root.onclick=e=>{
+    const ab=e.target.closest('[data-alt]');
+    if(ab){ const nid=ab.dataset.alt, from=ab.dataset.from, dir=ab.dataset.dir;
+      if(dir==='down'){ S.trial[from]=S.trial[from]||{}; S.trial[from].dec='drop'; }
+      S.picked.add(nid); S.dropped.delete(nid); S.trial[nid]={from:{id:from,t:dir}};
+      applyTrial(); renderTrial();
+      const card=$(`#trialList .tr-card[data-id="${nid}"]`); if(card) card.scrollIntoView({behavior:'smooth',block:'center'});
+      return; }
     const b=e.target.closest('.seg [data-v]'); if(!b) return;
-    const sg=b.parentElement, id=sg.dataset.id, k=sg.dataset.k, t=(S.trial[id]=S.trial[id]||{});
+    const sg=b.parentElement, id=sg.dataset.id, k=sg.dataset.k, t0=(S.trial[id]=S.trial[id]||{}), t=sg.dataset.re?(t0.re=t0.re||{}):t0;
     t[k] = (t[k]===b.dataset.v) ? '' : b.dataset.v;
     sg.querySelectorAll('[data-v]').forEach(x=>x.dataset.on=(t[k]===x.dataset.v)?'1':'0');
-    if(k==='dec') root.querySelector(`.tr-card[data-id="${id}"]`).dataset.dec=t.dec||'';
-    $('#hint_'+id).textContent=hint(id); prog();
+    const card=root.querySelector(`.tr-card[data-id="${id}"]`);
+    if(card.classList.contains('tr-carry')) card.dataset.dec=carryDec(id);
+    else if(k==='dec') card.dataset.dec=t.dec||'';
+    $('#hint_'+id).textContent=hint(id); drawAlt(id); prog();
   };
   root.oninput=root.onchange=e=>{
-    const el=e.target; if(!el.dataset.k) return;
-    const t=(S.trial[el.dataset.id]=S.trial[el.dataset.id]||{});
-    t[el.dataset.k] = el.type==='checkbox'?el.checked:el.value;
-    if(el.dataset.k==='worry') $('#hint_'+el.dataset.id).textContent=hint(el.dataset.id);
+    const el=e.target, k=el.dataset.k; if(!k) return;
+    const id=el.dataset.id, t0=(S.trial[id]=S.trial[id]||{}), t=el.dataset.re?(t0.re=t0.re||{}):t0;
+    t[k] = el.type==='checkbox'?el.checked:el.value;
+    const card=root.querySelector(`.tr-card[data-id="${id}"]`);
+    if(k==='same'){ card.dataset.same=el.checked?'1':'0'; card.dataset.dec=carryDec(id); prog(); }
+    if(k==='worry'||k==='same'){ $('#hint_'+id).textContent=hint(id); drawAlt(id); }
   };
 }
 // 「빼기」 결정을 프로그램에 반영 (되돌리면 다시 포함)
@@ -3307,8 +3533,9 @@ function autoWeekPlan(){
   for(let w=from; w<=to; w++){
     const prog=(w-1)/Math.max(1,T-1);
     const time=Math.round(baseTime + prog*Math.min(20,baseTime*0.8));
-    const rpe=Math.min(res&&res.risk==='caution'?13:15, Math.round(baseRpe + prog*3));   // 자동 초안은 판정에 맞는 강도를 넘지 않음 (조건부 진행은 RPE 13까지)
-    const freq=Math.min(7, baseFreq + (w>Math.round(T/2)?1:0));
+    const p2=ph2?(S.p2dose||{}):{};                                                        // 2차시 4단계에서 정한 3~4주차 운동량
+    const rpe=p2.rpe ? +p2.rpe : Math.min(res&&res.risk==='caution'?13:15, Math.round(baseRpe + prog*3));   // 자동 초안은 판정에 맞는 강도를 넘지 않음 (조건부 진행은 RPE 13까지)
+    const freq=p2.freq ? +p2.freq : Math.min(7, baseFreq + (w>Math.round(T/2)?1:0));
     const items=picked.filter(id=>introWeek(id)<=w);
     const added=picked.filter(id=>introWeek(id)===w && !(ph2&&isCarried(id)));
     // 요일 구조: 7일, 각 운동일에 이번 주 운동을 배치
@@ -3355,7 +3582,7 @@ function autoWeekGoal(w, W, added, res){
   if(w>W*0.6) return '강도와 지속시간을 목표 수준까지 끌어올리고 기능적 동작으로 확장한다.';
   return '이전 주보다 시간·횟수를 조금 늘려 점진적으로 강화한다.';
 }
-function planKey(){ const tr=Object.keys(S.trial||{}).sort().map(k=>k+':'+(S.trial[k].dec||'')).join(','); return `${S.built?S.built.id:''}|${S.phase}|${[...S.picked].sort().join(',')}|${S.dose.weeks}|${S.dose.time}|${S.dose.rpe}|${S.dose.freq}|${tr}`; }
+function planKey(){ const tr=Object.keys(S.trial||{}).sort().map(k=>k+':'+(S.trial[k].dec||'')).join(','); return `${S.built?S.built.id:''}|${S.phase}|${[...S.picked].sort().join(',')}|${S.dose.weeks}|${S.dose.time}|${S.dose.rpe}|${S.dose.freq}|${tr}${S.p2dose&&(S.p2dose.freq||S.p2dose.rpe)?`|${S.p2dose.freq||''}/${S.p2dose.rpe||''}`:''}`; }   // 운동량을 정하지 않았으면 예전 저장본과 같은 키 (1차시 주차 계획이 다시 만들어지지 않게)
 
 function renderSchedule(){
   const c=caseObj(), res=S.evalRes;
@@ -3696,7 +3923,80 @@ function initRecovery(){
     };
     anim=requestAnimationFrame(stepFn);
   };
+  // 발표 모드에서 같은 3D 회복 화면을 씀
+  window.__rec={WR, setP:p=>{ slider.value=Math.round(p*100); setP(p); },
+    stop:()=>{ stopProg(); if(anim){ cancelAnimationFrame(anim); anim=null; playBtn.disabled=false; } },
+    play:()=>{ stopProg(); if(progBtn) progBtn.click(); }};
 }
+/* 발표 모드: 발표 세 문장 ↔ 3D 장면 (한 장면씩 넘김) */
+const Present=(()=>{
+  let i=0, bound=false;
+  const N=4, nm=id=>{ const x=EX_LIB.find(e=>e.id===id); return x?x.nm.split(' (')[0]:id; };
+  const say=t=>(t&&t.trim())?`<div class="pr-say">${_esc(t)}</div>`:'<div class="pr-say empty">아직 쓰지 않았습니다. 발표 준비 칸에 적어 주세요.</div>';
+  const cap=h=>{ const el=$('#realCaption'); if(el){ el.innerHTML=h||''; el.style.display=h?'block':'none'; } };
+  function scene(){
+    const c=caseObj(), a0=Object.assign({}, c.base), R=window.__rec, WR=R?R.WR:weeklyRecovery(), W=WR.W;
+    const regs=BODY_REGIONS.filter(r=>WR.cr.has(r));
+    if(R) R.stop(); RealBody.setExercise(null); cap('');
+    let h='';
+    if(i===0){ if(R) R.setP(0); cap('<b class="cap-nm">치료 시작 전</b>빨강 = 꼭 필요한 부위');
+      h=`<p class="pr-k">1 / 4 · 우리 대상자</p><h3 class="pr-h">${c.nm} 님 (${c.age}세 · ${c.sex})</h3><p class="pr-dx">${c.dx}</p>
+        <div class="pr-kv"><div><b>NRS ${a0.pain}</b><span>처음 통증</span></div><div><b>MMT ${a0.mmt}</b><span>환측 근력</span></div><div><b>${a0.fall}</b><span>낙상 위험</span></div></div>
+        <p class="pr-k">① 우리 대상자의 목표</p>${say(S.goal)}`; }
+    else if(i===1){ if(R) R.setP(0); cap('<b class="cap-nm">운동을 눌러 동작을 보여 주세요</b>');
+      const items=EX_LIB.filter(x=>S.picked.has(x.id)), cut=S.p1?EX_LIB.filter(x=>S.p1.picked.includes(x.id)&&!S.picked.has(x.id)):[];
+      h=`<p class="pr-k">2 / 4 · 우리 운동</p><h3 class="pr-h">운동 ${items.length}가지</h3>
+        <div class="pr-chips" id="prChips">${items.map(x=>`<button type="button" data-prex="${x.id}">${x.icon||''} ${nm(x.id)}<small>${isCarried(x.id)?'1주차부터 계속':'3~4주차에 추가'}</small></button>`).join('')}</div>
+        ${cut.length?`<p class="pr-small">2주 경과를 보고 뺀 운동: ${cut.map(x=>nm(x.id)).join(', ')}</p>`:''}
+        <p class="pr-k">② 직접 해 보고 바꾼 것</p>${say(S.talk.changed)}`; }
+    else if(i===2){
+      h=`<p class="pr-k">3 / 4 · 4주 변화</p><h3 class="pr-h">주차별 4주 목표 달성도</h3>
+        <table class="pr-tb"><tr><th>부위</th>${WR.weeks.map(w=>`<th>${w.w}주</th>`).join('')}</tr>${regs.map(r=>`<tr><td>${REGION_KO[r]}</td>${WR.weeks.map((w,k)=>`<td>${WR.bad.has(r)?'금기':Math.round(WR.cum[r][k+1]*100)+'%'}</td>`).join('')}</tr>`).join('')}</table>
+        <button type="button" class="btn ghost small" id="prReplay">▶ 다시 재생</button>
+        <p class="pr-k">③ 피드백을 받고 고친 것</p>${say(S.talk.fixed)}`; }
+    else {
+      if(R) R.setP(1); cap('<b class="cap-nm">4주 뒤 모습</b>빨강·주황으로 남은 곳 = 더 필요한 곳');
+      const late=(S.weekPlan||[]).filter(w=>w.w>2), days=Math.max(0,...late.map(w=>w.days.filter(d=>!d.rest&&d.ex.length).length)), rpe=Math.max(0,...late.flatMap(w=>w.days.flatMap(d=>d.rest?[]:d.ex.map(e=>+e.rpe||0)))), mins=Math.max(0,...late.map(w=>+w.time||0));
+      const v=r=>WR.cum[r][W], vt=r=>WR.bad.has(r)?'금기 부위':v(r)>=0.9?'4주 목표 달성':v(r)>0?Math.round(v(r)*100)+'%':'변화 없음';
+      const remain=[...new Set(regs.filter(r=>!WR.bad.has(r)&&v(r)<0.9).map(r=>REGION_KO[r]))];
+      h=`<p class="pr-k">4 / 4 · 마무리</p><h3 class="pr-h">4주 뒤 우리 대상자</h3>
+        <div class="pr-kv"><div><b>주 ${days||S.dose.freq}회</b><span>3~4주차 횟수</span></div><div><b>RPE ${rpe||S.dose.rpe}</b><span>강도</span></div><div><b>${mins||S.dose.time}분</b><span>1회 시간</span></div></div>
+        ${regs.map(r=>`<div class="pr-row"><span>${REGION_KO[r]}</span><b>${vt(r)}</b></div>`).join('')}
+        <p class="pr-q">${remain.length?`질문 받기: ${remain.join(', ')}이(가) 4주 목표에 못 미친 이유는 무엇일까요?`:'꼭 필요한 부위를 모두 4주 목표까지 채웠습니다. 질문을 받아 보세요.'}</p>`; }
+    $('#presSide').innerHTML=h; $('#presSide').scrollTop=0;
+    $('#presDots').innerHTML=Array.from({length:N},(_,k)=>`<i class="${k<=i?'on':''}"></i>`).join('');
+    $('#presPrev').style.visibility=i?'visible':'hidden';
+    $('#presNext').textContent=i<N-1?'다음 →':'발표 끝내기';
+    const ch=$('#prChips'); if(ch) ch.onclick=e=>{ const b=e.target.closest('[data-prex]'); if(!b) return;
+      ch.querySelectorAll('[data-prex]').forEach(x=>x.dataset.on=(x===b)?'1':'0');
+      RealBody.setExercise(b.dataset.prex); cap(`<span class="cap-now">지금 보는 운동</span><b class="cap-nm">${exMotionText(b.dataset.prex)}</b>`); };
+    if(i===2&&R){ R.play(); $('#prReplay').onclick=()=>R.play(); }
+  }
+  function open(){
+    if(!(S.phase===2&&S.p1)) return;
+    if(!window.__rec) initRecovery();
+    i=0; $('#presTeam').textContent=S.team||''; $('#presCase').textContent=caseObj()?`${caseObj().nm} 님 · ${caseObj().dx}`:'';
+    const host=$('#realCanvasHost'); if(host) $('#presStage').appendChild(host);
+    $('#pres').hidden=false; document.documentElement.classList.add('presenting');
+    RealBody.setView('auto'); requestAnimationFrame(()=>RealBody.resizeNow());
+    if(!bound){ bound=true;
+      $('#presNext').onclick=()=>{ if(i<N-1){ i++; scene(); } else close(); };
+      $('#presPrev').onclick=()=>{ if(i>0){ i--; scene(); } };
+      $('#presClose').onclick=close;
+      document.addEventListener('keydown',e=>{ if($('#pres').hidden) return;
+        if(e.key==='ArrowRight'||e.key==='PageDown'){ e.preventDefault(); $('#presNext').click(); }
+        else if(e.key==='ArrowLeft'||e.key==='PageUp'){ e.preventDefault(); $('#presPrev').click(); }
+        else if(e.key==='Escape') close(); }); }
+    scene();
+  }
+  function close(){
+    if(window.__rec) window.__rec.stop();
+    RealBody.setExercise(null); cap('');
+    $('#pres').hidden=true; document.documentElement.classList.remove('presenting');
+    moveRealHost(7); initRecovery(); RealBody.resizeNow();
+  }
+  return {open, close};
+})();
 function renderCard(){
   const c=caseObj(), a=S.a, res=S.evalRes, k=karvonen(), g=ageObj();
   const beta=c.tags.includes('betablocker');
@@ -3953,7 +4253,11 @@ function buildReviewContext(){
   const tr=EX_LIB.filter(x=>S.trial[x.id]&&(S.trial[x.id].can||S.trial[x.id].dec));
   if(tr.length){
     L.push('\n# 실습생이 환자 역할로 직접 체험한 결과');
-    tr.forEach(x=>{const t=S.trial[x.id]; L.push(`- ${x.nm}: ${t.can?CAN_TXT[t.can]:'미기록'}${t.rpe?`, RPE ${t.rpe}`:''}${t.worry?', 불안함':''} → 결정: ${t.dec?decTxt(x.id,t.dec):'기본 시기'}${t.memo?` (메모: ${t.memo})`:''}`);});
+    tr.forEach(x=>{const t=S.trial[x.id];
+      if(S.phase===2&&isCarried(x.id)){ const r=t.re||{};
+        L.push(`- ${x.nm} (1~2주차부터 하던 운동): ${t.same?'2주 뒤 다시 해 보니 1차시와 같음':r.can?`2주 뒤 다시 해 보니 ${CAN_TXT[r.can]}${r.rpe?`, RPE ${r.rpe}`:''}${r.worry?', 불안함':''}`:'다시 체험하지 않음'} → ${t.dec==='drop'?'빼기':'3~4주차에도 계속'}${!t.same&&r.memo?` (메모: ${r.memo})`:''}`); return; }
+      if(t.from){ const f=EX_LIB.find(e=>e.id===t.from.id); if(f) L.push(`- (${f.nm}을(를) 2주 뒤 다시 해 보니 ${t.from.t==='up'?'쉬워서 다음 단계로 추가':'힘들어서 쉬운 단계로 교체'}한 운동)`); }
+      L.push(`- ${x.nm}: ${t.can?CAN_TXT[t.can]:'미기록'}${t.rpe?`, RPE ${t.rpe}`:''}${t.worry?', 불안함':''} → 결정: ${t.dec?decTxt(x.id,t.dec):'기본 시기'}${t.memo?` (메모: ${t.memo})`:''}`);});
     L.push('- 체험 결과(어려웠던 운동을 초기에 넣었는지, 쉬운 운동을 너무 늦게 넣었는지)와 주차별 계획이 일관되는지도 검토하라.');
   }
   return L.join('\n');
@@ -4894,7 +5198,7 @@ const Save = (()=>{
       weekPlan:S.weekPlan, weekPlanKey:S.weekPlanKey, activeWeek:S.activeWeek,
       goal:S.goal, team:S.team, members:S.members, roles:S.roles, evalRes:S.evalRes,
       tools:[...S.tools], trial:S.trial, dropped:[...S.dropped], talk:S.talk, reviews:S.reviews,
-      phase:S.phase, p1:S.p1, owner:Auth.owner()
+      phase:S.phase, p1:S.p1, p2dose:S.p2dose||{}, owner:Auth.owner()
     };
   }
   function write(){
@@ -4924,7 +5228,7 @@ const Save = (()=>{
     S.weekPlan=d.weekPlan||null; S.weekPlanKey=d.weekPlanKey||''; S.activeWeek=d.activeWeek||0;
     S.goal=d.goal||''; S.members=(d.members&&d.members.length)?d.members:S.members;
     S.roles=d.roles||S.roles; S.evalRes=d.evalRes||null; S.trial=d.trial||{};
-    S.talk=d.talk||{changed:'',fixed:''}; S.reviews=d.reviews||0;
+    S.talk=d.talk||{changed:'',fixed:''}; S.reviews=d.reviews||0; S.p2dose=d.p2dose||{};
     // 목록에서 뺀 운동(체육관에서 못 하는 운동 등)이 예전 기록에 남아 있으면 걸러 냄
     const known=id=>EX_LIB.some(x=>x.id===id), cleanWeeks=w=>(w||[]).forEach(wk=>{ wk.items=(wk.items||[]).filter(known); (wk.days||[]).forEach(dy=>{ dy.ex=(dy.ex||[]).filter(e=>known(e.id)); }); });
     [...S.picked].forEach(id=>{ if(!known(id)) S.picked.delete(id); }); [...S.dropped].forEach(id=>{ if(!known(id)) S.dropped.delete(id); });
@@ -4997,26 +5301,29 @@ $('#btnToAssess').addEventListener('click',()=>go(3));
 $('#btnBack1').addEventListener('click',()=>go(1));
 $('#btnBack2').addEventListener('click',()=>go(2));
 $('#btnToRx').addEventListener('click',()=>go(4));
-$('#btnToTrial').addEventListener('click',()=>{ if(S.picked.size===0){alert('운동 후보를 1개 이상 담으세요.');return;} go(5); });
-$('#btnToSchedule').addEventListener('click',()=>{ applyTrial(); if(S.picked.size===0){alert('「빼기」로 모든 운동이 빠졌습니다. 하나 이상은 남겨주세요.');return;} go(6); });
+$('#btnToTrial').addEventListener('click',()=>{
+  if(S.picked.size===0){alert(S.phase===2?'담은 운동이 없습니다. 하나 이상 담으세요.':'운동 후보를 1개 이상 담으세요.');return;} go(5); });
+$('#btnP2Detail').addEventListener('click',()=>{ applyTrial(); if(S.picked.size===0){alert('담은 운동이 없습니다. 하나 이상 담으세요.');return;} go(6); });
+$('#btnPresent').addEventListener('click',()=>Present.open());
+$('#btnPrint').addEventListener('click',()=>{ document.body.classList.add('print-card'); window.print(); });
+window.addEventListener('afterprint',()=>document.body.classList.remove('print-card'));
+$('#btnToSchedule').addEventListener('click',()=>{ applyTrial(); if(S.picked.size===0){alert('「빼기」로 모든 운동이 빠졌습니다. 하나 이상은 남겨주세요.');return;} go(S.phase===2&&S.p1?7:6); });
 $('#btnToReview').addEventListener('click',()=>go(7));
-$('#btnToCard').addEventListener('click',()=>go(8));
 $('#btnPhase2').addEventListener('click',startPhase2);
 $('#btnPhaseSubmit').addEventListener('click',()=>Sync.now(true));
 $('#btnAI').addEventListener('click',()=>{ S.reviews=(S.reviews||0)+1; renderAiCount(); aiReview(); });
 $('#btnBack4').addEventListener('click',()=>go(4));
 $('#btnBack4c').addEventListener('click',()=>go(4));
 $('#btnBack6').addEventListener('click',()=>go(6));
-$('#btnBack7').addEventListener('click',()=>go(7));
 $('#talkGoal').addEventListener('input',e=>{ S.goal=e.target.value; const g=$('#goalText'); if(g) g.value=S.goal; renderCard(); });
 $('#talkChanged').addEventListener('input',e=>{ S.talk.changed=e.target.value; renderCard(); });
 $('#talkFixed').addEventListener('input',e=>{ S.talk.fixed=e.target.value; renderCard(); });
 $('#btnReautoWeeks').addEventListener('click',()=>{ S.weekPlan=autoWeekPlan(); S.weekPlanKey=planKey(); renderSchedule(); });
 $('#btnBack3').addEventListener('click',()=>go(3));
-$('#btnBack5').addEventListener('click',()=>go(5));
+$('#btnBack5').addEventListener('click',()=>go(S.phase===2&&S.p1?4:5));
 $('#btnReset').addEventListener('click',()=>{
   S.built=null;S.age=null;S.a={};S.redraws=0;S.picked.clear();S.evalRes=null;S.goal='';S.trial={};S.dropped.clear();S.talk={changed:'',fixed:''};S.reviews=0;S.tools=new Set(TOOLS.map(t=>t.id));['talkGoal','talkChanged','talkFixed'].forEach(i=>{const el=$('#'+i); if(el) el.value='';});
-  S.weekPlan=null;S.weekPlanKey='';S.activeWeek=0;S.doseSet=false;S.roles=['','','',''];S.phase=1;S.p1=null;
+  S.weekPlan=null;S.weekPlanKey='';S.activeWeek=0;S.doseSet=false;S.roles=['','','',''];S.phase=1;S.p1=null;S.p2dose={};
   renderDraw(false);
   $('#btnDraw').hidden=false; $('#btnRedraw').hidden=true; $('#btnDrawNext').hidden=true;
   go(1);
@@ -5034,7 +5341,7 @@ const Live = (()=>{
     let gap=0, bad=0;
     if(S.built&&S.evalRes){ const cr=caseRegions(), pr=programRegions();
       BODY_REGIONS.forEach(r=>{ if(pr.bad.has(r)) bad++; else if(cr.has(r)&&!pr.hit.has(r)) gap++; }); }
-    const ids=[...S.picked], done=ids.filter(id=>{ const t=S.trial[id]||{}; return t.can&&t.dec; }).length;
+    const ids=[...S.picked], done=ids.filter(id=>{ const t=S.trial[id]||{}; return (S.phase===2&&isCarried(id)) ? (t.same||(t.re&&t.re.can)) : (t.can&&t.dec); }).length;
     let sub=null; try{ sub=JSON.parse(localStorage.getItem('rehablab.sub')||'null'); }catch(e){}
     return {gap, bad, risk:S.evalRes?S.evalRes.risk:'', trial:done, trialN:ids.length,
             sub: sub&&sub.at ? {at:sub.at, same:sub.h===stateHash()} : null};
