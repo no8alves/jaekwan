@@ -4221,7 +4221,8 @@ function buildReviewContext(){
     const rel = x.tags.includes('*') || x.tags.some(t=>c.tags.includes(t));
     const blk = x.block ? x.block(a) : null;
     const notes=[];
-    if(!rel) notes.push('⚠ 대상자의 계통/진단과 직접 관련이 낮음');
+    if(!rel && GENERAL_FIT.has(x.id)) notes.push('전신 체력 운동(모든 대상자에게 도움)');
+    else if(!rel) notes.push('⚠ 대상자의 계통/진단과 직접 관련이 낮음');
     if(blk) notes.push('⚠ 현재 사정값에서 금기 조건: '+blk);
     const ps=(EX_PROPS[x.id]||[]).map(p=>PROP_KO[p][0]); if(ps.length) notes.push('동작 특성: '+ps.join('·'));
     const kc=contraOf(x.id, S.phase===2 && !isCarried(x.id) ? 3 : 1); if(kc) notes.push(`⚠ 진단별 주의사항과 충돌(${PROP_KO[kc.p][1]}): ${kc.why}`);
@@ -4318,6 +4319,8 @@ function salvageJSON(t){
 }
 
 /* AI 없이 돌아가는 규칙 기반 점검 (폴백) */
+// 전신 체력 운동: 어떤 대상자에게도 도움이 되므로 「진단과 관련이 낮다」고 지적하지 않음 (대상자에 맞게 조정했는지만 봄)
+const GENERAL_FIT = new Set(['aerobic','interval','gait','sts','t_sts','t_march','t_sitmarch','t_fastmarch']);
 function localReviewData(){
   const c=caseObj(), a=S.a, res=S.evalRes;
   const picked=EX_LIB.filter(x=>S.picked.has(x.id));
@@ -4327,7 +4330,10 @@ function localReviewData(){
   picked.forEach(x=>{
     const rel = x.tags.includes('*') || x.tags.some(t=>c.tags.includes(t));
     const blk = x.block ? x.block(a) : null;
+    const kc=contraOf(x.id, S.phase===2 && !isCarried(x.id) ? 3 : 1);
     if(blk) fix.push({what:x.nm, why:`현재 사정값에서 금기 조건에 해당: ${blk}`, how:'해당 조건이 해소된 뒤 다시 배치하세요.'});
+    else if(kc) fix.push({what:x.nm, why:`${PROP_KO[kc.p][1]}이라 이 대상자의 주의사항과 맞지 않습니다: "${kc.why}"`, how:kc.until==='p1'?'처음 2주에는 빼고, 3~4주차 이후에 검토하세요.':'이 운동을 빼고 주의사항에 맞는 운동으로 바꾸세요.'});
+    else if(!rel && GENERAL_FIT.has(x.id)) good.push(`${x.nm} — 전신 체력 유지에 도움이 되는 선택 (이 대상자의 주의사항에 맞게 방법을 조정하세요)`);
     else if(!rel) fix.push({what:x.nm, why:`표적 계통[${x.tags.join(', ')}]이 대상자 계통(${sys})·진단과 직접 관련이 낮습니다.`, how:'선택 근거를 확인하고, 대상자 진단에 맞는 중재로 교체를 검토하세요.'});
     else good.push(`${x.nm} — 대상자 계통(${sys})에 부합하는 선택`);
   });
@@ -4374,6 +4380,7 @@ async function aiReview(){
 - 규칙 코드를 인용할 때는 그 뜻도 함께 쉽게 말하라. 예: "BP-02(혈압이 높아 고강도 운동을 피해야 함)".
 - how(고칠 방법)는 학생이 이 실습 화면에서 바로 할 수 있는 행동으로 써라. 예: 어떤 운동을 빼거나 더 쉬운 운동으로 바꾸기, 몇 주차부터 넣기, 주 몇 회·강도 얼마로 바꾸기.
 - good(잘한 점)은 무엇을 왜 잘했는지 구체적으로 칭찬하라.
+- 걷기·유산소 운동, 앉았다 일어서기 같은 전신 체력 운동은 어떤 대상자에게도 도움이 되므로 "진단과 관련이 낮다"고 지적하지 마라. 대신 이 대상자의 주의사항에 맞게 방법을 조정했는지 봐라(예: 어깨 수술 대상자는 걸을 때 팔을 크게 흔들지 않기, 팔걸이를 짚고 일어서지 않기). 조정이 필요하면 advice에 쓰고, 주의사항과 맞지 않는 동작이 있으면 fix에 써라.
 - 반드시 아래 JSON 객체 하나만 출력하라. 코드펜스나 다른 설명 문장을 붙이지 마라.
 
 {
