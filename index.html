@@ -879,6 +879,7 @@ html.presenting body{overflow:hidden}
 
 /* ---------- 보기 전용 (교사용 현황판 안) ---------- */
 html.watch .savebar,html.watch .foot{display:none !important}
+html.watch .pres .btn,html.watch .pres button,html.watch .pres .realcanvas{pointer-events:auto !important}   /* 교사 화면에서 연 발표 모드는 넘기기·운동 버튼을 누를 수 있음 */
 html.watch .btn,html.watch .ex,html.watch .tagpick button,html.watch .freshbtn,html.watch .mem-star,html.watch .mem-del,
 html.watch input,html.watch textarea,html.watch select,html.watch .wk-chip,html.watch .day-chip,html.watch .seg button{pointer-events:none}
 html.watch .panel{animation:none}
@@ -1833,14 +1834,14 @@ const CASES = [
   cc:'오른쪽 팔다리에 힘이 없고 말이 어눌하며 쉽게 지친다',
   hx:'수술 후 급성기 지나 재활 전동, 주의집중·지구력 저하, 좌위 유지 훈련 중',
   meds:'항경련제, 혈압약, 항혈전제', tags:['neuro','cognitive','frailty'],
-  cautions:['혈압 급상승 유발 등척성 과부하·발살바 금지','피로·집중력 저하 — 20분 이내로 나눠 자주 휴식','환측 견관절 아탈구 예방, 상지 견인 금지'],
+  cautions:['혈압 급상승 유발 등척성 과부하·발살바 금지','피로·집중력 저하 — 20분 이내로 나눠 자주 휴식','환측 견관절 아탈구 예방, 상지 견인 금지','부축 보행 단계 — 한 발 지지·빠른 동작은 양발 균형이 안정될 때까지 제외'],
   base:{sbp:138,dbp:86,hr:80,rr:18,temp:36.6,spo2:96,pain:2,mmt:2,rom:'경도 제한',amb:'부축 필요',fall:'중위험',cog:'경도 저하',bg:null}},
  {id:'n03', cat:'뇌·신경', part:['sideL','shoulderL'], nm:'김O순', age:70, sex:'여',
   dx:'뇌졸중 후 편마비 · 환측 견관절 아탈구·어깨-손 증후군 동반',
   cc:'마비된 어깨가 빠질 것처럼 아프고 손이 붓고 뻣뻣하다',
   hx:'발병 7주, 이완성 마비로 견관절 하방 아탈구, 손 부종·이질통',
   meds:'항혈소판제, 신경통 약, 혈압약', tags:['neuro','ortho-upper','frailty'],
-  cautions:['환측 어깨 무리한 거상·견인 절대 금지 — 통증 유발','손 부종 관리(거상·압박), 온열·능동보조운동 병행','통증 범위 내에서만, 통증 증가 시 즉시 중단'],
+  cautions:['환측 어깨 무리한 거상·견인 절대 금지 — 통증 유발','손 부종 관리(거상·압박), 온열·능동보조운동 병행','통증 범위 내에서만, 통증 증가 시 즉시 중단','보조기구 보행 단계 — 한 발 지지·빠른 동작은 양발 균형이 안정될 때까지 제외'],
   base:{sbp:134,dbp:82,hr:78,rr:17,temp:36.6,spo2:97,pain:4,mmt:3,rom:'중등도 제한',amb:'보조기구',fall:'중위험',cog:'명료',bg:null}},
  {id:'n04', cat:'뇌·신경', part:['sideL','head'], nm:'조O남', age:72, sex:'남',
   dx:'우뇌 뇌경색 후 좌측 편마비 · 편측 무시(neglect) 동반',
@@ -2812,7 +2813,7 @@ const PROP_KO = {
   armhang:['팔 늘어뜨림','팔을 늘어뜨려 어깨가 당겨지는 동작'], hold:['버티기','숨을 참기 쉬운 버티기 동작'],
   hipdeep:['고관절 깊이 굽힘','고관절을 90° 넘게 굽히는 동작'], kneeload:['무릎 깊이 굽혀 체중','무릎을 깊이 굽혀 체중을 싣는 동작'], oneleg:['한 다리 지지','한 다리에 체중을 모두 싣는 동작'],
   spflex:['허리 굽힘','허리를 굽히거나 마는 동작'], spload:['허리 큰 부하','허리에 큰 부하가 걸리는 동작'],
-  impact:['빠르고 충격','빠르고 충격이 있는 동작'], turn:['빠른 방향 전환','빠르게 방향을 바꾸는 동작'], narrow:['좁은 지지면','좁은 지지면에서 균형을 잡는 동작'], dual:['이중과제','움직이면서 동시에 생각하는 이중과제']
+  impact:['빠르고 충격','빠르고 충격이 있는 동작'], armfast:['팔 빠른 동작','공을 던지거나 받아 팔에 갑자기 힘이 걸리는 동작'], turn:['빠른 방향 전환','빠르게 방향을 바꾸는 동작'], narrow:['좁은 지지면','좁은 지지면에서 균형을 잡는 동작'], dual:['이중과제','움직이면서 동시에 생각하는 이중과제']
 };
 const EX_PROPS = {
   band:['resistUp'], t_bext:['resistUp'], t_brow:['resistUp'], t_bapart:['resistUp'], t_bcurl:['resistUp'], t_bpress:['resistUp'], t_towelwring:['resistUp'],
@@ -2823,7 +2824,7 @@ const EX_PROPS = {
   t_kneelift:['hipdeep','spflex'], t_sitmarch:['hipdeep'], t_sitdual:['hipdeep','dual'], t_lunge:['hipdeep','kneeload','oneleg'], t_slsts:['hipdeep','kneeload','oneleg'],
   t_bsquat:['kneeload','spload'], t_padsq:['kneeload'], t_ballsq:['kneeload'], t_stepdown:['kneeload','oneleg'], t_slbridge:['spload'],
   t_sls:['oneleg','narrow'], t_pad1:['oneleg','narrow'], t_tandem:['narrow'],
-  t_fastmarch:['impact'], t_reactstep:['turn'], t_cone:['turn'], t_dualwalk:['dual'], t_padtoss:['dual']
+  t_fastmarch:['impact'], t_reactstep:['turn'], t_cone:['turn'], t_dualwalk:['dual'], t_padtoss:['dual','armfast'], t_ballwall:['armfast']
 };
 /* 대상자별 금기 동작: [동작 특성, 근거가 되는 주의사항, 기간]
    기간 'all' = 4주 내내 피해야 함, 'p1' = 처음 2주 동안만 피함(3~4주차부터 가능) */
@@ -2833,12 +2834,12 @@ const CASE_AVOID = {
   h03:[['spflex','급성기 요추 굴곡·회전 복합 동작 금지','p1']],
   h04:[['spflex','척추 신전근 강화, 굴곡 부하 금지','all']],
   u01:[['armwb','유합 초기 — 손목 체중지지·과신전, 무거운 물건 들기 금지','all'],['resistUp','통증 없는 범위에서 관절가동범위부터 회복','p1']],
-  u02:[['resistUp','봉합부 보호 — 저항성 외회전·과도한 능동 거상 12주까지 제한','all'],['overhead','봉합부 보호 — 저항성 외회전·과도한 능동 거상 12주까지 제한','all'],['armwb','무거운 물건 들기·갑작스러운 견인 금지','all']],
-  u04:[['resistUp','유합 확인 전 저항운동 금지, 진자운동·능동보조운동부터','all'],['armwb','유합 확인 전 저항운동 금지, 진자운동·능동보조운동부터','all']],
+  u02:[['resistUp','봉합부 보호 — 저항성 외회전·과도한 능동 거상 12주까지 제한','all'],['overhead','봉합부 보호 — 저항성 외회전·과도한 능동 거상 12주까지 제한','all'],['armwb','무거운 물건 들기·갑작스러운 견인 금지','all'],['armfast','무거운 물건 들기·갑작스러운 견인 금지','all']],
+  u04:[['resistUp','유합 확인 전 저항운동 금지, 진자운동·능동보조운동부터','all'],['armwb','유합 확인 전 저항운동 금지, 진자운동·능동보조운동부터','all'],['armfast','유합 확인 전 저항운동 금지, 진자운동·능동보조운동부터','all']],
   u05:[['resistUp','능동 가동범위 회복 우선, 저항은 후반부','p1']],
-  n01:[['armhang','환측 견관절 아탈구 예방 — 상지 견인 금지, 지지대 사용','all']],
-  n02:[['hold','혈압 급상승 유발 등척성 과부하·발살바 금지','all'],['armhang','환측 견관절 아탈구 예방, 상지 견인 금지','all']],
-  n03:[['overhead','환측 어깨 무리한 거상·견인 절대 금지 — 통증 유발','all'],['armhang','환측 어깨 무리한 거상·견인 절대 금지 — 통증 유발','all']],
+  n01:[['armhang','환측 견관절 아탈구 예방 — 상지 견인 금지, 지지대 사용','all'],['armwb','환측 견관절 아탈구 예방 — 상지 견인 금지, 지지대 사용','all'],['oneleg','급격한 체위 변경 금지, 균형훈련은 감독 하에','all'],['impact','급격한 체위 변경 금지, 균형훈련은 감독 하에','all']],
+  n02:[['hold','혈압 급상승 유발 등척성 과부하·발살바 금지','all'],['armhang','환측 견관절 아탈구 예방, 상지 견인 금지','all'],['armwb','환측 견관절 아탈구 예방, 상지 견인 금지','all'],['oneleg','부축 보행 단계 — 한 발 지지·빠른 동작은 양발 균형이 안정될 때까지 제외','all'],['impact','부축 보행 단계 — 한 발 지지·빠른 동작은 양발 균형이 안정될 때까지 제외','all']],
+  n03:[['overhead','환측 어깨 무리한 거상·견인 절대 금지 — 통증 유발','all'],['armhang','환측 어깨 무리한 거상·견인 절대 금지 — 통증 유발','all'],['armwb','환측 어깨 무리한 거상·견인 절대 금지 — 통증 유발','all'],['oneleg','보조기구 보행 단계 — 한 발 지지·빠른 동작은 양발 균형이 안정될 때까지 제외','all'],['impact','보조기구 보행 단계 — 한 발 지지·빠른 동작은 양발 균형이 안정될 때까지 제외','all']],
   n04:[['dual','좌측 공간 인지 훈련 병행, 이중과제 금지','all']],
   n05:[['turn','시각·청각 신호(cueing) 활용, 좁은 통로·급회전 회피','all']],
   n06:[['turn','빠른 방향 전환·좁은 지지면 과제는 후반부로','p1'],['narrow','빠른 방향 전환·좁은 지지면 과제는 후반부로','p1']],
@@ -3994,6 +3995,7 @@ const Present=(()=>{
     RealBody.setExercise(null); cap('');
     $('#pres').hidden=true; document.documentElement.classList.remove('presenting');
     moveRealHost(7); initRecovery(); RealBody.resizeNow();
+    if(WATCH && window.parent!==window) window.parent.postMessage({type:'rehab-present-closed'},location.origin);   // 교사용 현황판에서 연 발표면 창을 닫음
   }
   return {open, close};
 })();
@@ -5402,6 +5404,11 @@ const Watch = (()=>{
         Save.apply(m.state);
         if(!S.built) renderDraw(false);
         window.scrollTo({top:S.step===st?y:0, behavior:'instant'});
+      } else if(m.type==='rehab-present' && m.state && m.state.v===1){   // 교사용 현황판의 「발표」: 그 조의 저장 내용으로 발표 모드를 엶
+        lite=false; last=JSON.stringify(m.state);
+        Save.apply(m.state);
+        if(S.phase===2 && S.p1){ go(7); Present.open(); }
+        else window.parent.postMessage({type:'rehab-present-closed', reason:'not-phase2'},location.origin);
       } else if(m.type==='rehab-lite'){
         const was=lite; lite=!!m.on;
         if(was && !lite && S.built) { const y=window.scrollY; go(S.step); window.scrollTo({top:y,behavior:'instant'}); }

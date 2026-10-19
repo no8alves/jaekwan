@@ -70,6 +70,11 @@ button{font-family:inherit}
 .chip.ph2{background:#E6F0FB;color:#1F4E7A;border:1px solid #9CC0E6}
 
 .view{flex:1;min-height:0;position:relative;overflow:hidden;background:var(--paper)}
+.tbtn.pres{background:var(--ink);color:#fff;border-color:var(--ink)}
+.tbtn.pres:hover{background:var(--signal);border-color:var(--signal);color:#fff}
+.presfull{position:fixed;inset:0;z-index:100;background:var(--paper)}
+.presfull[hidden]{display:none}
+.presfull iframe{width:100%;height:100%;border:0;display:block}
 .view iframe{position:absolute;left:0;top:0;border:0;transform-origin:0 0;background:var(--paper)}
 
 /* ---- 안내 / 암호 ---- */
@@ -89,6 +94,8 @@ button{font-family:inherit}
 </style>
 </head>
 <body>
+
+<div class="presfull" id="presFull" hidden><iframe id="presFrame" title="조 발표 화면"></iframe></div>
 
 <header class="bar">
   <h1><small>REHAB LAB</small>교사용 현황판</h1>
@@ -214,6 +221,7 @@ function makeTile(sid){
     <div class="strip">
       <div class="team"></div><div class="mem"></div>
       <div class="right"><span class="act"><i></i><span class="act-t"></span></span>
+        <button type="button" class="tbtn pres" data-pres hidden title="이 조의 발표 화면을 교사 화면에 크게 띄웁니다 (2차시까지 진행한 조)">🎤 발표</button>
         <button type="button" class="tbtn" data-big>크게 보기</button>
         <button type="button" class="tbtn x" data-x title="현황판에서 이 화면 지우기">✕</button></div>
       <div class="chips"></div>
@@ -221,6 +229,7 @@ function makeTile(sid){
     <div class="view"><iframe title="조 화면" src="index.html?watch=1"></iframe></div>`;
   const t={el, frame:el.querySelector('iframe'), ready:false, item:null};
   el.querySelector('[data-big]').addEventListener('click',()=> big===sid ? closeBig() : openBig(sid));
+  el.querySelector('[data-pres]').addEventListener('click',()=>openPresent(t));
   el.querySelector('[data-x]').addEventListener('click',async()=>{
     const name=(t.item&&t.item.data.team)||'이 화면';
     if(!confirm(`「${name}」을(를) 현황판에서 지울까요?\n(학생 화면에는 영향이 없고, 그 조가 계속 진행하면 다시 나타납니다)`)) return;
@@ -250,6 +259,7 @@ function paintStrip(t){
     step>=7 ? `<span class="chip ${d.reviews>=2?'ok':d.reviews?'':'warn'}">AI 검토 ${d.reviews||0}회</span>` : '',
     subChip(sum.sub, !!b)
   ];
+  el.querySelector('[data-pres]').hidden = !(b && d.phase===2);
   el.querySelector('.chips').innerHTML=chips.join('');
   el.dataset.bad = sum.bad?'1':'0';
   paintAge(t);
@@ -291,7 +301,13 @@ function paintStats(){
 /* ---------- 조 화면(iframe) ---------- */
 function push(t){ if(t.ready && t.item) t.frame.contentWindow.postMessage({type:'rehab-state',state:t.item.data},location.origin); }
 window.addEventListener('message',e=>{
-  if(e.origin!==location.origin || !e.data || e.data.type!=='rehab-ready') return;
+  if(e.origin!==location.origin || !e.data) return;
+  if(e.source===$('#presFrame').contentWindow){        // 발표 창
+    if(e.data.type==='rehab-ready' && presState) e.source.postMessage({type:'rehab-present',state:presState},location.origin);
+    if(e.data.type==='rehab-present-closed'){ closePresent(); if(e.data.reason==='not-phase2') alert('이 조는 아직 2차시를 시작하지 않아 발표 화면을 열 수 없습니다.'); }
+    return;
+  }
+  if(e.data.type!=='rehab-ready') return;
   tiles.forEach(t=>{ if(t.frame.contentWindow===e.source){ t.ready=true; push(t);
     t.frame.contentWindow.postMessage({type:'rehab-lite',on:big!==t.el.dataset.sid},location.origin); } });
 });
@@ -303,6 +319,19 @@ function fit(t){
 function fitAll(){ tiles.forEach(fit); }
 window.addEventListener('resize',fitAll);
 
+/* ---------- 발표: 그 조의 발표 모드를 교사 화면 전체에 띄움 (여는 순간의 저장 내용 기준) ---------- */
+let presState=null;
+function openPresent(t){
+  if(!t.item || t.item.data.phase!==2){ alert('이 조는 아직 2차시를 시작하지 않아 발표 화면을 열 수 없습니다.'); return; }
+  closeBig();
+  presState=JSON.parse(JSON.stringify(t.item.data));
+  const f=$('#presFrame'); $('#presFull').hidden=false;
+  f.onload=()=>{ try{ f.contentWindow.focus(); }catch(e){} };
+  f.src='index.html?watch=1&present=1&t='+Date.now();
+}
+function closePresent(){
+  presState=null; $('#presFull').hidden=true; $('#presFrame').src='about:blank';
+}
 function openBig(sid){
   closeBig(); const t=tiles.get(sid); if(!t) return;
   big=sid; t.el.classList.add('big'); $('#shade').hidden=false; t.el.querySelector('[data-big]').textContent='작게 보기';
@@ -314,7 +343,7 @@ function closeBig(){
   if(t){ t.el.classList.remove('big'); t.el.querySelector('[data-big]').textContent='크게 보기'; fit(t); }
 }
 $('#shade').addEventListener('click',closeBig);
-document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeBig(); });
+document.addEventListener('keydown',e=>{ if(e.key!=='Escape') return; if(!$('#presFull').hidden) closePresent(); else closeBig(); });
 
 $('#btnClear').addEventListener('click',async()=>{
   if(!confirm('현황판을 비우고 새 수업을 시작할까요?\n\n· 지금 보이는 조 화면이 모두 현황판에서 사라집니다.\n· 학생 화면과 시트에 제출한 기록은 지워지지 않습니다.')) return;
