@@ -3834,7 +3834,8 @@ function initRecovery(){
   let prog=null; // 주차별 진행 재생 상태
   const progBtn=$('#btnProgramPlay');
   const stopProg=()=>{ if(prog){ cancelAnimationFrame(prog.raf); prog=null; if(progBtn){ progBtn.textContent='🎬 우리 프로그램 주차별로 보기'; } } };
-  slider.oninput = e=>{ stopProg(); RealBody.setExercise(null); setP((+e.target.value)/100); };
+  let viewEx=null;   // 학생이 고른 운동 동작 — 색 변화(주차별 재생·막대)와 상관없이 계속 보여 줌
+  slider.oninput = e=>{ stopProg(); setP((+e.target.value)/100); };
   // ── 운동 동작 보기 ──
   const host=$('#realCanvasHost');
   let cap=$('#realCaption'); if(host&&!cap){ cap=document.createElement('div'); cap.id='realCaption'; cap.className='realcaption'; host.appendChild(cap); }
@@ -3850,10 +3851,11 @@ function initRecovery(){
     chips.innerHTML='<button data-rex="" data-on="1">서 있기</button>'+picked.map(x=>`<button data-rex="${x.id}">${x.icon||''} ${exName(x)}</button>`).join('');
     chips.onclick=e=>{
       const b=e.target.closest('[data-rex]'); if(!b) return;
-      stopProg(); markChip(b.dataset.rex);
-      const id=b.dataset.rex;
-      RealBody.setExercise(id||null);
-      caption(id?`<span class="cap-now">지금 보는 운동</span><b class="cap-nm">${exMotionText(id)}</b><br>쓰는 근육(빛남): ${regText(id)}`:'');
+      markChip(b.dataset.rex);
+      const id=b.dataset.rex; viewEx=id||null;
+      RealBody.setExercise(viewEx);
+      if(prog&&prog.seg>=0) showSeg(prog.TL.segs[prog.seg]);      // 주차별 재생 중이면 멈추지 않고, 글에 운동 이름만 더함
+      else caption(id?`<span class="cap-now">지금 보는 운동</span><b class="cap-nm">${exMotionText(id)}</b><br>쓰는 근육(빛남): ${regText(id)}`:'');
     };
   }
   // ── 주차별로 보기: 한 주에 한 장면씩, 그 주에 한 운동과 좋아진 정도만 (동작은 위 버튼으로 따로) ──
@@ -3870,9 +3872,8 @@ function initRecovery(){
   const pAt=(TL,t)=>{ for(let i=0;i<TL.wkRange.length;i++){ const [a,b]=TL.wkRange[i]; if(t<b) return (i+(t-a)/(b-a))/W; } return 1; };
   const showSeg=seg=>{
     const wk=WR.weeks[seg.w-1];
-    RealBody.setExercise(null); markChip('');
     const now=probRegs.map(r=>`${REGION_KO[r]} ${WR.bad.has(r)?'금기':Math.round(WR.cum[r][seg.w]*100)+'%'}`).join(' · ');
-    caption(`<b>📅 ${seg.w}주차</b> · `+(wk.ids.length?`주 ${wk.days}회 · ${wk.ids.map(nameOf).join(', ')}`:'배치된 운동이 없습니다 → 이번 주는 멈춥니다')
+    caption((viewEx?`<span class="cap-now">지금 보는 운동 · ${nameOf(viewEx)}</span>`:'')+`<b>📅 ${seg.w}주차</b> · `+(wk.ids.length?`주 ${wk.days}회 · ${wk.ids.map(nameOf).join(', ')}`:'배치된 운동이 없습니다 → 이번 주는 멈춥니다')
       +(seg.w>1&&seg.added.length?`<br>➕ 추가: ${seg.added.map(nameOf).join(', ')}`:'')
       +(seg.removed.length?`<br>➖ 빠짐: ${seg.removed.map(nameOf).join(', ')}`:'')
       +`<br>이번 주가 끝나면 → <b>${now}</b>`);
@@ -3895,7 +3896,7 @@ function initRecovery(){
       const si=TL.segs.findIndex(sg=>t>=sg.t0&&t<sg.t0+sg.dur);
       if(si!==prog.seg&&si>=0){ prog.seg=si; showSeg(TL.segs[si]); }
       if(t<TL.total){ prog.raf=requestAnimationFrame(stepFn); }
-      else { prog=null; RealBody.setExercise(null); markChip(''); setP(1);
+      else { prog=null; setP(1);
         const fin=probRegs.map(r=>`${REGION_KO[r]} ${WR.bad.has(r)?'금기':Math.round(WR.cum[r][W]*100)+'%'}`).join(' · ');
         caption(`<b>✅ ${W<TOTAL_WEEKS?'1~2주차 처방 완료 (4주 중 절반)':W+'주 프로그램 완료'}</b><br>${fin}<br><span class="cap-sub">100%는 완치가 아니라 4주 단기 목표 달성입니다.</span><br><span class="cap-sub">아래 표에서 주차별로 어디가 얼마나 좋아졌는지 확인하세요. 뒷면도 돌려보세요.</span>`);
         progBtn.textContent='🎬 다시 보기'; }
@@ -3912,7 +3913,7 @@ function initRecovery(){
   });
   // 색 변화만 빠르게: 한 주에 1.5초씩
   playBtn.onclick = ()=>{
-    stopProg(); RealBody.setExercise(null); caption('');
+    stopProg(); caption(viewEx?`<span class="cap-now">지금 보는 운동</span><b class="cap-nm">${exMotionText(viewEx)}</b>`:'');
     if(anim){ cancelAnimationFrame(anim); anim=null; }
     const dur=1500*W/speed(), t0=performance.now();
     playBtn.disabled=true; playBtn.textContent='재생 중…';
@@ -3927,7 +3928,7 @@ function initRecovery(){
   // 발표 모드에서 같은 3D 회복 화면을 씀
   window.__rec={WR, setP:p=>{ slider.value=Math.round(p*100); setP(p); },
     stop:()=>{ stopProg(); if(anim){ cancelAnimationFrame(anim); anim=null; playBtn.disabled=false; } },
-    play:()=>{ stopProg(); if(progBtn) progBtn.click(); }};
+    play:()=>{ stopProg(); viewEx=null; markChip(''); if(progBtn) progBtn.click(); }};   // 발표 장면에서는 고른 운동 없이 재생
 }
 /* 발표 모드: 발표 세 문장 ↔ 3D 장면 (한 장면씩 넘김) */
 const Present=(()=>{
