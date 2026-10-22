@@ -742,6 +742,15 @@ html.presenting body{overflow:hidden}
 .tr-alt button{border:1px solid currentColor;background:#fff;color:inherit;border-radius:16px;padding:4px 11px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
 .tr-alt button[disabled]{opacity:.6;cursor:default}
 .tr-from{font-size:12px;color:var(--ink3);margin:4px 0 0}
+.claims{border:1px solid #E7C873;background:#FFFBEF;border-radius:10px;padding:12px 14px;margin:0 0 12px}
+.cl-h b{font-size:14.5px}
+.cl-h span{display:block;font-size:12.5px;color:var(--ink2);margin-top:2px}
+.cl-item{margin-top:10px}
+.cl-t{font-size:13.5px;font-weight:700}
+.cl-t i{display:block;font-style:normal;font-weight:500;font-size:12px;color:#8A5200;margin-top:1px}
+.claims textarea{width:100%;box-sizing:border-box;margin-top:5px;font:inherit;font-size:13.5px;padding:7px 9px;border:1px solid var(--rule);border-radius:8px;background:#fff}
+.claims label{display:block;font-size:12.5px;font-weight:700;color:var(--ink2);margin-top:10px}
+.pr-claim{font-size:15px;margin:6px 0;padding:6px 10px;border-radius:8px;background:#FFF4DC;color:#5C3D00}
 .tr-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:14.5px}
 .tr-ic{font-size:19px}
 .tr-tool{font-size:11px;background:var(--band);border-radius:12px;padding:1px 8px;color:var(--ink2)}
@@ -1617,6 +1626,7 @@ html.watch .fam-modal,html.watch .fam-shade{display:none !important}
   <div class="chart" id="aiChart">
     <h3>AI 적합성 검토 <span class="hint">검토 → 수정 → 재검토</span></h3>
     <div class="body">
+      <div id="claimBox"></div>
       <div class="aibox" id="aiOut">검토 버튼을 누르면 이 대상자의 사정 결과·체험 결과와 지금 짠 계획을 대조해, 잘한 점과 고칠 점을 알려줍니다.</div>
       <div class="rv-actions"><button class="btn" id="btnAI">AI 적합성 검토</button><span class="note" id="aiCount"></span></div>
       <p class="fhelp" style="margin-top:8px">고칠 점이 있으면 아래 「주차별 계획 수정」이나 「운동 후보 수정」으로 돌아가 고친 뒤, 다시 와서 검토를 누르세요.</p>
@@ -2187,7 +2197,7 @@ const ROLES = [
 /* ============================================================
    STATE
    ============================================================ */
-const S = {step:1, age:null, built:null, a:{}, redraws:0, picked:new Set(), dose:{freq:3,time:15,weeks:4,rpe:11}, weekPlan:null, weekPlanKey:'', activeWeek:0, goal:'', team:'', members:[{name:'',lead:false},{name:'',lead:false},{name:'',lead:false}], roles:['','','',''], evalRes:null, tools:new Set(TOOLS.map(t=>t.id)), trial:{}, dropped:new Set(), talk:{changed:'',fixed:''}, reviews:0, phase:1, p1:null};
+const S = {claims:{ex:{},note:''}, step:1, age:null, built:null, a:{}, redraws:0, picked:new Set(), dose:{freq:3,time:15,weeks:4,rpe:11}, weekPlan:null, weekPlanKey:'', activeWeek:0, goal:'', team:'', members:[{name:'',lead:false},{name:'',lead:false},{name:'',lead:false}], roles:['','','',''], evalRes:null, tools:new Set(TOOLS.map(t=>t.id)), trial:{}, dropped:new Set(), talk:{changed:'',fixed:''}, reviews:0, phase:1, p1:null};
 const DRAW_MAX = 3;
 const TOTAL_WEEKS = 4;   // 1차시 = 1~2주차 처방, 2차시 = 3~4주차 처방
 const WATCH = new URLSearchParams(location.search).has('watch');   // 교사용 현황판 안에서 보기 전용으로 열림
@@ -2237,7 +2247,7 @@ function go(n){
   if(n===4){ moveBodyCanvas(4); moveRealHost(4); renderProgram(); }
   if(n===5) renderTrial();
   if(n===6) renderSchedule();
-  if(n===7){ moveBodyCanvas(7); moveRealHost(7); initRecovery(); renderAiCount(); if(S.phase===2&&S.p1){ renderTalk(); renderCard(); } }
+  if(n===7){ moveBodyCanvas(7); moveRealHost(7); initRecovery(); renderAiCount(); renderClaims(); if(S.phase===2&&S.p1){ renderTalk(); renderCard(); } }
   window.scrollTo({top:0,behavior:'smooth'});
 }
 // 해부 모델(하나의 3D 화면)을 4단계 커버리지 ↔ 7단계 회복 자리로 옮김
@@ -3462,6 +3472,22 @@ function applyTrial(){
     else if(S.dropped.has(id)){ S.dropped.delete(id); S.picked.add(id); }
   });
 }
+// 앱이 문제라고 본 운동(주의사항 충돌·체험 기록과 어긋남)을 그래도 넣은 조가 자기 근거를 적는 칸 — AI 검토가 이 근거를 평가함
+function claimTargets(){
+  const ph2=S.phase===2&&!!S.p1;
+  const h=ph2?harmLate():planHarm((S.weekPlan||[]).slice(0,2), S.trial, S.evalRes?S.evalRes.risk:'');
+  return EX_LIB.filter(x=>S.picked.has(x.id) && (h.ids.has(x.id) || contraOf(x.id, ph2?3:1)));
+}
+function claimWhy(id){ const k=contraOf(id, S.phase===2&&S.p1?3:1); return k?`${PROP_KO[k.p][1]} · 주의사항 "${k.why}"`:'체험 기록과 시작 시기가 맞지 않음'; }
+function renderClaims(){
+  const box=$('#claimBox'); if(!box) return;
+  S.claims=S.claims&&S.claims.ex?S.claims:{ex:{},note:''};
+  const L=claimTargets(), nm=x=>x.nm.split(' (')[0];
+  box.innerHTML=`<div class="claims"><div class="cl-h"><b>✍️ 우리 조의 근거 (선택)</b><span>앱이 문제라고 본 운동을 그래도 넣었다면, <b>왜 넣었고 어떻게 안전하게 할지</b>(각도·범위, 저항 여부, 통증 기준, 보조 방법 등)를 적으세요. AI 검토가 이 근거를 함께 평가합니다.</span></div>`
+    + L.map(x=>`<div class="cl-item"><div class="cl-t">${x.icon||'🔹'} ${nm(x)}<i>앱 판정: ${claimWhy(x.id)}</i></div><textarea rows="2" data-claim="${x.id}" placeholder="예) 10°부터 시작해 매주 조금씩, 어깨 높이(90°)까지만 올립니다. 벽에 손가락을 대고 저항 없이, 통증 NRS 3 이하에서만 합니다.">${_esc(S.claims.ex[x.id]||'')}</textarea></div>`).join('')
+    + `<label>그 밖에 AI에게 설명하고 싶은 우리 조의 판단</label><textarea rows="2" data-claim="_note" placeholder="예) 대상자가 사무직이라 앉아서 하는 운동을 일부러 많이 넣었습니다.">${_esc(S.claims.note||'')}</textarea></div>`;
+  box.oninput=e=>{ const el=e.target.closest('[data-claim]'); if(!el) return; if(el.dataset.claim==='_note') S.claims.note=el.value; else S.claims.ex[el.dataset.claim]=el.value; };
+}
 function renderAiCount(){ const el=$('#aiCount'); if(el) el.textContent = S.reviews ? `검토 ${S.reviews}회${S.reviews>=2?' · 고친 뒤 다시 검토 완료 ✓':' · 고친 뒤 한 번 더 검토받으세요'}` : ''; }
 function renderTalk(){
   const g=$('#talkGoal'); if(g&&!g.value) g.value=S.goal||'';
@@ -3951,6 +3977,7 @@ const Present=(()=>{
       h=`<p class="pr-k">2 / 4 · 우리 운동</p><h3 class="pr-h">운동 ${items.length}가지</h3>
         <div class="pr-chips" id="prChips">${items.map(x=>`<button type="button" data-prex="${x.id}">${x.icon||''} ${nm(x.id)}<small>${isCarried(x.id)?'1주차부터 계속':'3~4주차에 추가'}</small></button>`).join('')}</div>
         ${cut.length?`<p class="pr-small">2주 경과를 보고 뺀 운동: ${cut.map(x=>nm(x.id)).join(', ')}</p>`:''}
+        ${Object.entries((S.claims||{}).ex||{}).filter(([id,t])=>t&&t.trim()&&S.picked.has(id)).map(([id,t])=>`<div class="pr-claim"><b>우리 조의 근거 · ${nm(id)}</b><br>${_esc(t.trim())}</div>`).join('')}
         <p class="pr-k">② 직접 해 보고 바꾼 것</p>${say(S.talk.changed)}`; }
     else if(i===2){
       h=`<p class="pr-k">3 / 4 · 4주 변화</p><h3 class="pr-h">주차별 4주 목표 달성도</h3>
@@ -4267,6 +4294,12 @@ function buildReviewContext(){
       L.push(`- ${x.nm}: ${t.can?CAN_TXT[t.can]:'미기록'}${t.rpe?`, RPE ${t.rpe}`:''}${t.worry?', 불안함':''} → 결정: ${t.dec?decTxt(x.id,t.dec):'기본 시기'}${t.memo?` (메모: ${t.memo})`:''}`);});
     L.push('- 체험 결과(어려웠던 운동을 초기에 넣었는지, 쉬운 운동을 너무 늦게 넣었는지)와 주차별 계획이 일관되는지도 검토하라.');
   }
+  const cl=S.claims||{ex:{}}, clEx=Object.entries(cl.ex||{}).filter(([id,t])=>t&&t.trim()&&S.picked.has(id));
+  if(clEx.length || (cl.note&&cl.note.trim())){
+    L.push('\n# 실습생 조가 직접 적은 근거 (반드시 하나씩 평가할 것)');
+    clEx.forEach(([id,t])=>{ const x=EX_LIB.find(e=>e.id===id); L.push(`- ${x?x.nm:id} — 앱 판정: ${claimWhy(id)} / 조의 근거: "${t.trim()}"`); });
+    if(cl.note&&cl.note.trim()) L.push(`- 조의 판단: "${cl.note.trim()}"`);
+  }
   return L.join('\n');
 }
 
@@ -4384,6 +4417,7 @@ async function aiReview(){
 - 규칙 코드를 인용할 때는 그 뜻도 함께 쉽게 말하라. 예: "BP-02(혈압이 높아 고강도 운동을 피해야 함)".
 - how(고칠 방법)는 학생이 이 실습 화면에서 바로 할 수 있는 행동으로 써라. 예: 어떤 운동을 빼거나 더 쉬운 운동으로 바꾸기, 몇 주차부터 넣기, 주 몇 회·강도 얼마로 바꾸기.
 - good(잘한 점)은 무엇을 왜 잘했는지 구체적으로 칭찬하라.
+- 「실습생 조가 직접 적은 근거」가 있으면 반드시 하나씩 평가하라. 그 근거(각도·범위 제한, 저항 없음, 통증 기준, 보조 사용 등)가 주의사항의 위험을 실제로 줄이는지 판단해, 타당하면 good에 근거를 인정하고 꼭 지켜야 할 조건을 advice에 쓰고, 부족하면 fix에 무엇이 부족한지와 어떻게 보완할지 써라. 근거를 무시하고 앱 판정만 되풀이하지 마라. 앱의 2주 경과·악화 판정은 운동의 동작 특성만 보고 계산한 단순 결과라 조가 정한 각도·저항 제한을 반영하지 못한다. 그러므로 그 악화 결과를 근거가 틀렸다는 증거로 쓰지 말고, 근거 자체가 임상적으로 타당한지로 판단하라.
 - 걷기·유산소 운동, 앉았다 일어서기 같은 전신 체력 운동은 어떤 대상자에게도 도움이 되므로 "진단과 관련이 낮다"고 지적하지 마라. 대신 이 대상자의 주의사항에 맞게 방법을 조정했는지 봐라(예: 어깨 수술 대상자는 걸을 때 팔을 크게 흔들지 않기, 팔걸이를 짚고 일어서지 않기). 조정이 필요하면 advice에 쓰고, 주의사항과 맞지 않는 동작이 있으면 fix에 써라.
 - 반드시 아래 JSON 객체 하나만 출력하라. 코드펜스나 다른 설명 문장을 붙이지 마라.
 
@@ -5219,7 +5253,7 @@ const Save = (()=>{
       a:S.a, redraws:S.redraws, picked:[...S.picked], dose:S.dose, doseSet:!!S.doseSet,
       weekPlan:S.weekPlan, weekPlanKey:S.weekPlanKey, activeWeek:S.activeWeek,
       goal:S.goal, team:S.team, members:S.members, roles:S.roles, evalRes:S.evalRes,
-      tools:[...S.tools], trial:S.trial, dropped:[...S.dropped], talk:S.talk, reviews:S.reviews,
+      tools:[...S.tools], trial:S.trial, dropped:[...S.dropped], talk:S.talk, claims:S.claims, reviews:S.reviews,
       phase:S.phase, p1:S.p1, p2dose:S.p2dose||{}, owner:Auth.owner()
     };
   }
@@ -5250,7 +5284,7 @@ const Save = (()=>{
     S.weekPlan=d.weekPlan||null; S.weekPlanKey=d.weekPlanKey||''; S.activeWeek=d.activeWeek||0;
     S.goal=d.goal||''; S.members=(d.members&&d.members.length)?d.members:S.members;
     S.roles=d.roles||S.roles; S.evalRes=d.evalRes||null; S.trial=d.trial||{};
-    S.talk=d.talk||{changed:'',fixed:''}; S.reviews=d.reviews||0; S.p2dose=d.p2dose||{};
+    S.talk=d.talk||{changed:'',fixed:''}; S.reviews=d.reviews||0; S.p2dose=d.p2dose||{}; S.claims=d.claims&&d.claims.ex?d.claims:{ex:{},note:''};
     // 목록에서 뺀 운동(체육관에서 못 하는 운동 등)이 예전 기록에 남아 있으면 걸러 냄
     const known=id=>EX_LIB.some(x=>x.id===id), cleanWeeks=w=>(w||[]).forEach(wk=>{ wk.items=(wk.items||[]).filter(known); (wk.days||[]).forEach(dy=>{ dy.ex=(dy.ex||[]).filter(e=>known(e.id)); }); });
     [...S.picked].forEach(id=>{ if(!known(id)) S.picked.delete(id); }); [...S.dropped].forEach(id=>{ if(!known(id)) S.dropped.delete(id); });
@@ -5344,7 +5378,7 @@ $('#btnReautoWeeks').addEventListener('click',()=>{ S.weekPlan=autoWeekPlan(); S
 $('#btnBack3').addEventListener('click',()=>go(3));
 $('#btnBack5').addEventListener('click',()=>go(5));
 $('#btnReset').addEventListener('click',()=>{
-  S.built=null;S.age=null;S.a={};S.redraws=0;S.picked.clear();S.evalRes=null;S.goal='';S.trial={};S.dropped.clear();S.talk={changed:'',fixed:''};S.reviews=0;S.tools=new Set(TOOLS.map(t=>t.id));['talkGoal','talkChanged','talkFixed'].forEach(i=>{const el=$('#'+i); if(el) el.value='';});
+  S.built=null;S.age=null;S.a={};S.redraws=0;S.picked.clear();S.evalRes=null;S.goal='';S.trial={};S.dropped.clear();S.talk={changed:'',fixed:''};S.claims={ex:{},note:''};S.reviews=0;S.tools=new Set(TOOLS.map(t=>t.id));['talkGoal','talkChanged','talkFixed'].forEach(i=>{const el=$('#'+i); if(el) el.value='';});
   S.weekPlan=null;S.weekPlanKey='';S.activeWeek=0;S.doseSet=false;S.roles=['','','',''];S.phase=1;S.p1=null;S.p2dose={};
   renderDraw(false);
   $('#btnDraw').hidden=false; $('#btnRedraw').hidden=true; $('#btnDrawNext').hidden=true;
