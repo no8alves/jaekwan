@@ -5409,24 +5409,42 @@ const Live = (()=>{
   }
   function stateHash(){ return hashOf(Save.snap()); }
   function markSubmitted(){ try{ localStorage.setItem('rehablab.sub',JSON.stringify({at:Date.now(),h:stateHash(),owner:Auth.owner()})); }catch(e){} soon(); }
+  // 학생이 지금 보고 있는 위치: 현재 단계 안의 몇 번째 상자의 어디쯤인지 (교사 화면이 같은 곳을 보여 주도록)
+  function viewPos(){
+    const p=document.querySelector('.panel[data-on="1"]'); if(!p) return null;
+    const kids=[...p.children].filter(k=>k.offsetHeight>0), top=80;
+    for(let i=0;i<kids.length;i++){ const r=kids[i].getBoundingClientRect();
+      if(r.bottom>top) return {i, f:Math.round(Math.max(0,Math.min(1,(top-r.top)/Math.max(1,r.height)))*100)/100}; }
+    return {i:0,f:0};
+  }
   function send(){
     timer=null;
     if(!S.built && !S.team.trim()) return;                 // 아직 아무것도 안 한 화면은 보내지 않음
-    const d=Save.snap(); delete d.at;
+    const d=Save.snap(); delete d.at; d.view=viewPos();
     const body=JSON.stringify({action:'live',sid,data:d,sum:summary()});
     if(body===lastBody) return;                            // 바뀐 게 없으면 다시 보내지 않음
     lastBody=body; lastSent=Date.now();
     fetch(AI_PROXY,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body,keepalive:body.length<60000}).catch(()=>{ lastBody=''; });
   }
   function soon(){ if(timer) return; timer=setTimeout(send, Math.max(2500, 10000-(Date.now()-lastSent))); }   // 최소 10초 간격
-  function start(){ sid=Auth.liveId(); ['input','change','click'].forEach(t=>document.addEventListener(t,soon)); soon(); }
+  function start(){ sid=Auth.liveId(); ['input','change','click'].forEach(t=>document.addEventListener(t,soon)); window.addEventListener('scroll',soon,{passive:true}); soon(); }
   return {start, markSubmitted, stateHash, hashOf, deviceId:getSid};
 })();
 
 /* ---- 보기 전용 모드: 교사용 현황판(teacher.html)이 보내 주는 조의 진행 상황을 그대로 그림 ---- */
 const Watch = (()=>{
-  let lite=true, last='';
+  let lite=true, last='', manualAt=0;
+  const FOLLOW_PAUSE=30000;     // 교사가 직접 스크롤하면 30초 동안은 학생 위치를 따라가지 않음
+  function follow(v){
+    if(!v) return;
+    const p=document.querySelector('.panel[data-on="1"]'); if(!p) return;
+    const kids=[...p.children].filter(k=>k.offsetHeight>0), k=kids[Math.min(v.i||0,kids.length-1)]; if(!k) return;
+    const y=k.getBoundingClientRect().top+window.scrollY+(v.f||0)*k.offsetHeight-80;
+    window.scrollTo({top:Math.max(0,y), behavior:'instant'});
+  }
+  const later=fn=>requestAnimationFrame(()=>requestAnimationFrame(fn));   // 다시 그린 뒤 자리 잡기
   function start(){
+    ['wheel','touchmove','keydown','pointerdown'].forEach(t=>window.addEventListener(t,()=>{ manualAt=Date.now(); },{passive:true}));
     document.documentElement.classList.add('watch');
     // 2×2 로 볼 때는 3D 를 돌리지 않음 (크게 볼 때만 켬)
     const re=RealBody.ensure, be=Body3D.ensure;
@@ -5435,11 +5453,15 @@ const Watch = (()=>{
       if(e.origin!==location.origin || e.source!==window.parent) return;
       const m=e.data||{};
       if(m.type==='rehab-state' && m.state && m.state.v===1){
-        const raw=JSON.stringify(m.state); if(raw===last) return; last=raw;
+        const v=m.state.view, core=Object.assign({},m.state); delete core.view;
+        const raw=JSON.stringify(core), manual=Date.now()-manualAt<FOLLOW_PAUSE;
+        if(raw===last){ if(!manual) follow(v); return; }       // 내용은 같고 학생이 스크롤만 했으면 위치만 따라감
+        last=raw;
         const y=window.scrollY, st=S.step;
-        Save.apply(m.state);
+        Save.apply(core);
         if(!S.built) renderDraw(false);
-        window.scrollTo({top:S.step===st?y:0, behavior:'instant'});
+        if(v && !(manual && S.step===st)) later(()=>follow(v));
+        else window.scrollTo({top:S.step===st?y:0, behavior:'instant'});
       } else if(m.type==='rehab-present' && m.state && m.state.v===1){   // 교사용 현황판의 「발표」: 그 조의 저장 내용으로 발표 모드를 엶
         lite=false; last=JSON.stringify(m.state);
         Save.apply(m.state);
